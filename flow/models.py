@@ -7,7 +7,7 @@ import namegenerator
 
 class Graph(models.Model):
     """ Graph is a Template for a Template"""
-    node = models.CharField(max_length=1000, help_text="The Node this one belongs two")
+    node = models.CharField(max_length=1000, help_text="The Node this one belongs two", null=True, blank=True)
     creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     version = models.CharField(max_length=100, default="1.0alpha")
     name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
@@ -22,7 +22,7 @@ class Graph(models.Model):
 class Template(models.Model):
     """ Mimics an Artikekt template """
     arkitekt_id = models.CharField(max_length=4000,  help_text="The Template this one belongs two (Arkitekt identifier)")
-
+    port_id = models.CharField(max_length=100,help_text="The PortTemplate this one belongs two (Arkitekt identifier)" )
 
 
 class Flow(models.Model):

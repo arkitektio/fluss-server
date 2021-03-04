@@ -1,5 +1,5 @@
 from django.apps import apps
-from delt.datamodel.pydantic import DataModel
+from .types import DataModel
 DATA_MODELS = None
 
 

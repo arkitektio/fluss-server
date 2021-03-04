@@ -1,3 +1,4 @@
+from delt.service.types import Service, ServiceType
 from django.conf import settings
 
 
@@ -11,8 +12,19 @@ class DeltSettings:
         self.outward = settings.DELT["OUTWARD"]
         self.type = settings.DELT["TYPE"]
         self.port = settings.DELT["PORT"]
-        
 
+
+        self.service_dict = settings.ARKITEKT_SERVICE
+
+
+
+
+
+        
+    @property
+    def service(self):
+        dc = self.service_dict
+        return Service(types=dc["TYPES"], outward=dc["OUTWARD"], inward=dc["INWARD"], port=dc["PORT"])
 
 
 

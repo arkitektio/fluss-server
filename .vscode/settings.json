@@ -11,7 +11,8 @@
         "--enable=W0614",
         "--load-plugins",
         "pylint_django",
-        "--django-settings-module=elements.settings"
+        "--django-settings-module=fluss.settings"
     ],
     "python.languageServer": "Pylance",
+    "window.title": "${dirty}Fluss${separator} ${activeEditorShort}${separator}${rootName}${separator}$",
 }

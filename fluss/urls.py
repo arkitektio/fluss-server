@@ -20,7 +20,7 @@ from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import url
 from balder.autodiscover import autodiscover
-from delt.datamodel.registry import get_datamodel_registry
+from delt.service.registry import get_datamodel_registry
 
 
 # Autodiscover for all of the Balder Modules in the installed Apps
