@@ -7,6 +7,42 @@ from herre import bounced
 from graphene.types.generic import GenericScalar
 import requests
 import namegenerator
+from delt.bridge import arkitekt, port
+
+createNodeMutation = """
+                mutation($description: String,
+                $name: String!,
+                $outputs: [OutPortInput],
+                $inputs: [InPortInput],
+                $type: NodeTypeInput,
+                $interface: String!
+                $package: String!
+                ) {
+                    createNode(
+                        description: $description,
+                        name: $name,
+                        outputs: $outputs,
+                        inputs: $inputs,
+                        type: $type,
+                        interface: $interface,
+                        package: $package
+                    ){
+                        id
+                        name
+                    }
+                }
+            """
+
+    
+createPortTemplateMutation = """
+    mutation($q: String!, $node: ID!, $env: GenericScalar) {
+        createPort(q: $q, env: $env, node: $node){
+            arkitektId
+            id
+        }
+    }
+"""
+
 
 class Deploy(BalderMutation):
 
@@ -15,82 +51,55 @@ class Deploy(BalderMutation):
 
     @bounced(anonymous=False)
     def mutate(root, info, *args, graph=None):
-
+        graph = models.Graph.objects.get(id=graph)
+        token = info.context.bounced.token
         #TODO: Use diagram and create a template over at the api
 
+
         # Request PortTemplate from arkitekt
+        if not graph.node:
+            answer = arkitekt.call(createNodeMutation, {
+                "name": namegenerator.gen(),
+                "inputs": [],
+                "outputs": [],
+                "type": "FUNCTION",
+                "package": "fluss",
+                "interface": namegenerator.gen(),
+            }, token)
+
+            print("Created node", answer)
+            arkitekt_node_id = answer["createNode"]["id"]
+            arkitekt_node_name = answer["createNode"]["id"]
+            node, created = models.FlowNode.objects.get_or_create(arkitekt_id=arkitekt_node_id, defaults={"name": arkitekt_node_name})
+            graph.node = node
 
 
-        createNodeMutation = """
-            mutation($description: String,
-             $name: String!,
-             $outputs: [OutPortInput],
-             $inputs: [InPortInput],
-             $type: NodeTypeInput,
-             $interface: String!
-             $package: String!
-             ) {
-                createNode(
-                    description: $description,
-                    name: $name,
-                    outputs: $outputs,
-                    inputs: $inputs,
-                    type: $type,
-                    interface: $interface,
-                    package: $package
-                ){
-                    id
-                }
-            }
-
-
-        """
-
-        result = requests.post("http://arkitekt:8090/graphql", json={"query": createNodeMutation, "variables": {
-            "name": namegenerator.gen(),
-            "inputs": [],
-            "outputs": [],
-            "type": "FUNCTION",
-            "package": "fluss",
-            "interface": namegenerator.gen(),
-        }})
-
-        answer = result.json()
-        print("Created node", answer)
-        node = answer["data"]["createNode"]["id"]
+        #TODO: assert that graph confines to the the node specifications
 
 
 
-        createPortTemplateMutation = """
-            mutation($q: String!, $node: ID!, $env: GenericScalar) {
-                createPort(q: $q, env: $env, node: $node){
-                    arkitektId
-                    id
-                }
-            }
-        """
 
-        result = requests.post("http://port:8060/graphql", json={"query": createPortTemplateMutation, "variables": {
-            "q": "jhnnsrs/flowly:latest",
-            "node": node,
+        answer = port.call(createPortTemplateMutation,{
+            "q": "tutum/hello-world:latest",
+            "node": graph.node.arkitekt_id,
             "env": {
                 "FLUSS": "fluss",
-                "GRAPH": "graph",
+                "GRAPH": graph.id,
             }
-        }})
+        }, token)
 
-        answer = result.json()
-        print(answer)
 
-        arkitekt_id = answer["data"]["createPort"]["arkitektId"]
-        port_id = answer["data"]["createPort"]["id"]
+        arkitekt_id = answer["createPort"]["arkitektId"]
+        port_id = answer["createPort"]["id"]
 
-        model, created = models.Template.objects.get_or_create(arkitekt_id=arkitekt_id,port_id=port_id)
+        template, created = models.FlowTemplate.objects.get_or_create(arkitekt_id=arkitekt_id,port_id=port_id)
+        graph.template = template         
+        graph.save()
 
-        return model
+        return graph
 
     class Meta:
-        type = types.Template
+        type = types.Graph
 
 
 

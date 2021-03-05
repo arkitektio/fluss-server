@@ -15,10 +15,22 @@ class User(BalderObject):
         model = get_user_model()
 
 
-class Template(BalderObject):
+class FlowTemplate(BalderObject):
 
     class Meta:
-        model = models.Template
+        model = models.FlowTemplate
+
+
+class FlowNode(BalderObject):
+
+    class Meta:
+        model = models.FlowNode
+
+
+class FlowPod(BalderObject):
+
+    class Meta:
+        model = models.FlowPod
 
 
 class Deployed(graphene.ObjectType):
