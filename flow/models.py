@@ -1,3 +1,4 @@
+from delt.bridge import arkitekt
 from django.db import models
 from django.contrib.auth import get_user_model
 import namegenerator
@@ -9,12 +10,14 @@ class FlowNode(models.Model):
     arkitekt_id = models.CharField(max_length=1000, help_text="The identifier on the Arkitekt platform", unique=True)
     name = models.CharField(max_length=100, help_text="The name of this Flow")
 
+    class Meta:
+        arkitekt = True
+
 
 
 class FlowTemplate(models.Model):
     """ Mimics an Artikekt template """
     arkitekt_id = models.CharField(max_length=4000,  help_text="The Template this one belongs two (Arkitekt identifier)", unique=True)
-    port_id = models.CharField(max_length=100,help_text="The PortTemplate this one belongs two (Arkitekt identifier)" ,unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     changed_at = models.DateTimeField(auto_now=True)
@@ -39,3 +42,6 @@ class Graph(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    class Meta:
+        arkitekt = True

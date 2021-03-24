@@ -34,7 +34,7 @@ ALLOWED_HOSTS = ["*"]
 
 ELEMENTS_HOST = "p-tnagerl-lab1"
 ELEMENTS_INWARD = "fluss" # Set this to the host you are on
-ELEMENTS_PORT = 8090 # Set this to the host you are on
+ELEMENTS_PORT = 8070 # Set this to the host you are on
 
 # Uncomment and re run
 OAUTH2_PROVIDER_APPLICATION_MODEL='oauth2_provider.Application'
@@ -54,20 +54,17 @@ AWS_S3_SECURE_URLS = False # Should resort to True if using in Production behind
 
 
 # Application definition
-
-DELT = {
-    "INWARD": "elements",
-    "OUTWARD": ELEMENTS_HOST,
-    "PORT": ELEMENTS_PORT,
-    "TYPE": "graphql"
-}
-
 ARKITEKT_SERVICE = {
-    "INWARD": "elements",
+    "INWARD": ELEMENTS_INWARD,
     "OUTWARD": ELEMENTS_HOST,
     "PORT": ELEMENTS_PORT,
-    "TYPES": ["SERVICE","DATA"],
-    "NAME": "Elements"
+    "TYPES": ["NEGOTIATE","POINT", "PROVIDER"],
+    "NAME": "flow",
+    "VERSION": "0.1",
+    "DEPENDENCIES": [],
+    "REGISTER_INSTALLED": True,
+    "NEGOTIATE_HOOK": "flow.negotiate.on_negotiate",
+    "SCOPES": ["read","write"]
 }
 
 HERRE = {

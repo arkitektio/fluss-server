@@ -1,3 +1,5 @@
+from flow.diagram import ArgData, ArkitektData, Diagram, KwargData, Node, ReturnData
+from typing import List, Optional, Union
 from django.http import request
 from balder.types import BalderQuery, BalderMutation
 from flow import types
@@ -7,13 +9,17 @@ from herre import bounced
 from graphene.types.generic import GenericScalar
 import requests
 import namegenerator
-from delt.bridge import arkitekt, port
+from delt.bridge import arkitekt
+from pydantic import BaseModel
+from enum import Enum
+
 
 createNodeMutation = """
                 mutation($description: String,
                 $name: String!,
-                $outputs: [OutPortInput],
-                $inputs: [InPortInput],
+                $args: [ArgPortInput],
+                $kwargs: [KwargPortInput],
+                $returns: [ReturnPortInput],
                 $type: NodeTypeInput,
                 $interface: String!
                 $package: String!
@@ -21,8 +27,9 @@ createNodeMutation = """
                     createNode(
                         description: $description,
                         name: $name,
-                        outputs: $outputs,
-                        inputs: $inputs,
+                        args: $args,
+                        kwargs: $kwargs,
+                        returns: $returns,
                         type: $type,
                         interface: $interface,
                         package: $package
@@ -34,14 +41,14 @@ createNodeMutation = """
             """
 
     
-createPortTemplateMutation = """
-    mutation($q: String!, $node: ID!, $env: GenericScalar) {
-        createPort(q: $q, env: $env, node: $node){
-            arkitektId
+createTemplateMutation = """
+    mutation($node: ID!, $params: GenericScalar) {
+        createTemplate(node: $node, params: $params){
             id
         }
     }
 """
+
 
 
 class Deploy(BalderMutation):
@@ -53,46 +60,54 @@ class Deploy(BalderMutation):
     def mutate(root, info, *args, graph=None):
         graph = models.Graph.objects.get(id=graph)
         token = info.context.bounced.token
-        #TODO: Use diagram and create a template over at the api
-
-
         # Request PortTemplate from arkitekt
         if not graph.node:
+
+            diagram = Diagram(**graph.diagram)
+
+            argNodes = [value for value in diagram.elements if value.type == "argNode" ]
+            kwargNodes = [value for value in diagram.elements if value.type == "kwargNode" ]
+            returnNodes = [value for value in diagram.elements if value.type == "returnNode" ]
+            assert len(list(zip(argNodes, kwargNodes, returnNodes))) == 1, "You cannot have more then one of the argNodes, KwargNode, and ReturnNodes to deploy"
+
+            argData: ArgData = argNodes[0].data
+            kwargData: KwargData = kwargNodes[0].data
+            returnData: ReturnData = returnNodes[0].data
+
+            arkitektNodes = [value for value in diagram.elements if isinstance(value, Node) and isinstance(value.data, ArkitektData)]
+            print(arkitektNodes)
+
+
             answer = arkitekt.call(createNodeMutation, {
                 "name": namegenerator.gen(),
-                "inputs": [],
-                "outputs": [],
+                "args": [p.dict() for p in argData.args],
+                "kwargs": [p.dict() for p in kwargData.kwargs],
+                "returns": [p.dict() for p in returnData.returns],
                 "type": "FUNCTION",
                 "package": "fluss",
                 "interface": namegenerator.gen(),
-            }, token)
+            })
 
             print("Created node", answer)
             arkitekt_node_id = answer["createNode"]["id"]
             arkitekt_node_name = answer["createNode"]["id"]
             node, created = models.FlowNode.objects.get_or_create(arkitekt_id=arkitekt_node_id, defaults={"name": arkitekt_node_name})
             graph.node = node
+            graph.save()
 
 
-        #TODO: assert that graph confines to the the node specifications
+        answer = arkitekt.call(createTemplateMutation, {
+                "node": graph.node.arkitekt_id,
+                "params": {
+                    "fluss": True
+                }
+        })
 
+        print(answer)
 
+        arkitekt_template_id = answer["createTemplate"]["id"]
 
-
-        answer = port.call(createPortTemplateMutation,{
-            "q": "tutum/hello-world:latest",
-            "node": graph.node.arkitekt_id,
-            "env": {
-                "FLUSS": "fluss",
-                "GRAPH": graph.id,
-            }
-        }, token)
-
-
-        arkitekt_id = answer["createPort"]["arkitektId"]
-        port_id = answer["createPort"]["id"]
-
-        template, created = models.FlowTemplate.objects.get_or_create(arkitekt_id=arkitekt_id,port_id=port_id)
+        template, created = models.FlowTemplate.objects.get_or_create(arkitekt_id=arkitekt_template_id)
         graph.template = template         
         graph.save()
 
@@ -149,11 +164,13 @@ class GraphDetail(BalderQuery):
 
     class Arguments:
         id = graphene.ID(description="A unique ID for this Graph")
+        template = graphene.ID(description="The corresponding template on arkitekt (proxied through FlowTemplate)")
 
 
     @bounced()
-    def resolve(root, info , *args,  id=None):
-        return models.Graph.objects.get(id=id)
+    def resolve(root, info , *args,  id=None, template=None):
+        if template: return models.Graph.objects.get(template__arkitekt_id=template)
+        if id: return models.Graph.objects.get(id=id)
 
 
     class Meta:
