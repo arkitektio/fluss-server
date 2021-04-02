@@ -15,10 +15,10 @@ class JwtToken(dict):
     """
     def __init__(self, decoded, user, token):
         decoded["scope"] = decoded["scope"] or ""
-
         self.scopes = decoded["scope"].split(" ")
         self.issuer = decoded["iss"]
         self.roles = decoded["roles"]
+        self.app = decoded["client_app"]
         self.user = user
         self.type = decoded["type"]
         self.token = token

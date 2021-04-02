@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from balder.views import BalderView
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render
@@ -25,8 +26,11 @@ from delt.service.registry import get_service_registry
 # Autodiscover for all of the Balder Modules in the installed Apps
 
 autodiscover()
-
-
+try:
+    import channels_graphql_ws
+    GraphQLView.graphiql_template = "graphene/graphiql-ws.html"
+except:
+    pass
 
 
 def index(request):
@@ -37,6 +41,6 @@ def index(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
-    url(r'^graphql$', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    url(r'^graphql$', BalderView),
     *get_service_registry().buildPaths()
 ]

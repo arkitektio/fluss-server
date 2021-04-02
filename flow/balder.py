@@ -1,4 +1,4 @@
-from flow.diagram import ArgData, ArkitektData, Diagram, KwargData, Node, ReturnData
+from flow.diagram import ArgData, ArgNode, ArkitektData, ArkitektNode, Diagram, KwargData, KwargNode, Node, ReturnData, ReturnNode
 from typing import List, Optional, Union
 from django.http import request
 from balder.types import BalderQuery, BalderMutation
@@ -48,7 +48,9 @@ createTemplateMutation = """
         }
     }
 """
+import logging
 
+logger = logging.getLogger(__name__)
 
 
 class Deploy(BalderMutation):
@@ -65,28 +67,30 @@ class Deploy(BalderMutation):
 
             diagram = Diagram(**graph.diagram)
 
-            argNodes = [value for value in diagram.elements if value.type == "argNode" ]
-            kwargNodes = [value for value in diagram.elements if value.type == "kwargNode" ]
-            returnNodes = [value for value in diagram.elements if value.type == "returnNode" ]
+            argNodes = [value for value in diagram.elements if isinstance(value, ArgNode) ]
+            kwargNodes = [value for value in diagram.elements if isinstance(value, KwargNode) ]
+            returnNodes = [value for value in diagram.elements if isinstance(value, ReturnNode) ]
             assert len(list(zip(argNodes, kwargNodes, returnNodes))) == 1, "You cannot have more then one of the argNodes, KwargNode, and ReturnNodes to deploy"
 
             argData: ArgData = argNodes[0].data
             kwargData: KwargData = kwargNodes[0].data
             returnData: ReturnData = returnNodes[0].data
 
-            arkitektNodes = [value for value in diagram.elements if isinstance(value, Node) and isinstance(value.data, ArkitektData)]
+            arkitektNodes = [value for value in diagram.elements if isinstance(value, ArkitektNode)]
             print(arkitektNodes)
 
-
-            answer = arkitekt.call(createNodeMutation, {
-                "name": namegenerator.gen(),
-                "args": [p.dict() for p in argData.args],
-                "kwargs": [p.dict() for p in kwargData.kwargs],
-                "returns": [p.dict() for p in returnData.returns],
-                "type": "FUNCTION",
-                "package": "fluss",
-                "interface": namegenerator.gen(),
-            })
+            try:
+                answer = arkitekt.call(createNodeMutation, {
+                    "name": namegenerator.gen(),
+                    "args": [p.dict() for p in argData.args],
+                    "kwargs": [p.dict() for p in kwargData.kwargs],
+                    "returns": [p.dict() for p in returnData.returns],
+                    "type": "FUNCTION",
+                    "package": "fluss",
+                    "interface": namegenerator.gen(),
+                })
+            except Exception as e:
+                logger.error(e)
 
             print("Created node", answer)
             arkitekt_node_id = answer["createNode"]["id"]
@@ -167,7 +171,7 @@ class GraphDetail(BalderQuery):
         template = graphene.ID(description="The corresponding template on arkitekt (proxied through FlowTemplate)")
 
 
-    @bounced()
+    @bounced(anonymous=False)
     def resolve(root, info , *args,  id=None, template=None):
         if template: return models.Graph.objects.get(template__arkitekt_id=template)
         if id: return models.Graph.objects.get(id=id)

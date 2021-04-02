@@ -12,9 +12,9 @@ def bounce(context_or_scope, required_roles=[], required_scopes=[], allowed_type
         assert context_or_scope.bounced is not None, "No bounced context provided"
         bouncer = context_or_scope.bounced
 
-
         bouncer.bounce(required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
-        setattr(context_or_scope, "user", bouncer.user)
+     
+        #setattr(context_or_scope, "user", bouncer.user)
 
     elif hasattr(context_or_scope, "_scope"):
         scope = context_or_scope._scope
@@ -23,7 +23,7 @@ def bounce(context_or_scope, required_roles=[], required_scopes=[], allowed_type
         bouncer = scope["bounced"]
 
         bouncer.bounce(required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
-        setattr(context_or_scope, "user", bouncer.user)
+        #setattr(context_or_scope, "user", bouncer.user)
 
 
     elif "bounced" in context_or_scope: # We are dealing with a scobe (websocket request)
@@ -31,6 +31,7 @@ def bounce(context_or_scope, required_roles=[], required_scopes=[], allowed_type
 
         bouncer.bounce(required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
         context_or_scope["user"] = bouncer.user
+
     else:
         raise Exception("Unknown Request")
 
@@ -45,12 +46,12 @@ def bounced(required_roles=[], required_scopes=[], allowed_types=["m2m","u2m"], 
 
         if asyncio.iscoroutinefunction(function):
             async def bounced_function(root, info, *args, **kwargs):
-                info.context = bounce(info.context, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
+                bounce(info.context, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
                 return await function(root, info, *args, **kwargs)
 
         else:
             def bounced_function(root, info, *args, **kwargs):
-                info.context = bounce(info.context, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
+                bounce(info.context, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)    
                 return function(root, info, *args, **kwargs)
 
 
@@ -69,7 +70,7 @@ def bounced_ws(required_roles=[], required_scopes=[], allowed_types=["m2m","u2m"
         if asyncio.iscoroutinefunction(function):
             async def bounced_function(self, *args, **kwargs):
                 try:
-                    self.scope = bounce(self.scope, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
+                    bounce(self.scope, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
                 except BounceException as e:
                     logger.error(f"Closed because of bouncing {e}")
                     await self.close(e)
@@ -79,7 +80,7 @@ def bounced_ws(required_roles=[], required_scopes=[], allowed_types=["m2m","u2m"
         else:
             def bounced_function(self, *args, **kwargs):
                 try:
-                    self.scope = bounce(self.scope, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
+                    bounce(self.scope, required_roles=required_roles, required_scopes=required_scopes, allowed_types=allowed_types, anonymous=anonymous, only_jwt=only_jwt)
                 except BounceException as e:
                     logger.error(f"Closed because of bouncing {e}")
                     self.close(e)

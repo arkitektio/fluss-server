@@ -1,13 +1,8 @@
 from typing import List, Optional, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from enum import Enum
 
-class Edge(BaseModel):
-    type: str
-    source: str
-    target: str
-    sourceHandle: str
-    targetHandle: str
+
 
 
 class ArkitektType(str, Enum):
@@ -17,21 +12,27 @@ class ArkitektType(str, Enum):
 
 class Arkitekt(BaseModel):
     id: str
+    name: str
     args: list
     kwargs: list
     returns: list
     type: ArkitektType
 
 
-
 class Selector(BaseModel):
     provider: Optional[List[str]]
-
 
 
 class ArkitektData(BaseModel):
     node: Arkitekt
     selector: Selector
+
+class Widget(BaseModel):
+    type: str = Field(None, alias='__typename')
+    query:  Optional[str]
+    dependencies: Optional[List[str]]
+    max:  Optional[str]
+    min:  Optional[str]
 
 
 class Port(BaseModel):
@@ -43,7 +44,7 @@ class Port(BaseModel):
 
 class ArgPort(Port):
     identifier: Optional[str]
-    widget: Optional[dict]
+    widget: Optional[Widget]
 
 
 class KwargPort(Port):
@@ -63,11 +64,57 @@ class KwargData(BaseModel):
 class ReturnData(BaseModel):
     returns: List[ReturnPort]
 
-class Node(BaseModel):
+
+class Edge(BaseModel):
+    id: str
     type: str
-    position: dict
+    label: Optional[str]
+    style: Optional[dict]
+    source: str
+    target: str
+    sourceHandle: str
+    targetHandle: str
+
+
+class Position(BaseModel):
+    x: int
+    y: int
+
+
+class Node(BaseModel):
+    id: str
+    type: str
+    position: Optional[Position]
     data: Union[ArkitektData, ArgData, KwargData, ReturnData]
+
+    @validator('type')
+    def type_match(cls, v):
+        if v == cls._type: return v
+        raise ValueError("Is not the Right")
+
+
+class ArkitektNode(Node):
+    _type = "arkitektNode"
+    data: ArkitektData
+
+
+
+class ArgNode(Node):
+    _type = "argNode"
+    data: ArgData
+
+
+class KwargNode(Node):
+    _type = "kwargNode"
+    data: KwargData
+
+
+class ReturnNode(Node):
+    _type = "returnNode"
+    data: ReturnData
 
 
 class Diagram(BaseModel):
-    elements: List[Union[Node, Edge]]
+    zoom: Optional[float]
+    position: Optional[List[int]]
+    elements: List[Union[ArkitektNode, ArgNode, KwargNode, ReturnNode, Edge]]

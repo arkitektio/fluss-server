@@ -21,9 +21,8 @@ s3fs==0.4.2 #TODO: Need to figure out parallel access in the eventloop first, sh
 boto3
 django-storages
 scipy
-graphene-django
+graphene-django>=3
 unflatten
-graphql-core<3,>=2.1.0
 
 pandas-profiling
 zarr>=2.4.0
