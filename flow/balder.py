@@ -1,3 +1,4 @@
+from bergen.schema import NodeType
 from flow.diagram import ArgData, ArgNode, ArkitektData, ArkitektNode, Diagram, KwargData, KwargNode, Node, ReturnData, ReturnNode
 from typing import List, Optional, Union
 from django.http import request
@@ -63,41 +64,44 @@ class Deploy(BalderMutation):
         graph = models.Graph.objects.get(id=graph)
         token = info.context.bounced.token
         # Request PortTemplate from arkitekt
-        if not graph.node:
+        
+        diagram = Diagram(**graph.diagram)
 
-            diagram = Diagram(**graph.diagram)
+        argNodes = [value for value in diagram.elements if isinstance(value, ArgNode) ]
+        kwargNodes = [value for value in diagram.elements if isinstance(value, KwargNode) ]
+        returnNodes = [value for value in diagram.elements if isinstance(value, ReturnNode) ]
 
-            argNodes = [value for value in diagram.elements if isinstance(value, ArgNode) ]
-            kwargNodes = [value for value in diagram.elements if isinstance(value, KwargNode) ]
-            returnNodes = [value for value in diagram.elements if isinstance(value, ReturnNode) ]
-            assert len(list(zip(argNodes, kwargNodes, returnNodes))) == 1, "You cannot have more then one of the argNodes, KwargNode, and ReturnNodes to deploy"
+        assert len(list(zip(argNodes, kwargNodes, returnNodes))) == 1, "You cannot have more then one of the argNodes, KwargNode, and ReturnNodes to deploy"
 
-            argData: ArgData = argNodes[0].data
-            kwargData: KwargData = kwargNodes[0].data
-            returnData: ReturnData = returnNodes[0].data
+        argData: ArgData = argNodes[0].data
+        kwargData: KwargData = kwargNodes[0].data
+        returnData: ReturnData = returnNodes[0].data
 
-            arkitektNodes = [value for value in diagram.elements if isinstance(value, ArkitektNode)]
-            print(arkitektNodes)
+        arkitektNodes = [value for value in diagram.elements if isinstance(value, ArkitektNode)]
+        # A Graph that contains generators is always a generator??? Maybe stupid but for now the solution
+        gen_nodes = [node for node in arkitektNodes if node.data.node.type == NodeType.GENERATOR]
+        node_type = NodeType.GENERATOR if len(gen_nodes) != 0 else NodeType.FUNCTION
 
-            try:
-                answer = arkitekt.call(createNodeMutation, {
-                    "name": namegenerator.gen(),
-                    "args": [p.dict() for p in argData.args],
-                    "kwargs": [p.dict() for p in kwargData.kwargs],
-                    "returns": [p.dict() for p in returnData.returns],
-                    "type": "FUNCTION",
-                    "package": "fluss",
-                    "interface": namegenerator.gen(),
-                })
-            except Exception as e:
-                logger.error(e)
+        print(node_type)
+        try:
+            answer = arkitekt.call(createNodeMutation, {
+                "name": graph.name,
+                "args": [p.dict() for p in argData.args],
+                "kwargs": [p.dict() for p in kwargData.kwargs],
+                "returns": [p.dict() for p in returnData.returns],
+                "type": node_type.value,
+                "package": "fluss",
+                "interface": graph.name,
+            })
+        except Exception as e:
+            logger.error(e)
 
-            print("Created node", answer)
-            arkitekt_node_id = answer["createNode"]["id"]
-            arkitekt_node_name = answer["createNode"]["id"]
-            node, created = models.FlowNode.objects.get_or_create(arkitekt_id=arkitekt_node_id, defaults={"name": arkitekt_node_name})
-            graph.node = node
-            graph.save()
+        print("Created node", answer)
+        arkitekt_node_id = answer["createNode"]["id"]
+        arkitekt_node_name = answer["createNode"]["id"]
+        node, created = models.FlowNode.objects.get_or_create(arkitekt_id=arkitekt_node_id, defaults={"name": arkitekt_node_name})
+        graph.node = node
+        graph.save()
 
 
         answer = arkitekt.call(createTemplateMutation, {

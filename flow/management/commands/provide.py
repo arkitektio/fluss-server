@@ -1,14 +1,22 @@
-from delt.bridge import arkitekt
-from flow.models import FlowTemplate
-from re import template
-from pydantic import BaseModel
+from bergen.schema import NodeType, Template
+from flow.actors import FuncFlowActor, GenFlowActor
 from django.core.management import BaseCommand
 from bergen.messages.postman.provide import *
 from bergen.clients.provider import ProviderBergen
 import asyncio
 import logging 
-from asgiref.sync import sync_to_async
+from bergen.messages import *
+from bergen.provider.base import BaseProvider
+
+
+
+
 logger = logging.getLogger(__name__)
+
+
+
+
+
 
 async def main():
     # Perform connection
@@ -17,16 +25,19 @@ async def main():
         auto_reconnect=True# if we want to specifically only use pods on this innstance we would use that it in the selector
         ) as client:
 
-        @client.hook("bounced_provide", overwrite=True)
-        async def on_bounced_provide(self, bounced_provide: BouncedProvideMessage):
-            
-            template = await sync_to_async(FlowTemplate.objects.get)(arkitekt_id=bounced_provide.data.template)
-            logger.error(template)
+        @client.hook("get_actorclass_for_template", overwrite=True)
+        async def get_actorclass_for_template(self: BaseProvider, template_id):
+            template = await Template.asyncs.get(id=template_id)
+
+            if template.node.type == NodeType.FUNCTION:
+                return FuncFlowActor
+
+            if template.node.type == NodeType.GENERATOR:
+                return GenFlowActor
 
 
 
         await client.provide_async()
-
 
 
 class Command(BaseCommand):

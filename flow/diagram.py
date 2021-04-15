@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field, validator
 from enum import Enum
 
 
-
+class Constants(dict):
+    pass
 
 class ArkitektType(str, Enum):
     FUNCTION = "FUNCTION"

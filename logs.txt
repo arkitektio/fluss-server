@@ -1,0 +1,862 @@
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Successfully connected [bold]Postman
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Provision Calls
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Successfully connected [bold]Postman
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Provision Calls
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='96461c12-6288-4ce7-b6d2-d670b23642c6', extensions=MetaExtensionsModel(progress='amq.gen-DU3UoFBXOZ8bk4_mIuulWQ', callback='amq.gen-ypQ7ZZOHKdBPqPxadqUVKw'))
+Received Message data=DataModel(node='22', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='96461c12-6288-4ce7-b6d2-d670b23642c6') meta=MetaModel(type='bounced_forwarded_reserve', reference='96461c12-6288-4ce7-b6d2-d670b23642c6', extensions=MetaExtensionsModel(progress='amq.gen-DU3UoFBXOZ8bk4_mIuulWQ', callback='amq.gen-ypQ7ZZOHKdBPqPxadqUVKw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation ee0c4bd3-dce9-439d-be9c-661e3c05dd5a
+Established Reservation 2522892b-7505-4e0d-96df-a318b564a008
+Received Message data=DataModel(reservation='96461c12-6288-4ce7-b6d2-d670b23642c6', provision='96461c12-6288-4ce7-b6d2-d670b23642c6', args={'sleep': 1}, kwargs={'amount': 100}) meta=MetaModel(type='bounced_forwarded_assign', reference='d30a7db4-fa63-4c2c-b97a-382f9ded4a8a', extensions=MetaExtensionsModel(progress='amq.gen-DU3UoFBXOZ8bk4_mIuulWQ', callback='amq.gen-ypQ7ZZOHKdBPqPxadqUVKw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+Done
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+<Future finished result=AssignReturnM...Fn_8nt7pPA')))>
+Received Message data=DataModel(reservation='96461c12-6288-4ce7-b6d2-d670b23642c6') meta=MetaModel(type='bounced_unreserve', reference='66993919-49cc-454c-86fe-1fa54d78f295', extensions=MetaExtensionsModel(progress='amq.gen-DU3UoFBXOZ8bk4_mIuulWQ', callback='amq.gen-ypQ7ZZOHKdBPqPxadqUVKw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Fn_8nt7pPA')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Fn_8nt7pPA')))>
+Unreserved Sucessfully
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+ [x] Awaiting Provision Calls
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='4a9ecfb4-3ca9-4e43-b01e-4ada9047ec0c', extensions=MetaExtensionsModel(progress='amq.gen-2QKEBvWiBsZo9ZnXBHvhOQ', callback='amq.gen-9XzojlS1pntn_nAzeW4CGg'))
+Actor is done! Cancellation or Finished??
+Received Message data=DataModel(node='22', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='4a9ecfb4-3ca9-4e43-b01e-4ada9047ec0c') meta=MetaModel(type='bounced_forwarded_reserve', reference='4a9ecfb4-3ca9-4e43-b01e-4ada9047ec0c', extensions=MetaExtensionsModel(progress='amq.gen-2QKEBvWiBsZo9ZnXBHvhOQ', callback='amq.gen-9XzojlS1pntn_nAzeW4CGg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Successfully connected [bold]Postman
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Provision Calls
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='e6cf88e2-8e38-43de-a26e-f85f0e8786e0', extensions=MetaExtensionsModel(progress='amq.gen-DQ1xiYNhmA1iEbh4f0SRDQ', callback='amq.gen-q4fvxaMDF2I4mmjhpviFPg'))
+Received Message data=DataModel(node='22', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='e6cf88e2-8e38-43de-a26e-f85f0e8786e0') meta=MetaModel(type='bounced_forwarded_reserve', reference='e6cf88e2-8e38-43de-a26e-f85f0e8786e0', extensions=MetaExtensionsModel(progress='amq.gen-DQ1xiYNhmA1iEbh4f0SRDQ', callback='amq.gen-q4fvxaMDF2I4mmjhpviFPg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation 49bc6670-8806-455e-9570-59acf0d2a6c5
+Established Reservation e4021f60-af1d-4795-b8a1-622087ef442d
+Received Message data=DataModel(reservation='e6cf88e2-8e38-43de-a26e-f85f0e8786e0', provision='e6cf88e2-8e38-43de-a26e-f85f0e8786e0', args={'sleep': 1}, kwargs={'amount': 100}) meta=MetaModel(type='bounced_forwarded_assign', reference='38e001d3-3380-433c-a3a2-5e3a2c2825c2', extensions=MetaExtensionsModel(progress='amq.gen-DQ1xiYNhmA1iEbh4f0SRDQ', callback='amq.gen-q4fvxaMDF2I4mmjhpviFPg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Done
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Received Message data=DataModel(reservation='e6cf88e2-8e38-43de-a26e-f85f0e8786e0') meta=MetaModel(type='bounced_unreserve', reference='bf2c0703-df5c-4fc7-a0e6-413282b19dbb', extensions=MetaExtensionsModel(progress='amq.gen-DQ1xiYNhmA1iEbh4f0SRDQ', callback='amq.gen-q4fvxaMDF2I4mmjhpviFPg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4', extensions=MetaExtensionsModel(progress='amq.gen-KN1u8AwOcrMVmpfqQwgpyA', callback='amq.gen-maORdQVqdVj3i-pa3ddw_A'))
+Received Message data=DataModel(node='24', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4') meta=MetaModel(type='bounced_forwarded_reserve', reference='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4', extensions=MetaExtensionsModel(progress='amq.gen-KN1u8AwOcrMVmpfqQwgpyA', callback='amq.gen-maORdQVqdVj3i-pa3ddw_A'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation d4f97917-92ae-4a75-897a-ef0cefb338ef
+Established Reservation 35d4aec4-53f7-4bf6-9460-84ad22aedfa3
+Received Message data=DataModel(reservation='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4') meta=MetaModel(type='bounced_unreserve', reference='f204bf41-c1af-49f4-8abd-aad8df1b0dea', extensions=MetaExtensionsModel(progress='amq.gen-KN1u8AwOcrMVmpfqQwgpyA', callback='amq.gen-maORdQVqdVj3i-pa3ddw_A'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+Received Message data=DataModel(node='24', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4') meta=MetaModel(type='bounced_forwarded_reserve', reference='d1c6a9c9-0d9d-4a1d-b4fc-d10e5ccc3fa2', extensions=MetaExtensionsModel(progress='amq.gen-XFCWgWZo5cq_kNJ02EmOHw', callback='amq.gen-clZQde2Ty-GoK64_eFDTyQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation 6586324b-672c-4a1b-92cf-7a7e2dbb8b01
+Established Reservation b135e147-9bb3-401d-ab68-1f233babac99
+Received Message data=DataModel(reservation='d1c6a9c9-0d9d-4a1d-b4fc-d10e5ccc3fa2', provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4', args={'sleep': 1}, kwargs={'amount': 100}) meta=MetaModel(type='bounced_forwarded_assign', reference='0bc26c27-c2fa-43bf-9769-f6b5e4c58aaa', extensions=MetaExtensionsModel(progress='amq.gen-XFCWgWZo5cq_kNJ02EmOHw', callback='amq.gen-clZQde2Ty-GoK64_eFDTyQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Done
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Received Message data=DataModel(reservation='d1c6a9c9-0d9d-4a1d-b4fc-d10e5ccc3fa2') meta=MetaModel(type='bounced_unreserve', reference='c9b798a3-2cc1-4d6f-8b53-9e5aae3faa7a', extensions=MetaExtensionsModel(progress='amq.gen-XFCWgWZo5cq_kNJ02EmOHw', callback='amq.gen-clZQde2Ty-GoK64_eFDTyQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+Received Message data=DataModel(node='24', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4') meta=MetaModel(type='bounced_forwarded_reserve', reference='32a9bd5d-4aff-4f2e-94f0-d39d7d055d6c', extensions=MetaExtensionsModel(progress='amq.gen-X3x9I8NblJhIoyIqcfz69Q', callback='amq.gen-DJWB1iOyiaI5CGoSPAuiig'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation 9e678f4e-c5b2-43cc-9855-0ee91dad9295
+Established Reservation e7c71670-b623-4d7e-8a59-d487691a63c6
+Received Message data=DataModel(reservation='32a9bd5d-4aff-4f2e-94f0-d39d7d055d6c', provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4', args={'sleep': 1}, kwargs={'amount': 100}) meta=MetaModel(type='bounced_forwarded_assign', reference='f1da4a06-fe82-45f3-922f-ec14280ea038', extensions=MetaExtensionsModel(progress='amq.gen-X3x9I8NblJhIoyIqcfz69Q', callback='amq.gen-DJWB1iOyiaI5CGoSPAuiig'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Done
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Received Message data=DataModel(reservation='32a9bd5d-4aff-4f2e-94f0-d39d7d055d6c') meta=MetaModel(type='bounced_unreserve', reference='b515925b-4987-441e-8715-41d9590cd9f3', extensions=MetaExtensionsModel(progress='amq.gen-X3x9I8NblJhIoyIqcfz69Q', callback='amq.gen-DJWB1iOyiaI5CGoSPAuiig'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+Received Message data=DataModel(node='24', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4') meta=MetaModel(type='bounced_forwarded_reserve', reference='fb086658-616e-46c2-bfd2-5492fab4f938', extensions=MetaExtensionsModel(progress='amq.gen-NDspEHd9SMBegz4zTCbH5w', callback='amq.gen-2UEQLP915F91KLqvG8fy6Q'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation b1fbb7d2-747d-4e16-a6a9-ae2e55a4a78c
+Established Reservation 4a9c2f1b-595e-46f3-ae87-e11b1fbaa84d
+Received Message data=DataModel(reservation='fb086658-616e-46c2-bfd2-5492fab4f938', provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4', args={'sleep': 1}, kwargs={'amount': 100}) meta=MetaModel(type='bounced_forwarded_assign', reference='3bf8c26f-ecbe-457d-b897-da6413575e4b', extensions=MetaExtensionsModel(progress='amq.gen-NDspEHd9SMBegz4zTCbH5w', callback='amq.gen-2UEQLP915F91KLqvG8fy6Q'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Done
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Received Message data=DataModel(reservation='fb086658-616e-46c2-bfd2-5492fab4f938') meta=MetaModel(type='bounced_unreserve', reference='0e464d3a-8997-4084-a743-278c058f3049', extensions=MetaExtensionsModel(progress='amq.gen-NDspEHd9SMBegz4zTCbH5w', callback='amq.gen-2UEQLP915F91KLqvG8fy6Q'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+Received Message data=DataModel(node='24', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4') meta=MetaModel(type='bounced_forwarded_reserve', reference='1cac4dbc-ea2a-4e31-a89c-4e9eb23ad14c', extensions=MetaExtensionsModel(progress='amq.gen-n29KOqfZkTcvfQ6XrTtrZQ', callback='amq.gen-HoMSPfiwc-hXlGrlH-xNmw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 22 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation 5850dba6-e335-4eed-bedf-0cb746487a06
+Established Reservation ba909f86-deac-4343-9dfd-1ba3e01f3858
+Received Message data=DataModel(reservation='1cac4dbc-ea2a-4e31-a89c-4e9eb23ad14c', provision='0086b704-ca2f-4ddc-a09e-1bf4bb1555e4', args={'sleep': 1}, kwargs={'amount': 100}) meta=MetaModel(type='bounced_forwarded_assign', reference='c5a3a0c1-a003-47c0-b40b-08befe796f9a', extensions=MetaExtensionsModel(progress='amq.gen-n29KOqfZkTcvfQ6XrTtrZQ', callback='amq.gen-HoMSPfiwc-hXlGrlH-xNmw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Done
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+<Future finished result=AssignReturnM...Z6W-lp8e8g')))>
+Received Message data=DataModel(reservation='1cac4dbc-ea2a-4e31-a89c-4e9eb23ad14c') meta=MetaModel(type='bounced_unreserve', reference='74ca4c46-edf0-4ea8-8b96-9106e5d4a0b6', extensions=MetaExtensionsModel(progress='amq.gen-n29KOqfZkTcvfQ6XrTtrZQ', callback='amq.gen-HoMSPfiwc-hXlGrlH-xNmw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z6W-lp8e8g')))>
+Unreserved Sucessfully
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+ [x] Awaiting Provision Calls
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Successfully connected [bold]Postman
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Provision Calls
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='30a0712e-a921-44c7-921c-4c7ed4a88e6e', extensions=MetaExtensionsModel(progress='amq.gen-AimgGUIyxDAq7FYaLuPE1w', callback='amq.gen-SlZgx20_jefkXPLQ2keFHw'))
+Received Message data=DataModel(node='25', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='30a0712e-a921-44c7-921c-4c7ed4a88e6e') meta=MetaModel(type='bounced_forwarded_reserve', reference='30a0712e-a921-44c7-921c-4c7ed4a88e6e', extensions=MetaExtensionsModel(progress='amq.gen-AimgGUIyxDAq7FYaLuPE1w', callback='amq.gen-SlZgx20_jefkXPLQ2keFHw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Received Message data=DataModel(node='25', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='30a0712e-a921-44c7-921c-4c7ed4a88e6e') meta=MetaModel(type='bounced_forwarded_reserve', reference='e8107882-2c63-4b0a-bbd7-25472845d140', extensions=MetaExtensionsModel(progress='amq.gen-0Viyi4CRFh2KJkKqOO1NcQ', callback='amq.gen-vDeYD5xlxTKAz7oPbmMNSg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 23 on Flow Boy 
+Providing Template 23 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation 80d6772b-9b68-413c-b028-7727e772ea88
+Established Reservation b10c252c-1756-4104-a7fd-360bf982a0fa
+Received Message data=DataModel(reservation='e8107882-2c63-4b0a-bbd7-25472845d140', provision='30a0712e-a921-44c7-921c-4c7ed4a88e6e', args={'x': 1}, kwargs={}) meta=MetaModel(type='bounced_forwarded_assign', reference='efa89ca8-6edb-4a8c-9715-0a20814e6c22', extensions=MetaExtensionsModel(progress='amq.gen-0Viyi4CRFh2KJkKqOO1NcQ', callback='amq.gen-vDeYD5xlxTKAz7oPbmMNSg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+<Future finished result=AssignReturnM...Z3au2d8Kng')))>
+<Future finished result=AssignReturnM...Z3au2d8Kng')))>
+Received Message data=DataModel(reservation='e8107882-2c63-4b0a-bbd7-25472845d140') meta=MetaModel(type='bounced_unreserve', reference='17739046-dcf1-4e4f-9970-d84e72f8f119', extensions=MetaExtensionsModel(progress='amq.gen-0Viyi4CRFh2KJkKqOO1NcQ', callback='amq.gen-vDeYD5xlxTKAz7oPbmMNSg'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...Z3au2d8Kng')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...Z3au2d8Kng')))>
+Unreserved Sucessfully
+Task was destroyed but it is pending!
+task: <Task pending name='Task-47' coro=<FunctionalArkitektAtom.run() running at /workspace/flow/atoms/arkitekt.py:40> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7fc46904f4c0>()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-48' coro=<FunctionalArkitektAtom.run() running at /workspace/flow/atoms/arkitekt.py:40> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7fc4681cfb20>()]>>
+Creating new Ward for Datapoint TYPENAME=None id=1 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Creating new Ward for Datapoint TYPENAME=None id=2 type='GRAPHQL' name=None inward=None outward='p-tnagerl-lab1' port=8070 url=None models=None
+Successfully connected [bold]Postman
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Provision Calls
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='1127ee01-f6fd-4f8a-afe7-323928b6b9f7', extensions=MetaExtensionsModel(progress='amq.gen-HT2TybKnYVj_lqjqp5mkMg', callback='amq.gen-IUyWNhwAW_PZwk7-N7t3kQ'))
+Received Message data=DataModel(node='35', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='1127ee01-f6fd-4f8a-afe7-323928b6b9f7') meta=MetaModel(type='bounced_forwarded_reserve', reference='1127ee01-f6fd-4f8a-afe7-323928b6b9f7', extensions=MetaExtensionsModel(progress='amq.gen-HT2TybKnYVj_lqjqp5mkMg', callback='amq.gen-IUyWNhwAW_PZwk7-N7t3kQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 37 on Flow Boy 
+Providing Template 36 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation a62b8621-9276-415d-be2d-57e0ee130f97
+Established Reservation 95eb3e3b-260b-4d6c-a466-d60d7a7616e8
+Received Message data=DataModel(reservation='1127ee01-f6fd-4f8a-afe7-323928b6b9f7', provision='1127ee01-f6fd-4f8a-afe7-323928b6b9f7', args={'sleep': 1}, kwargs={}) meta=MetaModel(type='bounced_forwarded_assign', reference='99b9bbc8-dd80-4ba0-a78b-49fd18c3396d', extensions=MetaExtensionsModel(progress='amq.gen-HT2TybKnYVj_lqjqp5mkMg', callback='amq.gen-IUyWNhwAW_PZwk7-N7t3kQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Done
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+Received Message data=DataModel(reservation='1127ee01-f6fd-4f8a-afe7-323928b6b9f7') meta=MetaModel(type='bounced_unreserve', reference='a11fe03b-ea2c-4f6d-9077-5ec7ce8a5352', extensions=MetaExtensionsModel(progress='amq.gen-HT2TybKnYVj_lqjqp5mkMg', callback='amq.gen-IUyWNhwAW_PZwk7-N7t3kQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...3RwwibEACA')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...3RwwibEACA')))>
+Unreserved Sucessfully
+Message
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='053e427b-884e-4515-9845-f7ba88a32c4d', extensions=MetaExtensionsModel(progress='amq.gen-BPsPd329N9eVfGt0w-lNIQ', callback='amq.gen-jcWNN5t0xamj97Z5Ov4IwQ'))
+Received Message data=DataModel(node='37', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='053e427b-884e-4515-9845-f7ba88a32c4d') meta=MetaModel(type='bounced_forwarded_reserve', reference='053e427b-884e-4515-9845-f7ba88a32c4d', extensions=MetaExtensionsModel(progress='amq.gen-BPsPd329N9eVfGt0w-lNIQ', callback='amq.gen-jcWNN5t0xamj97Z5Ov4IwQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 37 on Flow Boy 
+Providing Template 36 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation cccc97ff-f452-4cb6-93b6-69adf111413b
+Established Reservation 48a0f43a-fc1e-4e42-afe6-339abb51a5ea
+Received Message data=DataModel(reservation='053e427b-884e-4515-9845-f7ba88a32c4d', provision='053e427b-884e-4515-9845-f7ba88a32c4d', args={'sleep': 1}, kwargs={}) meta=MetaModel(type='bounced_forwarded_assign', reference='0d99da65-a2c5-4676-bb64-cfb73dc9deb1', extensions=MetaExtensionsModel(progress='amq.gen-BPsPd329N9eVfGt0w-lNIQ', callback='amq.gen-jcWNN5t0xamj97Z5Ov4IwQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Done
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+Received Message data=DataModel(reservation='053e427b-884e-4515-9845-f7ba88a32c4d') meta=MetaModel(type='bounced_unreserve', reference='8b0634d6-58bd-46a7-b4ac-2af3ff1f5b12', extensions=MetaExtensionsModel(progress='amq.gen-BPsPd329N9eVfGt0w-lNIQ', callback='amq.gen-jcWNN5t0xamj97Z5Ov4IwQ'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...3RwwibEACA')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...3RwwibEACA')))>
+Unreserved Sucessfully
+Received Message data=DataModel(node='37', template=None, params=ReserveParams(providers=None, auto_unprovide=False, auto_provide=True), provision='053e427b-884e-4515-9845-f7ba88a32c4d') meta=MetaModel(type='bounced_forwarded_reserve', reference='038e5f57-d2a7-4f88-bec5-94c18ef1a936', extensions=MetaExtensionsModel(progress='amq.gen-j3mSW8MWFASaQJTOhvwXCQ', callback='amq.gen-rPYErKy0_2T__bWF2v6asw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Arkitekt demands a New Reservation from us
+Providing Template 37 on Flow Boy 
+Providing Template 36 on Flow Boy 
+Pod Pending
+Pod Pending
+Established Reservation 5b0de66b-236e-45dc-afb8-9e725cd0d1bb
+Established Reservation e3deb65c-75a0-4f2e-8693-6d136bfa99ed
+Received Message data=DataModel(reservation='038e5f57-d2a7-4f88-bec5-94c18ef1a936', provision='053e427b-884e-4515-9845-f7ba88a32c4d', args={'sleep': 1}, kwargs={}) meta=MetaModel(type='bounced_forwarded_assign', reference='de1f4ad1-7979-44f6-9917-20c16dd79f15', extensions=MetaExtensionsModel(progress='amq.gen-j3mSW8MWFASaQJTOhvwXCQ', callback='amq.gen-rPYErKy0_2T__bWF2v6asw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Done
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+<Future finished result=AssignReturnM...3RwwibEACA')))>
+Received Message data=DataModel(reservation='038e5f57-d2a7-4f88-bec5-94c18ef1a936') meta=MetaModel(type='bounced_unreserve', reference='c8a9338a-394b-4514-bd48-f6fd703e75d7', extensions=MetaExtensionsModel(progress='amq.gen-j3mSW8MWFASaQJTOhvwXCQ', callback='amq.gen-rPYErKy0_2T__bWF2v6asw'), token=Token(roles=[], scopes=['read', 'write', 'provider', 'can_provide', 'introspection'], user=3))
+Cancellation for Reservatoion received. Canceling!
+<Future finished result=UnreserveDone...3RwwibEACA')))>
+Unreserved Sucessfully
+<Future finished result=UnreserveDone...3RwwibEACA')))>
+Unreserved Sucessfully
