@@ -36,9 +36,6 @@ ELEMENTS_HOST = "p-tnagerl-lab1"
 ELEMENTS_INWARD = "fluss" # Set this to the host you are on
 ELEMENTS_PORT = 8070 # Set this to the host you are on
 
-# Uncomment and re run
-OAUTH2_PROVIDER_APPLICATION_MODEL='oauth2_provider.Application'
-
 
 # S3 Settings
 S3_PUBLIC_DOMAIN = f"{ELEMENTS_HOST}:9000" #TODO: FIx
@@ -108,6 +105,7 @@ INSTALLED_APPS = [
     'taggit',
     'channels',
     'herre',
+    'delt',
     'guardian',
     'graphene_django',
     "rest_framework",

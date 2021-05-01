@@ -1,3 +1,4 @@
+from bergen.messages.postman.progress import ProgressLevel
 from flow.utils import get_diagram_for_arkitekt_template_id
 from bergen.handlers.assign import AssignHandler
 from bergen.handlers.unreserve import UnreserveHandler
@@ -10,7 +11,8 @@ from bergen.debugging import DebugLevel
 from typing import Dict, List, Tuple, Union
 from bergen.actors.classic import ClassicGenActor
 from bergen.messages import *
-from bergen.models import *
+from bergen.models import Node
+from bergen.schema import NodeType
 from flow.atoms.events import *
 from flow import diagram
 import asyncio
@@ -20,6 +22,8 @@ from bergen.contracts import Reservation
 
 
 class GenFlowActor(ClassicGenActor):
+    expandInputs = False
+    shrinkOutputs = False
     """ Flow Base receives a Pod with an attached template """
 
     async def on_provide(self, provide: ProvideHandler):
@@ -38,9 +42,10 @@ class GenFlowActor(ClassicGenActor):
         await provide.log(self.kwargNode, level=DebugLevel.INFO)
         await provide.log(self.returnNode, level=DebugLevel.INFO)
         
-        await provide.log("Querying ArkitektNodes", level=DebugLevel.INFO)
+        await provide.log(f"Querying ArkitektNodes {self.arkitektNodes}", level=DebugLevel.INFO)
         self.nodeIDs = [node.id for node in self.arkitektNodes]
         self.nodeSelectors = [node.data.selector for node in self.arkitektNodes]
+        console.log(f"[blue] {self.nodeSelectors}")
         nodeInstanceFutures = [Node.asyncs.get(id=node.data.node.id)for node in self.arkitektNodes]
         self.nodeInstances = await asyncio.gather(*nodeInstanceFutures)
 
@@ -48,13 +53,14 @@ class GenFlowActor(ClassicGenActor):
 
 
     async def on_reserve(self, handler: ReserveHandler) -> None:
-
-        await handler.log("Reserving Arkitekt nodes", level=DebugLevel.INFO)
+        await handler.log("Workflow: Running on a Generative Flow Handler", level=DebugLevel.INFO)
+        await handler.log("Workflow: Reserving Arkitekt nodes", level=DebugLevel.INFO)
+        console.log(f"[blue] {self.nodeSelectors}")
         reservationsContexts = [node.reserve(**selector.dict(), bounced=handler.bounced) for node, selector in zip(self.nodeInstances, self.nodeSelectors)]
         reservationEnterFutures = [res.start() for res in reservationsContexts]
         reservations = await asyncio.gather(*reservationEnterFutures)
 
-        await handler.log("Building a Reservation map", level=DebugLevel.INFO)
+        await handler.log("Workflow: Building a Reservation map", level=DebugLevel.INFO)
         return { node_id: reservation for node_id, reservation in zip(self.nodeIDs, reservations)}
 
 
@@ -74,23 +80,23 @@ class GenFlowActor(ClassicGenActor):
                 self.nodeIDConstantsMap.setdefault(node.id, {})[kwarg] = value
 
 
-        await assign_handler.log("Building a Reservation map", level=DebugLevel.INFO)
+        await assign_handler.log("Workflow: Building a Reservation map", level=ProgressLevel.DEBUG)
 
         runs: List[Tuple[str, Atom]] = []
 
-        await assign_handler.log("Instantiating Node Runs: Creating All necessary Queues for our Eventbus")
+        await assign_handler.log("Workflow: Instantiating Node Runs: Creating All necessary Queues for our Eventbus" , level=ProgressLevel.DEBUG)
         for node in self.nodes:
             if isinstance(node, diagram.ArkitektNode):
                 res = reservations[node.id]
                 constants = self.nodeIDConstantsMap.get(node.id, {})
                 if node.data.node.type == NodeType.GENERATOR:
-                    runs.append((node.id, GenerativeArkitektAtom(action_queue, node, res, constants)))
+                    runs.append((node.id, GenerativeArkitektAtom(action_queue, node, res, constants, assign_handler)))
                 if node.data.node.type == NodeType.FUNCTION:
-                    runs.append((node.id, FunctionalArkitektAtom(action_queue, node, res, constants)))
+                    runs.append((node.id, FunctionalArkitektAtom(action_queue, node, res, constants, assign_handler)))
 
 
         tasks = []
-        await assign_handler.log("Creating Runs as tasks")
+        await assign_handler.log("Workflow: Creating Runs as tasks", level=ProgressLevel.DEBUG)
         for id, run in runs:
             tasks.append((id, await run.start()))
 
@@ -102,39 +108,38 @@ class GenFlowActor(ClassicGenActor):
         # We send our first arguments 
 
         initial_nodes = self.parser.getInitialNodes()
-        await assign_handler.log(f"This nodes have no args and will automatically be called: {[node.id for node in initial_nodes]}")
+        await assign_handler.log(f"Workflow: This nodes have no args and will automatically be called: {[node.id for node in initial_nodes]}")
 
 
-        await assign_handler.log(f"Starting Initial Nodes (Nodes that need no Args)")
+        await assign_handler.log(f"Workflow: Sending Initial Arguments", level=ProgressLevel.INFO)
         await asyncio.gather(*[nodeIDRunMap[node.id].on_event(PassInEvent(handle="args", value=[])) for node in initial_nodes])
         await asyncio.gather(*[nodeIDRunMap[node.id].on_event(DoneInEvent(handle="args")) for node in initial_nodes])
 
 
         arg_receiving_nodes = self.parser.connectedNodes(self.argNode.id)
-        await assign_handler.log(f"This nodes will receive args: {[node.id for node in arg_receiving_nodes]}")
+        await assign_handler.log(f"Workflow: This nodes will receive args: {[node.id for node in arg_receiving_nodes]}", level=ProgressLevel.DEBUG)
         await asyncio.gather(*[nodeIDRunMap[node.id].on_event(PassInEvent(handle="args",value=args)) for node in arg_receiving_nodes])
         await asyncio.gather(*[nodeIDRunMap[node.id].on_event(DoneInEvent(handle="args")) for node in arg_receiving_nodes])
 
         while True:
             event: Union[PassOutEvent, DoneOutEvent] = await action_queue.get()
-            await assign_handler.log(f"[red] NEW EVENT: {event}")
-            await assign_handler.log(f"Searching for nodes {event.node_id} on {event.handle}")
+            await assign_handler.log(f"Workflow: Searching for nodes {event.node_id} on {event.handle}", level=ProgressLevel.DEBUG)
             # Action follows NODE_ID, OUTPUT_HANDLE, VALUES
             handle_nodes = self.parser.connectedNodesWithHandle(event.node_id, event.handle)
-            await assign_handler.log(f"Found the Following handles {handle_nodes}")
+            await assign_handler.log(f"Workflow: Found the Following handles {handle_nodes}", level=ProgressLevel.DEBUG)
 
             for handle, node in handle_nodes:
 
                 if isinstance(event, PassOutEvent):
                     if isinstance(node, diagram.ReturnNode):
-                        await assign_handler.log("Yielded")
+                        await assign_handler.log("Workflow: Yielded")
                         yield event.value
                     else:
                         await nodeIDRunMap[node.id].on_event(PassInEvent(handle=handle, value=event.value))
 
                 if isinstance(event, DoneOutEvent):
                     if isinstance(node, diagram.ReturnNode):
-                        await assign_handler.log("Loop is done")
+                        await assign_handler.log("Workflow: Done")
                         return
                     else:
                         await nodeIDRunMap[node.id].on_event(DoneInEvent(handle=handle))

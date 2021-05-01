@@ -9,7 +9,7 @@ herre:
   port: 8000
   client_id: nX1RcMSQ3FkQWCuw127B1TwZTpxyl7jloDP8GscC
   client_secret: YdZFYHU2nNn88qPxkqPHqAmiFcznnZBrLCr9iIPjcPtnZ2hjN54Ws0grbxefYf0nsbmImcTHtVgLmzlEnjJJWvchjBq9JRpWFNBvpDKF8WHjZPnsL9Dna3R9Ccfxr9Of
-  authorization_grant_type: backend
+  authorization_grant_type: client-credentials
   scopes: 
       - read
       - write

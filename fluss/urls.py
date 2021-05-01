@@ -20,17 +20,8 @@ from django.shortcuts import render
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import url
-from balder.autodiscover import autodiscover
 from delt.service.registry import get_service_registry
-
-# Autodiscover for all of the Balder Modules in the installed Apps
-
-autodiscover()
-try:
-    import channels_graphql_ws
-    GraphQLView.graphiql_template = "graphene/graphiql-ws.html"
-except:
-    pass
+import fluss.arkitekt
 
 
 def index(request):

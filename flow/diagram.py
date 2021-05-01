@@ -21,7 +21,8 @@ class Arkitekt(BaseModel):
 
 
 class Selector(BaseModel):
-    provider: Optional[List[str]]
+    providers: Optional[List[str]]
+    templates: Optional[List[str]]
 
 
 class ArkitektData(BaseModel):
