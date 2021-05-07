@@ -3,7 +3,7 @@ channels>=2.4.0
 channels_redis
 django-registration-redux
 django-extensions
-drf-access-policy
+
 django-oauth-toolkit
 django-cors-headers
 django-filter
@@ -13,34 +13,23 @@ drf-access-policy
 psycopg2
 pytest-django
 pytest-asyncio
-django-channels-graphql-ws
 django-guardian
 django-avatar
 python-slugify
-s3fs==0.4.2 #TODO: Need to figure out parallel access in the eventloop first, should yield a massive boost in performance
 boto3
 django-storages
 scipy
-graphene-django
+graphene-django==3.0.0b7
 unflatten
 
-pandas-profiling
-zarr>=2.4.0
-dask[complete]>=2.28.0
-lz4
-numcodecs
-xarray
-seaborn
-blosc
-dask-image
-Markdown
+# Bergen
+bergen>=0.3.133
+delt
+django-health-check
 
 # For port provision
 docker
 
-# For Local/Medium
-celery[redis]
-flower
 
 # Testing and Linting
 ptvsd

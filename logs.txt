@@ -33250,3 +33250,19 @@ Registering UpdateGraph as Mutation
 Registering CreateGraph as Mutation
 Registering GraphDetail as Query
 Registering MyGraphs as Query
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
