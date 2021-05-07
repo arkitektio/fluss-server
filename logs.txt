@@ -32749,3 +32749,504 @@ Postman: Trying to reconnect Postman
 Postman: Trying to reconnect Postman
 Successfully connected [bold]Postman
 Successfully connected [bold]Postman
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f037c004280>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f037c004280>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f037b5adac0>, 160537.111420852)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f037c004550>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f037b5adac0>, 160537.111420852)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f037c004550>
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7fcf0f1af6d0>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7fcf0f1af6d0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7fcf0ef4f4c0>, 160600.627832875)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7fcf0f1affd0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7fcf0ef4f4c0>, 160600.627832875)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7fcf0f1affd0>
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f23384dc7c0>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f23384dc7c0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f23384d0460>, 160686.80282064)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f23384dc640>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f23384d0460>, 160686.80282064)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f23384dc640>
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Provider: Lost connection inbetween everything :( [ConnectionClosedError('code = 1006 (connection closed abnormally [internal]), no reason')]
+Provider: Lost connection inbetween everything :( [ConnectionClosedError('code = 1006 (connection closed abnormally [internal]), no reason')]
+Provider: Reconnecting
+Provider: Reconnecting
+Lost connection inbetween everything :( [ConnectionClosedError('code = 1006 (connection closed abnormally [internal]), no reason')]
+Lost connection inbetween everything :( [ConnectionClosedError('code = 1006 (connection closed abnormally [internal]), no reason')]
+Reconnecting
+Reconnecting
+Postman: Trying to reconnect Postman
+Postman: Trying to reconnect Postman
+Postman: Trying to reconnect Postman
+Postman: Trying to reconnect Postman
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Provider: Lost connection inbetween everything :( [ConnectionClosedError('code = 1011 (unexpected error), no reason')]
+Provider: Lost connection inbetween everything :( [ConnectionClosedError('code = 1011 (unexpected error), no reason')]
+Provider: Reconnecting
+Provider: Reconnecting
+Lost connection inbetween everything :( [ConnectionClosedError('code = 1011 (unexpected error), no reason')]
+Lost connection inbetween everything :( [ConnectionClosedError('code = 1011 (unexpected error), no reason')]
+Reconnecting
+Reconnecting
+Postman: Trying to reconnect Postman
+Postman: Trying to reconnect Postman
+Postman: Trying to reconnect Postman
+Postman: Trying to reconnect Postman
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f5a658884c0>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f5a658884c0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f5a65033dc0>, 1996.463350462)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f5a65888130>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f5a65033dc0>, 1996.463350462)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f5a65888130>
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+[red] Connection attempt as Entertainer failed
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f77132ac460>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f77132ac460>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f771329a400>, 2014.606801946)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f77132ac250>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f771329a400>, 2014.606801946)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f77132ac250>
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Received Provide Request
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='32e3b202-0975-4b08-9057-9e6cc11433f6', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'))
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='32e3b202-0975-4b08-9057-9e6cc11433f6', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'))
+Received Message data=DataModel(node='18', template='18', params=ReserveParams(providers=None, auto_unprovide=True, auto_provide=True), provision='32e3b202-0975-4b08-9057-9e6cc11433f6') meta=MetaModel(type='bounced_forwarded_reserve', reference='32e3b202-0975-4b08-9057-9e6cc11433f6', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Received Message data=DataModel(node='18', template='18', params=ReserveParams(providers=None, auto_unprovide=True, auto_provide=True), provision='32e3b202-0975-4b08-9057-9e6cc11433f6') meta=MetaModel(type='bounced_forwarded_reserve', reference='32e3b202-0975-4b08-9057-9e6cc11433f6', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Arkitekt demands a New Reservation from us
+Arkitekt demands a New Reservation from us
+Reserver Received Event
+Reserver Received Event
+Reserver Received Event
+Reserver Received Event
+Protocol Exception Did not find a providable Template for this Node 4 with params providers=['4'] auto_unprovide=True auto_provide=True
+Protocol Exception Did not find a providable Template for this Node 4 with params providers=['4'] auto_unprovide=True auto_provide=True
+Providing Template 17 on Fiji
+Providing Template 17 on Fiji
+Pod Pending
+Pod Pending
+Established Reservation 8d3a2b99-1a20-42e8-b631-f107b3982b1e
+Established Reservation 8d3a2b99-1a20-42e8-b631-f107b3982b1e
+Received Provide Request
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='748d6a63-c8a8-437b-834a-8e07703a003d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'))
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='748d6a63-c8a8-437b-834a-8e07703a003d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'))
+Received Message data=DataModel(node='18', template='18', params=ReserveParams(providers=None, auto_unprovide=True, auto_provide=True), provision='748d6a63-c8a8-437b-834a-8e07703a003d') meta=MetaModel(type='bounced_forwarded_reserve', reference='748d6a63-c8a8-437b-834a-8e07703a003d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Received Message data=DataModel(node='18', template='18', params=ReserveParams(providers=None, auto_unprovide=True, auto_provide=True), provision='748d6a63-c8a8-437b-834a-8e07703a003d') meta=MetaModel(type='bounced_forwarded_reserve', reference='748d6a63-c8a8-437b-834a-8e07703a003d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Arkitekt demands a New Reservation from us
+Arkitekt demands a New Reservation from us
+Reserver Received Event
+Reserver Received Event
+Reserver Received Event
+Reserver Received Event
+Providing Template 17 on Fiji
+Providing Template 17 on Fiji
+Protocol Exception Did not find a providable Template for this Node 4 with params providers=['4'] auto_unprovide=True auto_provide=True
+Protocol Exception Did not find a providable Template for this Node 4 with params providers=['4'] auto_unprovide=True auto_provide=True
+Pod Pending
+Pod Pending
+Established Reservation 4da2413b-46ec-4885-bd1e-85bc167169af
+Established Reservation 4da2413b-46ec-4885-bd1e-85bc167169af
+Received Message data=DataModel(reservation='748d6a63-c8a8-437b-834a-8e07703a003d') meta=MetaModel(type='bounced_unreserve', reference='b4a05cd8-2a3d-4fee-8f09-2cc0c4d624c4', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Received Message data=DataModel(reservation='748d6a63-c8a8-437b-834a-8e07703a003d') meta=MetaModel(type='bounced_unreserve', reference='b4a05cd8-2a3d-4fee-8f09-2cc0c4d624c4', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Cancellation for Reservatoion received. Canceling!
+Cancellation for Reservatoion received. Canceling!
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f0c029c45b0>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f0c029c45b0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f0c02761400>, 2382.386034388)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f0c029c4ee0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f0c02761400>, 2382.386034388)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f0c029c4ee0>
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Received Provide Request
+Received Provide Request
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='d39daa42-0d7e-4c08-9c65-cbfa5faf981d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'))
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Pending') meta=MetaModel(type='provide_progress', reference='d39daa42-0d7e-4c08-9c65-cbfa5faf981d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'))
+Received Message data=DataModel(node='18', template='18', params=ReserveParams(providers=None, auto_unprovide=True, auto_provide=True), provision='d39daa42-0d7e-4c08-9c65-cbfa5faf981d') meta=MetaModel(type='bounced_forwarded_reserve', reference='d39daa42-0d7e-4c08-9c65-cbfa5faf981d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Received Message data=DataModel(node='18', template='18', params=ReserveParams(providers=None, auto_unprovide=True, auto_provide=True), provision='d39daa42-0d7e-4c08-9c65-cbfa5faf981d') meta=MetaModel(type='bounced_forwarded_reserve', reference='d39daa42-0d7e-4c08-9c65-cbfa5faf981d', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Arkitekt demands a New Reservation from us
+Arkitekt demands a New Reservation from us
+Reserver Received Event
+Reserver Received Event
+Reserver Received Event
+Reserver Received Event
+Protocol Exception Did not find a providable Template for this Node 4 with params providers=['4'] auto_unprovide=True auto_provide=True
+Protocol Exception Did not find a providable Template for this Node 4 with params providers=['4'] auto_unprovide=True auto_provide=True
+Providing Template 17 on Fiji
+Providing Template 17 on Fiji
+Pod Pending
+Pod Pending
+Established Reservation 56573084-66ba-486b-9c53-2ea28e71f896
+Established Reservation 56573084-66ba-486b-9c53-2ea28e71f896
+Received Message data=DataModel(reservation='d39daa42-0d7e-4c08-9c65-cbfa5faf981d') meta=MetaModel(type='bounced_unreserve', reference='4a53796b-e3ef-488c-824f-73b8b523c879', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Received Message data=DataModel(reservation='d39daa42-0d7e-4c08-9c65-cbfa5faf981d') meta=MetaModel(type='bounced_unreserve', reference='4a53796b-e3ef-488c-824f-73b8b523c879', extensions=MetaExtensionsModel(progress='amq.gen-qQ36dkbDMyZYGv1Nu5-9mw', persist=None, callback='amq.gen-qUWV3KIG4Bp77Jv-OQ6eyg'), token=Token(roles=['admin'], scopes=['read', 'read_starred', 'write', 'provider', 'hooker', 'introspection', 'can_provide', 'can_assign', 'can_forward_bounce', 'profile'], user=2))
+Cancellation for Reservatoion received. Canceling!
+Cancellation for Reservatoion received. Canceling!
+Received Unprovide Request
+Received Unprovide Request
+Cancelling Task
+Cancelling Task
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Unproviding') meta=MetaModel(type='unprovide_progress', reference='4a53796b-e3ef-488c-824f-73b8b523c879', extensions=MetaExtensionsModel(progress=None, persist=None, callback=None))
+Sending data=ProgressDataModel(level=<ProgressLevel.INFO: 'INFO'>, message='Pod Unproviding') meta=MetaModel(type='unprovide_progress', reference='4a53796b-e3ef-488c-824f-73b8b523c879', extensions=MetaExtensionsModel(progress=None, persist=None, callback=None))
+Actor is done! Cancellation or Finished??
+Actor is done! Cancellation or Finished??
+Future was cancelled everything is cools
+Future was cancelled everything is cools
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f2bf45de580>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f2bf45de580>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f2bf45d0400>, 621.137336844)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f2bf45de3a0>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f2bf45d0400>, 621.137336844)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f2bf45de3a0>
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='100.108.99.108' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=1 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward='p-tnagerl-lab1' port=8080 url=None models=None
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f28d9584e80>
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f28d9584e80>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f28d8d1ed60>, 75.245559239)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f28d9584520>
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7f28d8d1ed60>, 75.245559239)]']
+connector: <aiohttp.connector.TCPConnector object at 0x7f28d9584520>
+Successfully connected [bold]Postman
+Successfully connected [bold]Postman
+Connecting as Entertainer
+Connecting as Entertainer
+ [x] Awaiting Entertaining Calls
+ [x] Awaiting Entertaining Calls
+Sueccess fully connected Provider 
+Sueccess fully connected Provider 
+Creating new Ward for Datapoint TYPENAME=None id=2 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward=None port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=2 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward=None port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Creating new Ward for Datapoint TYPENAME=None id=2 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward=None port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Creating new Ward for Datapoint TYPENAME=None id=2 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward=None port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Creating new Ward for Datapoint TYPENAME=None id=2 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward=None port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query
+Creating new Ward for Datapoint TYPENAME=None id=2 app={   'TYPENAME': None,
+    'client_id': None,
+    'grant_type': None,
+    'id': None,
+    'name': 'Elements'} user=None type='GRAPHQL' name=None needsNegotiation=True inward=None outward=None port=8080 url=None models=None
+Overwriting <class 'bergen.schema.Node'> with <class 'bergen.models.Node'> for node
+Overwriting <class 'bergen.schema.Template'> with <class 'bergen.models.Template'> for template
+Overwriting <class 'bergen.schema.Pod'> with <class 'bergen.models.Pod'> for pod
+Registering DeleteGraph as Mutation
+Registering Deploy as Mutation
+Registering UpdateGraph as Mutation
+Registering CreateGraph as Mutation
+Registering GraphDetail as Query
+Registering MyGraphs as Query

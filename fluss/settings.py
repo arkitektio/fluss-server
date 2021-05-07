@@ -105,6 +105,9 @@ INSTALLED_APPS = [
     'taggit',
     'channels',
     'herre',
+
+    'health_check',
+    'health_check.db', 
     'delt',
     'guardian',
     'graphene_django',
@@ -112,6 +115,10 @@ INSTALLED_APPS = [
     'oauth2_provider'
 ] + EXTENSIONS
 
+HEALTH_CHECK = {
+    'DISK_USAGE_MAX': 90,  # percent
+    'MEMORY_MIN': 100,    # in MB
+}
 
 
 MIDDLEWARE = [
