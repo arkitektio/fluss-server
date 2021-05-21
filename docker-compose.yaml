@@ -6,14 +6,12 @@ services:
     command: python manage.py runserver 0.0.0.0:8090
     ports:
       - 8070:8070
-    volumes:
-      - .:/worskpace:cached
-    env_file:
-      - fluss.env
   schnaberl:
     image: postgres:12.6-alpine
-    env_file:
-      - fluss.env
+    environment:
+      POSTGRES_DB: hello_baberl
+      POSTGRES_PASSWORD: hello_baberl
+      POSTGRES_USER: hello_baberl
 
 
 

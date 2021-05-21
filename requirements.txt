@@ -16,9 +16,6 @@ pytest-asyncio
 django-guardian
 django-avatar
 python-slugify
-boto3
-django-storages
-scipy
 graphene-django==3.0.0b7
 unflatten
 
@@ -44,3 +41,8 @@ namegenerator
 pika
 aiormq
 pyjwt
+
+# DeployMent
+omegaconf
+gunicorn
+django-probes

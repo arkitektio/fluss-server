@@ -1,7 +1,6 @@
 import logging
 
 import graphene
-from bergen.models import Node, Template
 from bergen.schema import NodeType
 from graphene.types.generic import GenericScalar
 from herre import bounced
@@ -15,6 +14,7 @@ from flow.graphql.mutations import *
 
 logger = logging.getLogger(__name__)
 
+from bergen.models import Node, Template
 
 class Deploy(BalderMutation):
 

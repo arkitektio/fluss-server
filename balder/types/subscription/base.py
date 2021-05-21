@@ -7,7 +7,6 @@ from balder.types.utils import classToString
 try:
     import channels_graphql_ws
 
-    
     class BaseSubscription(channels_graphql_ws.Subscription):
 
         @classmethod

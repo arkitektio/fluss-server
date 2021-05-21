@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
+from omegaconf import OmegaConf
 from delt.initialize import initialize
 
+conf = OmegaConf.load('config.yaml')
 
 initialize()
 
@@ -24,30 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '9=9u7c35!*p_h674kv*t^m oimsüoimsüeopmfes*#)z_h%6$#b(oe=_mwysw+'
+SECRET_KEY = conf.security.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = conf.server.debug or False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = conf.server.hosts
 
 
 ELEMENTS_HOST = "p-tnagerl-lab1"
 ELEMENTS_INWARD = "fluss" # Set this to the host you are on
 ELEMENTS_PORT = 8070 # Set this to the host you are on
-
-
-# S3 Settings
-S3_PUBLIC_DOMAIN = f"{ELEMENTS_HOST}:9000" #TODO: FIx
-AWS_ACCESS_KEY_ID = "weak_access_key"
-AWS_SECRET_ACCESS_KEY = "weak_secret_key"
-AWS_S3_ENDPOINT_URL  = f"http://minio:9000"
-AWS_STORAGE_BUCKET_NAME = "test"
-AWS_S3_URL_PROTOCOL = "http:"
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None
-AWS_S3_USE_SSL = True
-AWS_S3_SECURE_URLS = False # Should resort to True if using in Production behind TLS
 
 
 # Application definition
@@ -60,38 +49,14 @@ ARKITEKT_SERVICE = {
     "VERSION": "0.1",
     "DEPENDENCIES": [],
     "REGISTER_INSTALLED": True,
-    "NEGOTIATE_HOOK": "flow.negotiate.on_negotiate",
     "SCOPES": ["read","write"]
 }
 
 HERRE = {
-    "PUBLIC_KEY": """
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvIrkAA1Tr8pLRR08xXEs
-zuyi/+QGRQ3J7o5j7B+HJLv2MWppd+fgoPQYc9nOkZcA9Jizsvm0bqcXe/8zdxaU
-z7bA+nq3hxLolO4q4SXRxNuBIcNrfLizFrWku5csO9ZfS4EXQGOGAWsVE1WbSRBC
-gAcOR8eq8gB0ai4UByB/xGlwobz1bkuXd3jGVN2oeCo7gbij/JaMrOSkh9wX/WqZ
-lbrEWEFfgURENACn45Hm4ojjLepw/b2j7ZrHMQxvY1THi6lZ6bp9NdfkzyE6JhZb
-SVOzd/dHy+gLBx2UuvmovVEhhxzwRJYtPdqlOWuUOjO24AlpPv7j+BSY7eGSzYU5
-oQIDAQAB
------END PUBLIC KEY-----""",
-    "KEY_TYPE": "RS256",
-    "ISSUER": "arnheim"
+    "PUBLIC_KEY": conf.herre.public_key,
+    "KEY_TYPE": conf.herre.key_type or "RS256",
+    "ISSUER": conf.herre.key_type or "herre"
 }
-
-GRUNNLAG = {
-    "GROUPS": None
-
-}
-
-
-
-EXTENSIONS = [
-    'balder',
-    'flow'
-]
-
-
 
 
 INSTALLED_APPS = [
@@ -105,15 +70,18 @@ INSTALLED_APPS = [
     'taggit',
     'channels',
     'herre',
-
     'health_check',
-    'health_check.db', 
+    'health_check.db',
+    'django_probes',
     'delt',
     'guardian',
     'graphene_django',
     "rest_framework",
-    'oauth2_provider'
-] + EXTENSIONS
+    'oauth2_provider',
+    'balder',
+    'flow'
+]
+
 
 HEALTH_CHECK = {
     'DISK_USAGE_MAX': 90,  # percent
@@ -165,11 +133,11 @@ ASGI_APPLICATION = 'fluss.routing.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD":os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_SERVICE_HOST"),
-        "PORT": os.environ.get("POSTGRES_SERVICE_PORT"),
+        "NAME": conf.postgres.db_name,
+        "USER": conf.postgres.user,
+        "PASSWORD":conf.postgres.password,
+        "HOST": conf.postgres.host,
+        "PORT": conf.postgres.port,
     }
 }
 
