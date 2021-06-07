@@ -14,4 +14,5 @@ herre:
   scopes: 
       - provider
       - can_forward_bounce
+      - can_provide
   secure: False

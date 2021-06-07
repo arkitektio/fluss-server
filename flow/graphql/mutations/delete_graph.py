@@ -4,7 +4,7 @@ from flow import models, types
 from herre import bounced
 
 class DeleteGraphOut(graphene.ObjectType):
-    ok = graphene.Boolean()
+    id = graphene.ID()
 
 class DeleteGraph(BalderMutation):
 
@@ -16,7 +16,7 @@ class DeleteGraph(BalderMutation):
 
         graph = models.Graph.objects.get(id=id)
         graph.delete()
-        return {"ok": True}
+        return {"id": id}
 
     class Meta:
         type = DeleteGraphOut

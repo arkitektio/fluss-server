@@ -5,10 +5,11 @@ from abc import abstractmethod
 import asyncio
 from bergen.contracts.reservation import Reservation
 from bergen.handlers.assign import AssignHandler
-from bergen.messages.postman.progress import ProgressLevel
+from bergen.messages.postman.log import LogLevel
 from flow.atoms.base import Atom
 from flow.atoms.events import *
 from flow.diagram import Node, Constants
+from bergen.console import console
 
 class ArkitektAtom(Atom):
 
@@ -16,6 +17,7 @@ class ArkitektAtom(Atom):
         super().__init__(actionQueue, node, assign_handler)
         self.arg_queue = asyncio.Queue()
         self.contants = constants
+        self.context = assign_handler.message.meta.context
         self.res = res
         self.run_task = None
 
@@ -42,17 +44,17 @@ class FunctionalArkitektAtom(ArkitektAtom):
                 event = await self.arg_queue.get()
                 if isinstance(event, DoneInEvent):
                     # We are done, just let us send this further, 
-                    await self.log(f"We are done. Shutting Down!", level=ProgressLevel.DEBUG)
+                    await self.log(f"We are done. Shutting Down!", level=LogLevel.DEBUG)
                     await self.done()
                     break
 
                 if isinstance(event, PassInEvent):
                     ' we will never break a current thing as long as it is not cancelled'
-                    await self.log(f"Calling as Func", level=ProgressLevel.DEBUG)
+                    await self.log(f"Calling as Func", level=LogLevel.DEBUG)
                     #returns = await self.res.assign(*args, **self.contants)
                     args = event.value if isinstance(event.value, list) else [event.value]
-                    returns = await self.res.assign(*args, **self.contants, bypass_shrink=True, bypass_expand=True)
-                    await self.log(f"Pushing {returns}", level=ProgressLevel.DEBUG)
+                    returns = await self.res.assign(*args, **self.contants, bypass_shrink=True, bypass_expand=True, context=self.context)
+                    await self.log(f"Pushing {returns}", level=LogLevel.DEBUG)
                     await self.push(returns)
         except Exception as e:
             await self.on_except(e)
@@ -78,11 +80,11 @@ class GenerativeArkitektAtom(ArkitektAtom):
         try:
             while True:
                 event = await self.arg_queue.get()
-                await self.log(f"Calling Node {self.node.data.node.name} as Gen {event.value}", level=ProgressLevel.DEBUG)
+                await self.log(f"Calling Node {self.node.data.node.name} as Gen {event.value}", level=LogLevel.DEBUG)
 
                 args = event.value if isinstance(event.value, list) else [event.value]
-                async for yields in self.res.stream(*args, **self.contants, bypass_shrink=True, bypass_expand=True):
-                    await self.log(f"Yielding {yields}", level=ProgressLevel.INFO)
+                async for yields in self.res.stream(*args, **self.contants, bypass_shrink=True, bypass_expand=True, context=self.context):
+                    await self.log(f"Yielding {yields}", level=LogLevel.INFO)
                     await self.push(yields)
 
 
@@ -93,3 +95,7 @@ class GenerativeArkitektAtom(ArkitektAtom):
                 
         except Exception as e:
             await self.on_except(e)
+
+        except asyncio.CancelledError as e:
+            console.log(f"Cancelled Node {self.node.data.node.name}")
+            raise e

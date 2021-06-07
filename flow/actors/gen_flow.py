@@ -1,4 +1,4 @@
-from bergen.messages.postman.progress import ProgressLevel
+from bergen.messages.postman.log import LogLevel
 from flow.utils import get_diagram_for_arkitekt_template_id
 from bergen.handlers.assign import AssignHandler
 from bergen.handlers.unreserve import UnreserveHandler
@@ -18,7 +18,8 @@ from flow import diagram
 import asyncio
 from bergen.console import console
 from bergen.contracts import Reservation
-
+from bergen.messages.postman.reserve.reserve_transition import ReserveState
+from bergen.messages.postman.provide.provide_transition import ProvideState
 
 
 class GenFlowActor(ClassicGenActor):
@@ -26,7 +27,19 @@ class GenFlowActor(ClassicGenActor):
     shrinkOutputs = False
     """ Flow Base receives a Pod with an attached template """
 
+    async def handle_reservation_change(self, res, status: str):
+        self.current_state[res] = status
+        errors = [ res.node for res, status in self.current_state.items() if status in [ReserveState.ERROR, ReserveState.CANCELLED]]
+        if len(errors) > 0:
+            print("We are now Unactive")
+            await self.provide_handler.set_state(ProvideState.INACTIVE)
+        else:
+            print("We are now Active")
+            await self.provide_handler.set_state(ProvideState.ACTIVE)
+
     async def on_provide(self, provide: ProvideHandler):
+
+        self.current_state = {}
         # graph = await Graph.asyncs.get(template=self.pod.template)
         self.diagram: diagram.Diagram = await get_diagram_for_arkitekt_template_id(provide.template_id)
         self.nodes =  [ node for node in self.diagram.elements if isinstance(node, diagram.Node)]
@@ -42,7 +55,7 @@ class GenFlowActor(ClassicGenActor):
         await provide.log(self.kwargNode, level=DebugLevel.INFO)
         await provide.log(self.returnNode, level=DebugLevel.INFO)
         
-        await provide.log(f"Querying ArkitektNodes {self.arkitektNodes}", level=DebugLevel.INFO)
+        await provide.log(f"Querying ArkitektNodes {self.arkitektNodes}", level=LogLevel.INFO)
         self.nodeIDs = [node.id for node in self.arkitektNodes]
         self.nodeSelectors = [node.data.selector for node in self.arkitektNodes]
         console.log(f"[blue] {self.nodeSelectors}")
@@ -51,102 +64,115 @@ class GenFlowActor(ClassicGenActor):
 
         self.parser = Parser(self.diagram)
 
-
-    async def on_reserve(self, handler: ReserveHandler) -> None:
-        await handler.log("Workflow: Running on a Generative Flow Handler", level=DebugLevel.INFO)
-        await handler.log("Workflow: Reserving Arkitekt nodes", level=DebugLevel.INFO)
+        await provide.log("Workflow: Running on a Generative Flow Handler", level=LogLevel.INFO)
+        await provide.log("Workflow: Reserving Arkitekt nodes", level=LogLevel.INFO)
         console.log(f"[blue] {self.nodeSelectors}")
-        reservationsContexts = [node.reserve(**selector.dict(), bounced=handler.bounced) for node, selector in zip(self.nodeInstances, self.nodeSelectors)]
+        reservationsContexts = [
+            node.reserve(
+                **selector.dict(), 
+                context=provide.message.meta.context,
+                transition_hook=self.handle_reservation_change,
+                provision=provide.reference
+            ) for node, selector in zip(self.nodeInstances, self.nodeSelectors)]
+
         reservationEnterFutures = [res.start() for res in reservationsContexts]
+        await provide.log(f"Workflow: Reserving Arkitekt nodes {reservationsContexts}", level=LogLevel.INFO)
         reservations = await asyncio.gather(*reservationEnterFutures)
 
-        await handler.log("Workflow: Building a Reservation map", level=DebugLevel.INFO)
+        await provide.log("Workflow: Building a Reservation map", level=LogLevel.INFO)
         return { node_id: reservation for node_id, reservation in zip(self.nodeIDs, reservations)}
 
 
-    async def assign(self, assign_handler: AssignHandler, reserve_handler: ReserveHandler, args, kwargs):
+    async def assign(self, assign_handler: AssignHandler, args, kwargs):
 
-        assert len(self.argNode.data.args) == len(args), "Received different arguments then our ArgNode requires"
+        try:
+            assert len(self.argNode.data.args) == len(args), "Received different arguments then our ArgNode requires"
 
-        reservations: Dict[str, Reservation] = reserve_handler.context
+            reservations: Dict[str, Reservation] = self.provide_handler.context
 
-        action_queue = asyncio.Queue()
+            action_queue = asyncio.Queue()
 
-        self.nodeIDConstantsMap: Dict[str, diagram.Constants] = {}
+            self.nodeIDConstantsMap: Dict[str, diagram.Constants] = {}
 
-        for kwarg, value  in kwargs.items():
-            for kwarg_handle, node in self.parser.connectedNodesWithHandle(self.kwargNode.id, f"kwarg_{kwarg}"):
-                kwarg = kwarg_handle[len("kwarg_"):]
-                self.nodeIDConstantsMap.setdefault(node.id, {})[kwarg] = value
-
-
-        await assign_handler.log("Workflow: Building a Reservation map", level=ProgressLevel.DEBUG)
-
-        runs: List[Tuple[str, Atom]] = []
-
-        await assign_handler.log("Workflow: Instantiating Node Runs: Creating All necessary Queues for our Eventbus" , level=ProgressLevel.DEBUG)
-        for node in self.nodes:
-            if isinstance(node, diagram.ArkitektNode):
-                res = reservations[node.id]
-                constants = self.nodeIDConstantsMap.get(node.id, {})
-                if node.data.node.type == NodeType.GENERATOR:
-                    runs.append((node.id, GenerativeArkitektAtom(action_queue, node, res, constants, assign_handler)))
-                if node.data.node.type == NodeType.FUNCTION:
-                    runs.append((node.id, FunctionalArkitektAtom(action_queue, node, res, constants, assign_handler)))
+            for kwarg, value  in kwargs.items():
+                for kwarg_handle, node in self.parser.connectedNodesWithHandle(self.kwargNode.id, f"kwarg_{kwarg}"):
+                    kwarg = kwarg_handle[len("kwarg_"):]
+                    self.nodeIDConstantsMap.setdefault(node.id, {})[kwarg] = value
 
 
-        tasks = []
-        await assign_handler.log("Workflow: Creating Runs as tasks", level=ProgressLevel.DEBUG)
-        for id, run in runs:
-            tasks.append((id, await run.start()))
+            await assign_handler.log("Workflow: Building a Reservation map", level=LogLevel.INFO)
+
+            runs: List[Tuple[str, Atom]] = []
+
+            await assign_handler.log("Workflow: Instantiating Node Runs: Creating All necessary Queues for our Eventbus" , level=LogLevel.DEBUG)
+            for node in self.nodes:
+                if isinstance(node, diagram.ArkitektNode):
+                    res = reservations[node.id]
+                    constants = self.nodeIDConstantsMap.get(node.id, {})
+                    if node.data.node.type == NodeType.GENERATOR:
+                        runs.append((node.id, GenerativeArkitektAtom(action_queue, node, res, constants, assign_handler)))
+                    if node.data.node.type == NodeType.FUNCTION:
+                        runs.append((node.id, FunctionalArkitektAtom(action_queue, node, res, constants, assign_handler)))
 
 
-        nodeIDRunMap = {id: run for id, run in runs}
-        nodeIDTaskMap = {id: task for id, task in tasks}
-
-        await assign_handler.log(nodeIDRunMap)
-        # We send our first arguments 
-
-        initial_nodes = self.parser.getInitialNodes()
-        await assign_handler.log(f"Workflow: This nodes have no args and will automatically be called: {[node.id for node in initial_nodes]}")
+            tasks = []
+            await assign_handler.log("Workflow: Creating Runs as tasks", level=LogLevel.DEBUG)
+            for id, run in runs:
+                tasks.append((id, await run.start()))
 
 
-        await assign_handler.log(f"Workflow: Sending Initial Arguments", level=ProgressLevel.INFO)
-        await asyncio.gather(*[nodeIDRunMap[node.id].on_event(PassInEvent(handle="args", value=[])) for node in initial_nodes])
-        await asyncio.gather(*[nodeIDRunMap[node.id].on_event(DoneInEvent(handle="args")) for node in initial_nodes])
+            nodeIDRunMap = {id: run for id, run in runs}
+            nodeIDTaskMap = {id: task for id, task in tasks}
+
+            await assign_handler.log(nodeIDRunMap)
+            # We send our first arguments 
+
+            initial_nodes = self.parser.getInitialNodes()
+            await assign_handler.log(f"Workflow: This nodes have no args and will automatically be called: {[node.id for node in initial_nodes]}")
 
 
-        arg_receiving_nodes = self.parser.connectedNodes(self.argNode.id)
-        await assign_handler.log(f"Workflow: This nodes will receive args: {[node.id for node in arg_receiving_nodes]}", level=ProgressLevel.DEBUG)
-        await asyncio.gather(*[nodeIDRunMap[node.id].on_event(PassInEvent(handle="args",value=args)) for node in arg_receiving_nodes])
-        await asyncio.gather(*[nodeIDRunMap[node.id].on_event(DoneInEvent(handle="args")) for node in arg_receiving_nodes])
-
-        while True:
-            event: Union[PassOutEvent, DoneOutEvent] = await action_queue.get()
-            await assign_handler.log(f"Workflow: Searching for nodes {event.node_id} on {event.handle}", level=ProgressLevel.DEBUG)
-            # Action follows NODE_ID, OUTPUT_HANDLE, VALUES
-            handle_nodes = self.parser.connectedNodesWithHandle(event.node_id, event.handle)
-            await assign_handler.log(f"Workflow: Found the Following handles {handle_nodes}", level=ProgressLevel.DEBUG)
-
-            for handle, node in handle_nodes:
-
-                if isinstance(event, PassOutEvent):
-                    if isinstance(node, diagram.ReturnNode):
-                        await assign_handler.log("Workflow: Yielded")
-                        yield event.value
-                    else:
-                        await nodeIDRunMap[node.id].on_event(PassInEvent(handle=handle, value=event.value))
-
-                if isinstance(event, DoneOutEvent):
-                    if isinstance(node, diagram.ReturnNode):
-                        await assign_handler.log("Workflow: Done")
-                        return
-                    else:
-                        await nodeIDRunMap[node.id].on_event(DoneInEvent(handle=handle))
+            await assign_handler.log(f"Workflow: Sending Initial Arguments", level=LogLevel.INFO)
+            await asyncio.gather(*[nodeIDRunMap[node.id].on_event(PassInEvent(handle="args", value=[])) for node in initial_nodes])
+            await asyncio.gather(*[nodeIDRunMap[node.id].on_event(DoneInEvent(handle="args")) for node in initial_nodes])
 
 
-            action_queue.task_done()
+            arg_receiving_nodes = self.parser.connectedNodes(self.argNode.id)
+            await assign_handler.log(f"Workflow: This nodes will receive args: {[node.id for node in arg_receiving_nodes]}", level=LogLevel.DEBUG)
+            await asyncio.gather(*[nodeIDRunMap[node.id].on_event(PassInEvent(handle="args",value=args)) for node in arg_receiving_nodes])
+            await asyncio.gather(*[nodeIDRunMap[node.id].on_event(DoneInEvent(handle="args")) for node in arg_receiving_nodes])
 
+            while True:
+                event: Union[PassOutEvent, DoneOutEvent] = await action_queue.get()
+                await assign_handler.log(f"Workflow: Searching for nodes {event.node_id} on {event.handle}", level=LogLevel.DEBUG)
+                # Action follows NODE_ID, OUTPUT_HANDLE, VALUES
+                handle_nodes = self.parser.connectedNodesWithHandle(event.node_id, event.handle)
+                await assign_handler.log(f"Workflow: Found the Following handles {handle_nodes}", level=LogLevel.DEBUG)
+
+                for handle, node in handle_nodes:
+
+                    if isinstance(event, PassOutEvent):
+                        if isinstance(node, diagram.ReturnNode):
+                            await assign_handler.log("Workflow: Yielded")
+                            yield event.value
+                        else:
+                            await nodeIDRunMap[node.id].on_event(PassInEvent(handle=handle, value=event.value))
+
+                    if isinstance(event, DoneOutEvent):
+                        if isinstance(node, diagram.ReturnNode):
+                            await assign_handler.log("Workflow: Done")
+                            return
+                        else:
+                            await nodeIDRunMap[node.id].on_event(DoneInEvent(handle=handle))
+
+
+                action_queue.task_done()
+
+        except asyncio.CancelledError as e:
+            await asyncio.gather(*[run.cancel() for id, run in runs])
+            console.log("Was canceleld")
+            raise e
+
+        
     async def on_unreserve(self, unreserve_handler: UnreserveHandler, reserve_handler: ReserveHandler):
         await unreserve_handler.log("Gently deleting our reservations")
         await asyncio.gather(*[res.end() for item, res in reserve_handler.context.items()])

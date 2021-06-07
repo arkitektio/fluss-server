@@ -1,5 +1,5 @@
 from bergen.handlers.assign import AssignHandler
-from bergen.messages.postman.progress import ProgressLevel
+from bergen.messages.postman.log import LogLevel
 from .events import *
 from ..diagram import Node
 from abc import ABC, abstractmethod
@@ -16,7 +16,7 @@ class Atom(ABC):
         self.assign_handler = assign_handler
         pass
 
-    async def log(self, message, level=ProgressLevel.INFO):
+    async def log(self, message, level=LogLevel.INFO):
         await self.assign_handler.log(f"Node {self.node.id}: {message}", level=level)
 
     async def on_except(self, exception):
@@ -37,5 +37,10 @@ class Atom(ABC):
         self.run_task = asyncio.create_task(self.run())
 
     async def cancel(self):
+        console.log("Atom here is being cancelled")
         self.run_task.cancel()
+        try:
+            await self.run_task
+        except asyncio.CancelledError:
+            print("Cancellation finished")
         
