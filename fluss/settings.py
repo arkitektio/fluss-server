@@ -39,24 +39,31 @@ ELEMENTS_INWARD = "fluss" # Set this to the host you are on
 ELEMENTS_PORT = 8070 # Set this to the host you are on
 
 
+
+STATIC_ROOT = "/var/www/static"
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # Application definition
 ARKITEKT_SERVICE = {
     "INWARD": ELEMENTS_INWARD,
     "OUTWARD": ELEMENTS_HOST,
     "PORT": ELEMENTS_PORT,
     "TYPES": ["NEGOTIATE","POINT", "PROVIDER"],
-    "NAME": "flow",
-    "VERSION": "0.1",
-    "DEPENDENCIES": [],
-    "REGISTER_INSTALLED": True,
-    "SCOPES": ["read","write"]
+    "NEEDS_NEGOTIATION": False,
 }
+
 
 HERRE = {
     "PUBLIC_KEY": conf.herre.public_key,
-    "KEY_TYPE": conf.herre.key_type or "RS256",
-    "ISSUER": conf.herre.key_type or "herre"
+    "KEY_TYPE": conf.herre.key_type,
+    "ISSUER": conf.herre.issuer
 }
+
+SUPERUSERS = [{
+    "USERNAME": su.username,
+    "EMAIL": su.email,
+    "PASSWORD": su.password
+} for su in conf.security.admins]
 
 
 INSTALLED_APPS = [
@@ -146,7 +153,7 @@ CHANNEL_LAYERS = {
         # This example app uses the Redis channel layer implementation channels_redis
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis",6379)],
+            "hosts": [(conf.redis.host, conf.redis.port)],
         },
     },
 }

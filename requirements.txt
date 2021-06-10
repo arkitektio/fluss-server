@@ -4,6 +4,7 @@ channels_redis
 django-registration-redux
 django-extensions
 
+django-health-check
 django-oauth-toolkit
 django-cors-headers
 django-filter
@@ -16,16 +17,11 @@ pytest-asyncio
 django-guardian
 django-avatar
 python-slugify
-graphene-django==3.0.0b7
+graphene-django
 unflatten
 
 # Bergen
-bergen>=0.3.133
-delt
-django-health-check
-
-# For port provision
-docker
+delt==0.1.12
 
 
 # Testing and Linting

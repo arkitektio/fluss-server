@@ -1,9 +1,13 @@
 postgres:
-  host: schnaberl
+  host: gaberl
   port: 5432
-  user: hello_baberl
-  password: hello_baberl
-  db_name: hello_baberl
+  user: hello_gaberl
+  password: hello_gaberl
+  db_name: hello_gaberl
+
+redis:
+  host: redis
+  port: 6379
 
 server:
   debug: True
@@ -11,6 +15,10 @@ server:
     - "*"
 
 security:
+  admins:
+    - username: demo
+      password: demodemo 
+      email: demo@demo.com
   secret_key: gagamat5s+_5iyi=*z^zn67xyw&4pv$c0_j^m!aqz6c-q2z8-vht0%gag
 
 herre:
