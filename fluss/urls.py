@@ -20,7 +20,7 @@ from django.shortcuts import render
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import include, url
-import fluss.arkitekt
+from flow.router import router
 
 
 def index(request):
@@ -33,4 +33,5 @@ urlpatterns = [
     path('', index, name='index'),
     url(r'^graphql$', BalderView),
     url(r'^ht/', include('health_check.urls')),
+    url(r'^api/', include(router.urls)),
 ]
