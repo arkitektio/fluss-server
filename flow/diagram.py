@@ -1,7 +1,11 @@
 from typing import List, Optional, Union
 from pydantic import BaseModel, Field, validator
 from enum import Enum
+from typing import ForwardRef
 
+ArgPort = ForwardRef("ArgPort")
+KwargPort = ForwardRef("KwargPort")
+ReturnPort = ForwardRef("ReturnPort")
 
 class Constants(dict):
     pass
@@ -38,24 +42,27 @@ class Widget(BaseModel):
 
 
 class Port(BaseModel):
-    type: str = Field(None, alias='__typename')
+    type: Optional[str] = Field(None, alias='__typename')
     description: Optional[str]
-    key: str
+    key: Optional[str]
     label: Optional[str]
 
 
 class ArgPort(Port):
     identifier: Optional[str]
     widget: Optional[Widget]
+    child: Optional[ArgPort]
 
 
 class KwargPort(Port):
     identifier: Optional[str]
     default: Optional[Union[str, int, dict]]
+    child: Optional[KwargPort]
 
 
 class ReturnPort(Port):
     identifier: Optional[str]
+    child: Optional[ReturnPort]
 
 class ArgData(BaseModel):
     args: List[ArgPort]
@@ -120,3 +127,8 @@ class Diagram(BaseModel):
     zoom: Optional[float]
     position: Optional[List[int]]
     elements: List[Union[ArkitektNode, ArgNode, KwargNode, ReturnNode, Edge]]
+
+
+ArgPort.update_forward_refs()
+KwargPort.update_forward_refs()
+ReturnPort.update_forward_refs()

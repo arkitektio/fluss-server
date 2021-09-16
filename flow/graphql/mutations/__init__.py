@@ -1,1 +1,1 @@
-from .delete_graph import *
+from .graph import *

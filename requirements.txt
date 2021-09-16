@@ -22,6 +22,7 @@ unflatten
 
 # Bergen
 arkitekt
+log>=0.1.5
 
 
 # Testing and Linting
