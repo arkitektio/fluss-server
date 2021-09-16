@@ -11,12 +11,9 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
-from omegaconf import OmegaConf
-from delt.initialize import initialize
+from omegaconf import omegaconf
 
-conf = OmegaConf.load('config.yaml')
-
-initialize()
+conf = omegaconf.OmegaConf.load('config.yaml')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,11 +73,10 @@ INSTALLED_APPS = [
     'django_filters',
     'taggit',
     'channels',
-    'herre',
+    'lok',
     'health_check',
     'health_check.db',
     'django_probes',
-    'delt',
     'guardian',
     'graphene_django',
     "rest_framework",
@@ -103,8 +99,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'herre.middlewares.request.jwt.JWTTokenMiddleWare',
-    'herre.middlewares.request.bouncer.BouncedMiddleware', # needs to be after JWT and session 
+    'lok.middlewares.request.jwt.JWTTokenMiddleWare',
+    'lok.middlewares.request.bouncer.BouncedMiddleware', # needs to be after JWT and session 
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -158,12 +154,12 @@ CHANNEL_LAYERS = {
     },
 }
 
-AUTH_USER_MODEL = 'herre.HerreUser'
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'guardian.backends.ObjectPermissionBackend')
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
+AUTH_USER_MODEL = 'lok.LokUser'
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

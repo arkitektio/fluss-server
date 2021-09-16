@@ -1,7 +1,7 @@
 from balder.types import BalderMutation
 import graphene
 from flow import models, types
-from herre import bounced
+from lok import bounced
 
 class DeleteGraphOut(graphene.ObjectType):
     id = graphene.ID()

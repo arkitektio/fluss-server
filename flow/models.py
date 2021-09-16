@@ -9,9 +9,6 @@ class FlowNode(models.Model):
     arkitekt_id = models.CharField(max_length=1000, help_text="The identifier on the Arkitekt platform", unique=True)
     name = models.CharField(max_length=100, help_text="The name of this Flow")
 
-    class Meta:
-        arkitekt = True
-
 
 
 class FlowTemplate(models.Model):
@@ -42,5 +39,3 @@ class Graph(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    class Meta:
-        arkitekt = True

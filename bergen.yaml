@@ -3,7 +3,6 @@ arkitekt:
   host: arkitekt
   port: 8090
   secure: False
-  internal: True
 
 herre:
   host: herre
@@ -15,4 +14,5 @@ herre:
       - provider
       - can_forward_bounce
       - can_provide
+      - introspection
   secure: False

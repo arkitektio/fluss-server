@@ -21,7 +21,7 @@ graphene-django
 unflatten
 
 # Bergen
-delt==0.1.12
+arkitekt
 
 
 # Testing and Linting

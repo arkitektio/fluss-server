@@ -1,9 +1,9 @@
 import logging
 
 import graphene
-from bergen.schema import NodeType
 from graphene.types.generic import GenericScalar
-from herre import bounced
+from herre.auth import HerreClient
+from lok import bounced
 
 from balder.types import BalderMutation, BalderQuery
 from flow import models, types
@@ -12,9 +12,18 @@ from flow.diagram import (ArgData, ArgNode,ArkitektNode,
                           ReturnData, ReturnNode)
 from flow.graphql.mutations import *
 
+
 logger = logging.getLogger(__name__)
 
-from bergen.models import Node, Template
+from arkitekt import Node as ApiNode
+from arkitekt.schema.node import NodeType
+from arkitekt.schema.template import Template as ApiTemplate
+import asyncio
+
+
+herre = HerreClient()
+
+
 
 class Deploy(BalderMutation):
 
@@ -48,7 +57,7 @@ class Deploy(BalderMutation):
 
         logger.info(node_type)
 
-        arkitekt_node = Node.objects.update_or_create(**{
+        arkitekt_node = ApiNode.objects.create(**{
             "name": graph.name,
             "args": [p.dict() for p in argData.args],
             "kwargs": [p.dict() for p in kwargData.kwargs],
@@ -68,7 +77,7 @@ class Deploy(BalderMutation):
         graph.save()
 
 
-        arkitekt_template = Template.objects.update_or_create(**{
+        arkitekt_template = ApiTemplate.objects.create(**{
                 "node": graph.node.arkitekt_id,
                 "params": {
                     "fluss": True
