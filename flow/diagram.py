@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 from pydantic import BaseModel, Field, validator
 from enum import Enum
 from typing import ForwardRef
@@ -34,7 +34,7 @@ class ArkitektData(BaseModel):
     selector: Selector
 
 class Widget(BaseModel):
-    type: str = Field(None, alias='__typename')
+    typename: str = Field(None, alias='__typename')
     query:  Optional[str]
     dependencies: Optional[List[str]]
     max:  Optional[str]
@@ -42,7 +42,7 @@ class Widget(BaseModel):
 
 
 class Port(BaseModel):
-    type: Optional[str] = Field(None, alias='__typename')
+    typename: Optional[str] = Field(None, alias='__typename')
     description: Optional[str]
     key: Optional[str]
     label: Optional[str]
@@ -99,7 +99,7 @@ class Node(BaseModel):
     @validator('type')
     def type_match(cls, v):
         if v == cls._type: return v
-        raise ValueError("Is not the Right")
+        raise ValueError(f"Is not the Right Type {v}. Would Expect {cls._type}")
 
 
 class ArkitektNode(Node):
@@ -107,6 +107,26 @@ class ArkitektNode(Node):
     data: ArkitektData
 
 
+class CombinationData(BaseModel):
+    arg1: List[Port]
+    arg2: List[Port]
+    return1: List[Port]
+
+
+class ReactiveNode(Node):
+    pass
+
+class CombinatorNode(ReactiveNode):
+    data: CombinationData
+
+class ZipNode(CombinatorNode):
+    _type = "zipNode"
+
+class MergeNode(CombinatorNode):
+    _type = "mergeNode"
+
+class WithLatestFromNode(CombinatorNode):
+    _type = "withLatestFromNode"
 
 class ArgNode(Node):
     _type = "argNode"
@@ -126,7 +146,7 @@ class ReturnNode(Node):
 class Diagram(BaseModel):
     zoom: Optional[float]
     position: Optional[List[int]]
-    elements: List[Union[ArkitektNode, ArgNode, KwargNode, ReturnNode, Edge]]
+    elements: List[Union[ArkitektNode, ArgNode, KwargNode, ZipNode, MergeNode, WithLatestFromNode, ReturnNode, Edge]]
 
 
 ArgPort.update_forward_refs()
