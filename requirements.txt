@@ -22,7 +22,13 @@ unflatten
 
 # Bergen
 arkitekt
-log>=0.1.5
+
+# JWT
+lok>=0.1.7
+
+# GraphQL abstaction
+balder>=0.1.6
+
 
 
 # Testing and Linting

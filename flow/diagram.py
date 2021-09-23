@@ -103,9 +103,13 @@ class Node(BaseModel):
 
 
 class ArkitektNode(Node):
-    _type = "arkitektNode"
     data: ArkitektData
 
+class ArkitektFuncNode(ArkitektNode):
+    _type = "arkitektFuncNode"
+
+class ArkitektGenNode(ArkitektNode):
+    _type = "arkitektGenNode"
 
 class CombinationData(BaseModel):
     arg1: List[Port]
@@ -128,25 +132,35 @@ class MergeNode(CombinatorNode):
 class WithLatestFromNode(CombinatorNode):
     _type = "withLatestFromNode"
 
-class ArgNode(Node):
+class CombineLatestNode(CombinatorNode):
+    _type = "combineLatestNode"
+
+class IONode(Node):
+    pass
+
+class ArgNode(IONode):
     _type = "argNode"
     data: ArgData
 
 
-class KwargNode(Node):
+class KwargNode(IONode):
     _type = "kwargNode"
     data: KwargData
 
 
-class ReturnNode(Node):
+class ReturnNode(IONode):
     _type = "returnNode"
     data: ReturnData
+
+
+DiagramNode = Union[ArkitektFuncNode, ArkitektGenNode, ArgNode, KwargNode, ZipNode, MergeNode, WithLatestFromNode, ReturnNode, Edge]
+
 
 
 class Diagram(BaseModel):
     zoom: Optional[float]
     position: Optional[List[int]]
-    elements: List[Union[ArkitektNode, ArgNode, KwargNode, ZipNode, MergeNode, WithLatestFromNode, ReturnNode, Edge]]
+    elements: List[DiagramNode]
 
 
 ArgPort.update_forward_refs()
