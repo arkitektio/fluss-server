@@ -3,6 +3,15 @@ arkitekt:
   host: arkitekt
   port: 8090
   secure: False
+  postman:
+    host: arkitekt
+    port: 8090
+    secure: false
+
+logging:
+  stream: true
+  file: true
+  level: INFO
 
 herre:
   host: herre
