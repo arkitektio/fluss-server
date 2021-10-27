@@ -1,6 +1,10 @@
-from arkitekt import Bergen
+from arkitekt import Postman
 
-try:
-    arkitekt = Bergen(auto_connect=True)
-except:
-    arkitekt = None
+
+
+postman = Postman()
+
+
+
+
+

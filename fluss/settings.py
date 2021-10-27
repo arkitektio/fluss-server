@@ -50,7 +50,7 @@ ARKITEKT_SERVICE = {
 }
 
 
-HERRE = {
+LOK = {
     "PUBLIC_KEY": conf.herre.public_key,
     "KEY_TYPE": conf.herre.key_type,
     "ISSUER": conf.herre.issuer
@@ -128,7 +128,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'fluss.wsgi.application'
-ASGI_APPLICATION = 'fluss.routing.application'
+ASGI_APPLICATION = 'fluss.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

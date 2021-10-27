@@ -21,13 +21,13 @@ graphene-django
 unflatten
 
 # Bergen
-arkitekt>=0.1.24
+arkitekt>=0.1.55
 
 # JWT
-lok>=0.1.10
+lok>=0.1.12
 
 # GraphQL abstaction
-balder[subscription]>=0.1.6
+balder[subscription]>=0.1.10
 
 
 

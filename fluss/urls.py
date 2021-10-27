@@ -21,6 +21,7 @@ from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import include, url
 from flow.router import router
+import fluss.arkitekt
 
 
 def index(request):
@@ -31,7 +32,7 @@ def index(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
-    url(r'^graphql$', BalderView),
-    url(r'^ht/', include('health_check.urls')),
-    url(r'^api/', include(router.urls)),
+    path('graphql', BalderView, name="graphql"),
+    path('ht/', include('health_check.urls')),
+    path('api', include(router.urls)),
 ]

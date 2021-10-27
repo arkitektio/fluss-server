@@ -1,0 +1,24 @@
+arkitekt:
+  host: arkitekt
+  port: 8090
+  postman:
+    host: arkitekt
+    port: 8090
+    secure: false
+  secure: false
+herre:
+  authorization_grant_type: CLIENT_CREDENTIALS
+  client_id: nX1RcMSQ3FkQWCuw127B1TwZTpxyl7jloDP8GscC
+  client_secret: YdZFYHU2nNn88qPxkqPHqAmiFcznnZBrLCr9iIPjcPtnZ2hjN54Ws0grbxefYf0nsbmImcTHtVgLmzlEnjJJWvchjBq9JRpWFNBvpDKF8WHjZPnsL9Dna3R9Ccfxr9Of
+  host: herre
+  port: 8000
+  scopes:
+  - provider
+  - can_forward_bounce
+  - can_provide
+  - introspection
+  secure: false
+logging:
+  file: true
+  level: INFO
+  stream: true

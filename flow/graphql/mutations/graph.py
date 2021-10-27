@@ -70,7 +70,9 @@ class Deploy(BalderMutation):
                 "node": graph.node.arkitekt_id,
                 "params": {
                     "fluss": True
-                }
+                },
+                "extensions": ["graph"],
+                "version": "main"
         })
 
         logger.info(arkitekt_template)
