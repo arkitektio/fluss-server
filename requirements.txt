@@ -1,5 +1,5 @@
 Django>=3.1
-channels>=2.4.0
+channels
 channels_redis
 django-registration-redux
 django-extensions
@@ -21,14 +21,13 @@ graphene-django
 unflatten
 
 # Bergen
-arkitekt>=0.1.55
+arkitekt>=0.1.111
 
 # JWT
 lok>=0.1.12
 
 # GraphQL abstaction
-balder[subscription]>=0.1.10
-
+balder[subscription]>=0.1.18
 
 
 # Testing and Linting

@@ -6,19 +6,8 @@ services:
     command: bash run.sh
     ports:
       - 8070:8070
-    depends_on: 
-      - gaberl
-  gaberl:
-    image: postgres:12.6-alpine
-    environment:
-      POSTGRES_DB: hello_gaberl
-      POSTGRES_PASSWORD: hello_gaberl
-      POSTGRES_USER: hello_gaberl
-
-
 
 networks:
   default:
     external:
       name: dev
-
