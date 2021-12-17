@@ -17,22 +17,17 @@ from balder.views import BalderView
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render
-from graphene_django.views import GraphQLView
-from django.views.decorators.csrf import csrf_exempt
-from django.conf.urls import include, url
-from flow.router import router
-import fluss.arkitekt
+from django.conf.urls import include
 
 
 def index(request):
-        # Render that in the index template
+    # Render that in the index template
     return render(request, "index-oslo.html")
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', index, name='index'),
-    path('graphql', BalderView, name="graphql"),
-    path('ht/', include('health_check.urls')),
-    path('api', include(router.urls)),
+    path("admin/", admin.site.urls),
+    path("", index, name="index"),
+    path("graphql", BalderView, name="graphql"),
+    path("ht/", include("health_check.urls")),
 ]

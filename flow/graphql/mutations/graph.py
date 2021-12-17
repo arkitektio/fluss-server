@@ -158,7 +158,7 @@ class Draw(BalderMutation):
         type = types.Graph
 
 
-class DeleteGraphOut(graphene.ObjectType):
+class DeleteGraphReturn(graphene.ObjectType):
     id = graphene.ID()
 
 
@@ -174,7 +174,7 @@ class DeleteGraph(BalderMutation):
         return {"id": id}
 
     class Meta:
-        type = DeleteGraphOut
+        type = DeleteGraphReturn
 
 
 class UpdateGraph(BalderMutation):
