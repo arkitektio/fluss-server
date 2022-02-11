@@ -13,7 +13,7 @@ class Graph(models.Model):
         max_length=1000,
         blank=True,
         null=True,
-        help_text="The Associated Template on Arkitekt",
+        help_text="The associated Template on Arkitekt",
     )
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
