@@ -47,3 +47,20 @@ class MyGraphs(BalderQuery):
         personal = "creator"
         type = types.Graph
         operation = "mygraphs"
+
+
+class Flow(BalderQuery):
+    class Arguments:
+        id = graphene.ID(description="A unique ID for this Graph")
+        template = graphene.ID(description="The corresponding template on arkitekt")
+
+    @bounced(anonymous=False)
+    def resolve(root, info, *args, id=None, template=None, node=None):
+        if template:
+            return models.Flow.objects.get(template=template)
+        if id:
+            return models.Flow.objects.get(id=id)
+
+    class Meta:
+        type = types.Flow
+        operation = "flow"
