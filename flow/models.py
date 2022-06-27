@@ -1,6 +1,7 @@
 from re import template
 from django.db import models
 from django.contrib.auth import get_user_model
+from pyparsing import null_debug_action
 import namegenerator
 
 # Create your models here.
@@ -38,6 +39,7 @@ class Flow(models.Model):
     name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
     nodes = models.JSONField(null=True, blank=True, default=list)
     edges = models.JSONField(null=True, blank=True, default=list)
+    graph = models.JSONField(null=True, blank=True)
     description = models.CharField(
         max_length=50000, default="Add a Description", blank=True, null=True
     )

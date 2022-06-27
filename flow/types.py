@@ -1,4 +1,6 @@
+from ast import Global
 from sys import implementation
+from tokenize import String
 from balder.types import BalderObject
 from flow import models
 from django.contrib.auth import get_user_model
@@ -42,7 +44,7 @@ class FlowArg(graphene.ObjectType):
 
     label = graphene.String()
     name = graphene.String()
-    type = graphene.String()
+    typename = graphene.String()
     description = graphene.String()
 
 
@@ -50,41 +52,47 @@ class FlowKwarg(graphene.ObjectType):
     key = graphene.String(required=True)
     label = graphene.String()
     name = graphene.String()
-    type = graphene.String()
+    typename = graphene.String()
     description = graphene.String()
 
 
 class FlowReturn(graphene.ObjectType):
     key = graphene.String(required=True)
-
     label = graphene.String()
     name = graphene.String()
-    type = graphene.String()
+    typename = graphene.String()
     description = graphene.String()
 
 
 class FlowNode(graphene.Interface):
     id = graphene.String(required=True)
     position = graphene.Field(Position, required=True)
+    typename = graphene.String(required=True)
 
     @classmethod
     def resolve_type(cls, instance, info):
-        if instance["type"] == "ArkitektNode":
+        if instance["typename"] == "ArkitektNode":
             return ArkitektNode
-        if instance["type"] == "ReactiveNode":
+        if instance["typename"] == "ReactiveNode":
             return ReactiveNode
-        if instance["type"] == "ArgNode":
+        if instance["typename"] == "ArgNode":
             return ArgNode
-        if instance["type"] == "KwargNode":
+        if instance["typename"] == "KwargNode":
             return KwargNode
-        if instance["type"] == "ReturnNode":
+        if instance["typename"] == "ReturnNode":
             return ReturnNode
 
 
+class StreamItem(graphene.ObjectType):
+    key = graphene.String(required=True)
+    type = graphene.String(required=True)
+
+
 class FlowNodeCommons(graphene.Interface):
-    args = graphene.List(FlowArg)
-    kwargs = graphene.List(FlowKwarg)
-    returns = graphene.List(FlowReturn)
+    instream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    outstream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    constants = GenericScalar()
 
 
 @register_type
@@ -137,12 +145,13 @@ class FlowEdge(graphene.Interface):
     target = graphene.String(required=True)
     sourceHandle = graphene.String(required=True)
     targetHandle = graphene.String(required=True)
+    typename = graphene.String(required=True)
 
     @classmethod
     def resolve_type(cls, instance, info):
-        if instance["type"] == "LabeledEdge":
+        if instance["typename"] == "LabeledEdge":
             return LabeledEdge
-        if instance["type"] == "FancyEdge":
+        if instance["typename"] == "FancyEdge":
             return FancyEdge
 
 
@@ -168,18 +177,33 @@ class FancyEdge(graphene.ObjectType):
         interfaces = (FlowEdge, FlowEdgeCommons)
 
 
+class Constant(graphene.ObjectType):
+    key = graphene.String(required=True)
+    value = graphene.String(required=True)
+
+
+class Global(graphene.ObjectType):
+    locked = graphene.Boolean(required=False)
+    key = graphene.String(required=True)
+    typename = graphene.String(required=True)
+    identifier = graphene.String(required=False)
+    value = GenericScalar(required=False)
+    widget = GenericScalar(required=False)
+    mapped = graphene.List(graphene.String, required=False)
+
+
 class FlowGraph(graphene.ObjectType):
     zoom = graphene.Float()
     position = graphene.List(graphene.Int)
-    nodes = graphene.List(FlowNode)
-    edges = graphene.List(FlowEdge)
+    nodes = graphene.List(FlowNode, required=True)
+    edges = graphene.List(FlowEdge, required=True)
+    globals = graphene.List(Global, required=True)
 
 
 class Flow(BalderObject):
     zoom = graphene.Float()
     position = graphene.List(graphene.Int)
-    nodes = graphene.List(FlowNode)
-    edges = graphene.List(FlowEdge)
+    graph = graphene.Field(FlowGraph, required=True)
 
     class Meta:
         model = models.Flow

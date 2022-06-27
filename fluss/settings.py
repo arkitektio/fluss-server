@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from omegaconf import omegaconf
 
-conf = omegaconf.OmegaConf.load('config.yaml')
+conf = omegaconf.OmegaConf.load("config.yaml")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,112 +23,98 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = conf.security.secret_key
+SECRET_KEY = conf.server.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = conf.server.debug or False
 
 ALLOWED_HOSTS = conf.server.hosts
 
-
-ELEMENTS_HOST = "p-tnagerl-lab1"
-ELEMENTS_INWARD = "fluss" # Set this to the host you are on
-ELEMENTS_PORT = 8070 # Set this to the host you are on
-
-
-
 STATIC_ROOT = "/var/www/static"
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Application definition
-ARKITEKT_SERVICE = {
-    "INWARD": ELEMENTS_INWARD,
-    "OUTWARD": ELEMENTS_HOST,
-    "PORT": ELEMENTS_PORT,
-    "TYPES": ["NEGOTIATE","POINT", "PROVIDER"],
-    "NEEDS_NEGOTIATION": False,
-}
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 LOK = {
-    "PUBLIC_KEY": conf.herre.public_key,
-    "KEY_TYPE": conf.herre.key_type,
-    "ISSUER": conf.herre.issuer
+    "PUBLIC_KEY": conf.lok.public_key,
+    "KEY_TYPE": conf.lok.key_type,
+    "ISSUER": conf.lok.issuer,
 }
 
-SUPERUSERS = [{
-    "USERNAME": su.username,
-    "EMAIL": su.email,
-    "PASSWORD": su.password
-} for su in conf.security.admins]
+SUPERUSERS = [
+    {
+        "USERNAME": conf.server.admin.username,
+        "EMAIL": conf.server.admin.email,
+        "PASSWORD": conf.server.admin.password,
+    }
+]
 
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_filters',
-    'taggit',
-    'channels',
-    'lok',
-    'health_check',
-    'health_check.db',
-    'django_probes',
-    'guardian',
-    'graphene_django',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_filters",
+    "taggit",
+    "channels",
+    "lok",
+    "health_check",
+    "health_check.db",
+    "django_probes",
+    "guardian",
+    "graphene_django",
     "rest_framework",
-    'oauth2_provider',
-    'balder',
-    'flow'
+    "oauth2_provider",
+    "balder",
+    "flow",
 ]
 
 
 HEALTH_CHECK = {
-    'DISK_USAGE_MAX': 90,  # percent
-    'MEMORY_MIN': 100,    # in MB
+    "DISK_USAGE_MAX": 90,  # percent
+    "MEMORY_MIN": 100,  # in MB
 }
 
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'lok.middlewares.request.jwt.JWTTokenMiddleWare',
-    'lok.middlewares.request.bouncer.BouncedMiddleware', # needs to be after JWT and session 
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "lok.middlewares.request.jwt.JWTTokenMiddleWare",
+    "lok.middlewares.request.bouncer.BouncedMiddleware",  # needs to be after JWT and session
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'fluss.urls'
+ROOT_URLCONF = "fluss.urls"
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            'templates',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            "templates",
         ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'fluss.wsgi.application'
-ASGI_APPLICATION = 'fluss.asgi.application'
+WSGI_APPLICATION = "fluss.wsgi.application"
+ASGI_APPLICATION = "fluss.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -138,7 +124,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": conf.postgres.db_name,
         "USER": conf.postgres.user,
-        "PASSWORD":conf.postgres.password,
+        "PASSWORD": conf.postgres.password,
         "HOST": conf.postgres.host,
         "PORT": conf.postgres.port,
     }
@@ -154,37 +140,38 @@ CHANNEL_LAYERS = {
     },
 }
 
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'guardian.backends.ObjectPermissionBackend')
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
-AUTH_USER_MODEL = 'lok.LokUser'
+AUTH_USER_MODEL = "lok.LokUser"
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
-GRAPHENE = {
-    "SCHEMA": "balder.schema.graphql_schema"
-}
+GRAPHENE = {"SCHEMA": "balder.schema.graphql_schema"}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -196,55 +183,55 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            '()': 'colorlog.ColoredFormatter',  # colored output
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "()": "colorlog.ColoredFormatter",  # colored output
             # exact format is not important, this is the minimum information
-            'format': '%(log_color)s[%(levelname)s]  %(name)s %(asctime)s :: %(message)s',
-            'log_colors': {
-                'DEBUG':    'bold_black',
-                'INFO':     'green',
-                'WARNING':  'yellow',
-                'ERROR':    'red',
-                'CRITICAL': 'bold_red',
+            "format": "%(log_color)s[%(levelname)s]  %(name)s %(asctime)s :: %(message)s",
+            "log_colors": {
+                "DEBUG": "bold_black",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "bold_red",
             },
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'colorlog.StreamHandler',
-            'formatter': 'console',
+    "handlers": {
+        "console": {
+            "class": "colorlog.StreamHandler",
+            "formatter": "console",
         },
     },
-    'loggers': {
-    # root logger
-        '': {
-            'level': "INFO",
-            'handlers': ['console'],
+    "loggers": {
+        # root logger
+        "": {
+            "level": "INFO",
+            "handlers": ["console"],
         },
-        'oauthlib': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
+        "oauthlib": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
         },
-        'delt': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
+        "delt": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'oauth2_provider': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
+        "oauth2_provider": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
