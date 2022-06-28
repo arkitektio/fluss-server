@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 import graphene
 from graphene.types.generic import GenericScalar
 from balder.registry import register_type
+from flow.inputs import StreamType
 
 
 class Position(graphene.ObjectType):
@@ -85,7 +86,8 @@ class FlowNode(graphene.Interface):
 
 class StreamItem(graphene.ObjectType):
     key = graphene.String(required=True)
-    type = graphene.String(required=True)
+    type = StreamType(required=True)
+    identifier = graphene.String(required=False)
 
 
 class FlowNodeCommons(graphene.Interface):
@@ -156,13 +158,12 @@ class FlowEdge(graphene.Interface):
 
 
 class FlowEdgeCommons(graphene.Interface):
-    label = graphene.String()
+    stream = graphene.List(StreamItem, required=True)
 
 
 @register_type
 class LabeledEdge(graphene.ObjectType):
-
-    label = graphene.String()
+    stream = graphene.List(StreamItem, required=True)
 
     class Meta:
         interfaces = (FlowEdge, FlowEdgeCommons)
@@ -170,8 +171,7 @@ class LabeledEdge(graphene.ObjectType):
 
 @register_type
 class FancyEdge(graphene.ObjectType):
-
-    label = graphene.String()
+    stream = graphene.List(StreamItem, required=True)
 
     class Meta:
         interfaces = (FlowEdge, FlowEdgeCommons)
@@ -204,6 +204,17 @@ class Flow(BalderObject):
     zoom = graphene.Float()
     position = graphene.List(graphene.Int)
     graph = graphene.Field(FlowGraph, required=True)
+    name = graphene.String(required=True)
 
     class Meta:
         model = models.Flow
+
+
+class Run(BalderObject):
+    class Meta:
+        model = models.Run
+
+
+class RunLog(BalderObject):
+    class Meta:
+        model = models.RunLog

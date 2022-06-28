@@ -2,38 +2,26 @@ import graphene
 from graphene.types.generic import GenericScalar
 
 
-class FlowArgInput(graphene.InputObjectType):
-    key = graphene.String(required=True)
-    label = graphene.String()
-    name = graphene.String()
-    typename = graphene.String()
-    description = graphene.String()
-
-
-class FlowKwargInput(graphene.InputObjectType):
-    key = graphene.String(required=True)
-    label = graphene.String()
-    name = graphene.String()
-    typename = graphene.String()
-    description = graphene.String()
-
-
-class FlowReturnInput(graphene.InputObjectType):
-    key = graphene.String(required=True)
-    label = graphene.String()
-    name = graphene.String()
-    typename = graphene.String()
-    description = graphene.String()
-
-
 class PositionInput(graphene.InputObjectType):
     x = graphene.Float(required=True)
     y = graphene.Float(required=True)
 
 
+class StreamType(graphene.Enum):
+    INT = "INT"
+    STRING = "STRING"
+    STRUCTURE = "STRUCTURE"
+    LIST = "LIST"
+    BOOL = "BOOL"
+    ENUM = "ENUM"
+    DICT = "DICT"
+    UNSET = "UNSET"
+
+
 class StreamItemInput(graphene.InputObjectType):
     key = graphene.String(required=True)
-    type = graphene.String(required=True)
+    type = StreamType(required=True)
+    identifier = graphene.String(required=False)
 
 
 class NodeInput(graphene.InputObjectType):
@@ -65,7 +53,7 @@ class EdgeInput(graphene.InputObjectType):
     target = graphene.String(required=True)
     sourceHandle = graphene.String(required=True)
     targetHandle = graphene.String(required=True)
-    label = graphene.String(required=False)
+    stream = graphene.List(StreamItemInput, required=False)
 
 
 class GlobalInput(graphene.InputObjectType):

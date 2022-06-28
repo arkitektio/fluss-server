@@ -1,7 +1,7 @@
 from balder.types.mutation.base import BalderMutation
 from balder.types import BalderQuery
 import graphene
-from flow import models, types
+from flow import models, types, filters
 from lok import bounced
 
 
@@ -22,6 +22,7 @@ class Flows(BalderQuery):
     class Meta:
         type = types.Flow
         list = True
+        filter = filters.FlowFilter
 
 
 class FlowDetail(BalderQuery):

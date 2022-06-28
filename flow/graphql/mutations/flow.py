@@ -19,6 +19,7 @@ class Draw(BalderMutation):
     class Arguments:
         name = graphene.String(required=True)
         graph = graphene.Argument(GraphInput, required=True)
+        brittle = graphene.Boolean(default_value=False)
 
     @bounced(anonymous=False)
     def mutate(root, info, name, graph):
@@ -35,13 +36,15 @@ class Draw(BalderMutation):
 class UpdateFlow(BalderMutation):
     class Arguments:
         id = graphene.ID(required=True)
-        graph = graphene.Argument(GraphInput, required=True)
+        graph = graphene.Argument(GraphInput, required=False)
+        brittle = graphene.Boolean(default_value=False)
 
     @bounced(anonymous=False)
-    def mutate(root, info, id, graph):
+    def mutate(root, info, id, graph=None, brittle=False):
 
         flow = models.Flow.objects.get(id=id)
-        flow.graph = graph
+        flow.graph = graph or flow.graph
+        flow.brittle = brittle or flow.brittle
         flow.save()
 
         return flow
@@ -54,12 +57,14 @@ class UpdateFlow(BalderMutation):
 class DrawVanilla(BalderMutation):
     class Arguments:
         name = graphene.String(required=True)
+        brittle = graphene.Boolean(default_value=False)
 
     @bounced(anonymous=False)
     def mutate(
         root,
         info,
         name,
+        brittle=False,
     ):
 
         nodes = [
@@ -93,6 +98,7 @@ class DrawVanilla(BalderMutation):
             graph={"nodes": nodes, "edges": [], "globals": []},
             name=name,
             creator=info.context.user,
+            brittle=brittle or False,
         )
         return flow
 

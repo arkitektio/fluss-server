@@ -43,3 +43,34 @@ class Flow(models.Model):
     description = models.CharField(
         max_length=50000, default="Add a Description", blank=True, null=True
     )
+    brittle = models.BooleanField(
+        default=False,
+        help_text="Is this a brittle flow? aka. should the flow fail on any exception?",
+    )
+
+
+class Run(models.Model):
+
+    flow = models.ForeignKey(Flow, on_delete=models.CASCADE, null=True, blank=True)
+    assignation = models.CharField(max_length=100, null=True, blank=True)
+    status = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.flow.name} - {self.assignation}"
+
+
+class Snapshot(models.Model):
+
+    run = models.ForeignKey(Run, on_delete=models.CASCADE, null=True, blank=True)
+    assignation = models.CharField(max_length=100, null=True, blank=True)
+    status = models.CharField(max_length=100, null=True, blank=True)
+
+
+class RunLog(models.Model):
+
+    run = models.ForeignKey(Run, on_delete=models.CASCADE, null=True, blank=True)
+    log = models.CharField(max_length=100, null=True, blank=True)
+    node = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.run}"
