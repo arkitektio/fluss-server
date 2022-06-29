@@ -211,6 +211,11 @@ class Flow(BalderObject):
 
 
 class Run(BalderObject):
+    latest_snapshot = graphene.Field(lambda: Snapshot)
+
+    def resolve_latest_snapshot(root, info, *args, **kwargs):
+        return root.snapshots.order_by("-created_at").first()
+
     class Meta:
         model = models.Run
 
@@ -218,3 +223,8 @@ class Run(BalderObject):
 class RunLog(BalderObject):
     class Meta:
         model = models.RunLog
+
+
+class Snapshot(BalderObject):
+    class Meta:
+        model = models.Snapshot

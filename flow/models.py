@@ -51,7 +51,9 @@ class Flow(models.Model):
 
 class Run(models.Model):
 
-    flow = models.ForeignKey(Flow, on_delete=models.CASCADE, null=True, blank=True)
+    flow = models.ForeignKey(
+        Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="runs"
+    )
     assignation = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=100, null=True, blank=True)
 
@@ -61,14 +63,19 @@ class Run(models.Model):
 
 class Snapshot(models.Model):
 
-    run = models.ForeignKey(Run, on_delete=models.CASCADE, null=True, blank=True)
-    assignation = models.CharField(max_length=100, null=True, blank=True)
+    run = models.ForeignKey(
+        Run, on_delete=models.CASCADE, null=True, blank=True, related_name="snapshots"
+    )
     status = models.CharField(max_length=100, null=True, blank=True)
+    state = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
 
 
 class RunLog(models.Model):
 
-    run = models.ForeignKey(Run, on_delete=models.CASCADE, null=True, blank=True)
+    run = models.ForeignKey(
+        Run, on_delete=models.CASCADE, null=True, blank=True, related_name="logs"
+    )
     log = models.CharField(max_length=100, null=True, blank=True)
     node = models.CharField(max_length=100, null=True, blank=True)
 
