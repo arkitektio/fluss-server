@@ -1,5 +1,7 @@
 import graphene
 from graphene.types.generic import GenericScalar
+from flow.enums import EventTypeInput
+from flow.scalars import EventValue
 
 
 class PositionInput(graphene.InputObjectType):
@@ -66,3 +68,10 @@ class GraphInput(graphene.InputObjectType):
     nodes = graphene.List(NodeInput, required=True)
     edges = graphene.List(EdgeInput, required=True)
     globals = graphene.List(GlobalInput, required=True)
+
+
+class RunEventInput(graphene.InputObjectType):
+    handle = graphene.String(required=True)
+    type = EventTypeInput(required=True)
+    source = graphene.String(required=True)
+    value = EventValue(required=False)

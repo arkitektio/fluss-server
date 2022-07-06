@@ -18,6 +18,41 @@ class Run(BalderQuery):
         type = types.Run
 
 
+class EventsBetween(BalderQuery):
+    class Arguments:
+        run = graphene.ID(required=True)
+        min = graphene.Int(required=False)
+        max = graphene.Int(required=False)
+
+    @bounced(anonymous=False)
+    def resolve(root, info, run, min=0, max=None):
+        snapshot = (
+            models.Snapshot.objects.filter(run_id=run, t__lte=min)
+            .order_by("-t")
+            .first()
+        )
+
+        if snapshot:
+            min = snapshot.t
+            start_events = list(snapshot.events.all())
+        else:
+            start_events = []
+
+        events = models.RunEvent.objects.filter(run_id=run, t__gte=min)
+
+        if max:
+            events = events.filter(t__lte=max)
+
+        events = events.order_by("t").all()
+
+        return start_events + list(events)
+
+    class Meta:
+        type = types.RunEvent
+        list = True
+        operation = "eventsBetween"
+
+
 class Snapshot(BalderQuery):
     class Arguments:
         id = graphene.ID(required=True, description="The Id of the Graph")

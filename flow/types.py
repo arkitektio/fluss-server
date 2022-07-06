@@ -1,6 +1,3 @@
-from ast import Global
-from sys import implementation
-from tokenize import String
 from balder.types import BalderObject
 from flow import models
 from django.contrib.auth import get_user_model
@@ -8,6 +5,7 @@ import graphene
 from graphene.types.generic import GenericScalar
 from balder.registry import register_type
 from flow.inputs import StreamType
+from flow.scalars import EventValue
 
 
 class Position(graphene.ObjectType):
@@ -221,8 +219,19 @@ class Run(BalderObject):
 
 
 class RunLog(BalderObject):
+    node = graphene.String(required=True)
+
     class Meta:
         model = models.RunLog
+
+
+class RunEvent(BalderObject):
+    value = EventValue(required=True)
+    handle = graphene.String(required=True)
+    source = graphene.String(required=True)
+
+    class Meta:
+        model = models.RunEvent
 
 
 class Snapshot(BalderObject):

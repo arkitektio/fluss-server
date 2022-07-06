@@ -1,8 +1,7 @@
-from re import template
 from django.db import models
 from django.contrib.auth import get_user_model
-from pyparsing import null_debug_action
 import namegenerator
+from flow.enums import EventType
 
 # Create your models here.
 
@@ -66,8 +65,8 @@ class Snapshot(models.Model):
     run = models.ForeignKey(
         Run, on_delete=models.CASCADE, null=True, blank=True, related_name="snapshots"
     )
+    t = models.IntegerField()
     status = models.CharField(max_length=100, null=True, blank=True)
-    state = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
 
 
@@ -81,3 +80,27 @@ class RunLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.run}"
+
+
+class RunEvent(models.Model):
+
+    run = models.ForeignKey(
+        Run, on_delete=models.CASCADE, null=True, blank=True, related_name="events"
+    )
+    snapshot = models.ManyToManyField(Snapshot, related_name="events")
+    type = models.CharField(
+        max_length=1000,
+        choices=EventType.choices,
+        default=EventType.UNKNOWN.value,
+    )
+    t = models.IntegerField()
+    source = models.CharField(max_length=1000)
+    handle = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
+    value = models.JSONField(null=True, blank=True, default=[])
+
+    def __str__(self) -> str:
+        return f"Event for {self.run}"
+
+
+import flow.signals

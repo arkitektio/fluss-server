@@ -5,6 +5,9 @@ from flow import models, types
 from lok import bounced
 import logging
 from graphene.types.generic import GenericScalar
+from flow.enums import EventTypeInput
+from flow.scalars import EventValue
+from flow.inputs import RunEventInput
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,9 @@ class Start(BalderMutation):
 
     @bounced(anonymous=False)
     def mutate(root, info, assignation, flow):
-        run = models.Run.objects.create(flow_id=flow, assignation=assignation)
+        run, created = models.Run.objects.get_or_create(
+            flow_id=flow, assignation=assignation
+        )
         return run
 
     class Meta:
@@ -60,12 +65,18 @@ class Log(BalderMutation):
 class Snapshot(BalderMutation):
     class Arguments:
         run = graphene.ID(required=True)
-        state = GenericScalar(required=True)
+        events = graphene.List(
+            graphene.ID,
+            description="The IDs of the events that make up the snapshot",
+            required=True,
+        )
+        t = graphene.Int(required=True)
 
     @bounced(anonymous=False)
-    def mutate(root, info, run, state):
-        log = models.Snapshot.objects.create(run_id=run, state=state)
-        return log
+    def mutate(root, info, run, events, t):
+        s = models.Snapshot.objects.create(run_id=run, t=t)
+        s.events.set(events)
+        return s
 
     class Meta:
         type = types.Snapshot
@@ -88,3 +99,24 @@ class DeleteSnapshot(BalderMutation):
 
     class Meta:
         type = DeleteSnapshotReturn
+
+
+class Track(BalderMutation):
+    class Arguments:
+        source = graphene.String(required=True)
+        handle = graphene.String(required=True)
+        t = graphene.Int(required=True)
+        type = graphene.Argument(EventTypeInput, required=True)
+        run = graphene.ID(required=True)
+        value = EventValue(required=True)
+
+    @bounced(anonymous=False)
+    def mutate(root, info, run, source, handle, type, value, t):
+        log = models.RunEvent.objects.create(
+            run_id=run, source=source, handle=handle, type=type, value=value, t=t
+        )
+        return log
+
+    class Meta:
+        type = types.RunEvent
+        operation = "track"
