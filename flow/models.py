@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 import namegenerator
 from flow.enums import EventType
+from flow.storage import PrivateMediaStorage
 
 # Create your models here.
 
@@ -39,6 +40,7 @@ class Flow(models.Model):
     nodes = models.JSONField(null=True, blank=True, default=list)
     edges = models.JSONField(null=True, blank=True, default=list)
     graph = models.JSONField(null=True, blank=True)
+    screenshot = models.ImageField(null=True, storage=PrivateMediaStorage())
     description = models.CharField(
         max_length=50000, default="Add a Description", blank=True, null=True
     )

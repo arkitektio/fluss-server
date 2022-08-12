@@ -204,6 +204,9 @@ class Flow(BalderObject):
     graph = graphene.Field(FlowGraph, required=True)
     name = graphene.String(required=True)
 
+    def resolve_screenshot(root, info, *args, **kwargs):
+        return root.screenshot.url if root.screenshot else None
+
     class Meta:
         model = models.Flow
 

@@ -3,7 +3,7 @@ channels
 channels_redis
 django-registration-redux
 django-extensions
-
+django-storages
 django-health-check
 django-oauth-toolkit
 django-cors-headers
@@ -20,9 +20,7 @@ python-slugify
 graphene-django
 unflatten
 
-# Bergen
-arkitekt>=0.1.111
-
+boto3
 # JWT
 lok>=0.1.12
 

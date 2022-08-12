@@ -6,10 +6,7 @@ from lok import bounced
 import logging
 from flow.inputs import GraphInput, NodeInput, EdgeInput
 from graphene.types.generic import GenericScalar
-
-from arkitekt.schema import Node as ApiNode, template
-from arkitekt.schema import NodeType
-from arkitekt.schema import Template as ApiTemplate
+from balder.types.scalars import ImageFile
 import namegenerator
 
 logger = logging.getLogger(__name__)
@@ -38,13 +35,17 @@ class UpdateFlow(BalderMutation):
         id = graphene.ID(required=True)
         graph = graphene.Argument(GraphInput, required=False)
         brittle = graphene.Boolean(default_value=False)
+        screenshot = ImageFile(required=False)
 
     @bounced(anonymous=False)
-    def mutate(root, info, id, graph=None, brittle=False):
+    def mutate(root, info, id, graph=None, brittle=False, screenshot=None):
+
+        print(screenshot)
 
         flow = models.Flow.objects.get(id=id)
         flow.graph = graph or flow.graph
         flow.brittle = brittle or flow.brittle
+        flow.screenshot = screenshot or flow.screenshot
         flow.save()
 
         return flow
@@ -56,14 +57,14 @@ class UpdateFlow(BalderMutation):
 
 class DrawVanilla(BalderMutation):
     class Arguments:
-        name = graphene.String(required=True)
+        name = graphene.String(required=False)
         brittle = graphene.Boolean(default_value=False)
 
     @bounced(anonymous=False)
     def mutate(
         root,
         info,
-        name,
+        name=None,
         brittle=False,
     ):
 
@@ -96,7 +97,7 @@ class DrawVanilla(BalderMutation):
 
         flow = models.Flow.objects.create(
             graph={"nodes": nodes, "edges": [], "globals": []},
-            name=name,
+            name=name or namegenerator.gen(),
             creator=info.context.user,
             brittle=brittle or False,
         )

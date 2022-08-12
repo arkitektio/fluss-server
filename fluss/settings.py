@@ -72,6 +72,28 @@ INSTALLED_APPS = [
 ]
 
 
+# S3 Settings
+
+
+# S3_PUBLIC_DOMAIN = f"{conf.s3.public.host}:{conf.s3.public.port}"  # TODO: FIx
+AWS_ACCESS_KEY_ID = conf.minio.access_key
+AWS_SECRET_ACCESS_KEY = conf.minio.secret_key
+AWS_S3_ENDPOINT_URL = f"{conf.minio.protocol}://{conf.minio.host}:{conf.minio.port}"
+# AWS_S3_PUBLIC_ENDPOINT_URL = (
+#    f"{conf.minio.public.protocol}://{conf.minio.public.host}:{conf.minio.public.port}"
+# )
+AWS_S3_URL_PROTOCOL = f"{conf.minio.protocol}:"
+AWS_S3_FILE_OVERWRITE = False
+AWS_QUERYSTRING_EXPIRE = 3600
+
+
+AWS_STORAGE_BUCKET_NAME = conf.minio.bucket
+AWS_DEFAULT_ACL = "private"
+AWS_S3_USE_SSL = True
+AWS_S3_SECURE_URLS = False  # Should resort to True if using in Production behind TLS
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+
 HEALTH_CHECK = {
     "DISK_USAGE_MAX": 90,  # percent
     "MEMORY_MIN": 100,  # in MB
