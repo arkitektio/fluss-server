@@ -1,10 +1,19 @@
 import django_filters
-from flow.models import Flow, Run
+from flow.models import Diagram, Flow, Run
+
+
+class DiagramFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(
+        field_name="name", lookup_expr="icontains", label="Search for substring of name"
+    )
 
 
 class FlowFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(
         field_name="name", lookup_expr="icontains", label="Search for substring of name"
+    )
+    diagram = django_filters.ModelChoiceFilter(
+        queryset=Diagram.objects.all(), field_name="diagram"
     )
 
 

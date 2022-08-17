@@ -1,29 +1,20 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.auth import get_user_model
 import namegenerator
 from flow.enums import EventType
 from flow.storage import PrivateMediaStorage
+import uuid
 
 # Create your models here.
 
 
-class Graph(models.Model):
+class Diagram(models.Model):
     """Graph is a Template for a Template"""
 
-    template = models.CharField(
-        max_length=1000,
-        blank=True,
-        null=True,
-        help_text="The associated Template on Arkitekt",
-    )
+    name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
-    )
-    version = models.CharField(max_length=100, default="1.0alpha")
-    name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
-    diagram = models.JSONField(null=True, blank=True)
-    description = models.CharField(
-        max_length=50000, default="Add a Description", blank=True, null=True
     )
 
     def __str__(self):
@@ -31,7 +22,9 @@ class Graph(models.Model):
 
 
 class Flow(models.Model):
-
+    diagram = models.ForeignKey(
+        Diagram, on_delete=models.CASCADE, null=True, blank=True, related_name="flows"
+    )
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
     )
@@ -40,14 +33,24 @@ class Flow(models.Model):
     nodes = models.JSONField(null=True, blank=True, default=list)
     edges = models.JSONField(null=True, blank=True, default=list)
     graph = models.JSONField(null=True, blank=True)
+    hash = models.CharField(max_length=4000, default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
     screenshot = models.ImageField(null=True, storage=PrivateMediaStorage())
     description = models.CharField(
-        max_length=50000, default="Add a Description", blank=True, null=True
+        max_length=50000, default="Add a Dessscription", blank=True, null=True
     )
     brittle = models.BooleanField(
         default=False,
         help_text="Is this a brittle flow? aka. should the flow fail on any exception?",
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["diagram", "hash"],
+                name="Equal Reservation on this App by this Waiter is already in place",
+            )
+        ]
 
 
 class Run(models.Model):
@@ -99,7 +102,7 @@ class RunEvent(models.Model):
     source = models.CharField(max_length=1000)
     handle = models.CharField(max_length=1000)
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
-    value = models.JSONField(null=True, blank=True, default=[])
+    value = models.JSONField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"Event for {self.run}"

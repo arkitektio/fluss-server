@@ -4,18 +4,13 @@ from django.contrib.auth import get_user_model
 import graphene
 from graphene.types.generic import GenericScalar
 from balder.registry import register_type
-from flow.inputs import StreamType
+from flow.inputs import StreamKind
 from flow.scalars import EventValue
 
 
 class Position(graphene.ObjectType):
     x = graphene.Int(required=True)
     y = graphene.Int(required=True)
-
-
-class Graph(BalderObject):
-    class Meta:
-        model = models.Graph
 
 
 class User(BalderObject):
@@ -84,7 +79,7 @@ class FlowNode(graphene.Interface):
 
 class StreamItem(graphene.ObjectType):
     key = graphene.String(required=True)
-    type = StreamType(required=True)
+    kind = StreamKind(required=True)
     identifier = graphene.String(required=False)
 
 
@@ -102,31 +97,41 @@ class ArkitektNode(graphene.ObjectType):
     name = graphene.String()
     description = graphene.String()
     kind = graphene.String(required=True)
+    defaults = GenericScalar(required=False)
 
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
 
 
+class Widget(graphene.ObjectType):
+    kind = graphene.String(required=True)
+    query = graphene.String()
+
+
+class Port(graphene.ObjectType):
+    key = graphene.String(required=True)
+    label = graphene.String()
+    identifier = graphene.String()
+    name = graphene.String()
+    kind = StreamKind(required=True)
+    description = graphene.String()
+    widget = graphene.Field(Widget)
+
+
 @register_type
 class ArgNode(graphene.ObjectType):
-    extra = graphene.String()
-
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
 
 
 @register_type
 class KwargNode(graphene.ObjectType):
-    extra = graphene.String()
-
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
 
 
 @register_type
 class ReturnNode(graphene.ObjectType):
-    extra = graphene.String()
-
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
 
@@ -196,6 +201,9 @@ class FlowGraph(graphene.ObjectType):
     nodes = graphene.List(FlowNode, required=True)
     edges = graphene.List(FlowEdge, required=True)
     globals = graphene.List(Global, required=True)
+    args = graphene.List(Port, required=True)
+    kwargs = graphene.List(Port, required=True)
+    returns = graphene.List(Port, required=True)
 
 
 class Flow(BalderObject):
@@ -209,6 +217,16 @@ class Flow(BalderObject):
 
     class Meta:
         model = models.Flow
+
+
+class Diagram(BalderObject):
+    latest_flow = graphene.Field(lambda: Flow, description="The latest flow")
+
+    def resolve_latest_flow(self, info):
+        return self.flows.order_by("-created_at").first()
+
+    class Meta:
+        model = models.Diagram
 
 
 class Run(BalderObject):
@@ -229,7 +247,7 @@ class RunLog(BalderObject):
 
 
 class RunEvent(BalderObject):
-    value = EventValue(required=True)
+    value = EventValue(required=False)
     handle = graphene.String(required=True)
     source = graphene.String(required=True)
 

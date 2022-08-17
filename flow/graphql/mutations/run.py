@@ -108,10 +108,10 @@ class Track(BalderMutation):
         t = graphene.Int(required=True)
         type = graphene.Argument(EventTypeInput, required=True)
         run = graphene.ID(required=True)
-        value = EventValue(required=True)
+        value = EventValue(required=False)
 
     @bounced(anonymous=False)
-    def mutate(root, info, run, source, handle, type, value, t):
+    def mutate(root, info, run, source, handle, type, t, value=None):
         log = models.RunEvent.objects.create(
             run_id=run, source=source, handle=handle, type=type, value=value, t=t
         )

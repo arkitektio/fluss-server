@@ -1,4 +1,5 @@
 from email.policy import default
+import json
 from balder.types import BalderMutation
 import graphene
 from flow import models, types
@@ -8,29 +9,22 @@ from flow.inputs import GraphInput, NodeInput, EdgeInput
 from graphene.types.generic import GenericScalar
 from balder.types.scalars import ImageFile
 import namegenerator
+import hashlib
 
 logger = logging.getLogger(__name__)
 
 
-class Draw(BalderMutation):
-    class Arguments:
-        name = graphene.String(required=True)
-        graph = graphene.Argument(GraphInput, required=True)
-        brittle = graphene.Boolean(default_value=False)
-
-    @bounced(anonymous=False)
-    def mutate(root, info, name, graph):
-        flow = models.Flow.objects.create(
-            graph=graph, name=name, creator=info.context.user
-        )
-        return flow
-
-    class Meta:
-        type = types.Flow
-        operation = "makeflow"
+def graph_hash(graph_hash) -> str:
+    """MD5 hash of a dictionary."""
+    dhash = hashlib.md5()
+    # We need to sort arguments so {'a': 1, 'b': 2} is
+    # the same as {'b': 2, 'a': 1}
+    encoded = json.dumps(graph_hash, sort_keys=True).encode()
+    dhash.update(encoded)
+    return dhash.hexdigest()
 
 
-class UpdateFlow(BalderMutation):
+class UpdateDiagram(BalderMutation):
     class Arguments:
         id = graphene.ID(required=True)
         graph = graphene.Argument(GraphInput, required=False)
@@ -40,19 +34,23 @@ class UpdateFlow(BalderMutation):
     @bounced(anonymous=False)
     def mutate(root, info, id, graph=None, brittle=False, screenshot=None):
 
-        print(screenshot)
+        diagram = models.Diagram.objects.get(id=id)
 
-        flow = models.Flow.objects.get(id=id)
-        flow.graph = graph or flow.graph
+        flow, cr = models.Flow.objects.get_or_create(
+            diagram=diagram,
+            hash=graph_hash(graph),
+            defaults={"graph": graph, "brittle": brittle},
+        )
+
         flow.brittle = brittle or flow.brittle
         flow.screenshot = screenshot or flow.screenshot
         flow.save()
 
-        return flow
+        return diagram
 
     class Meta:
-        type = types.Flow
-        operation = "updateflow"
+        type = types.Diagram
+        operation = "updatediagram"
 
 
 class DrawVanilla(BalderMutation):
@@ -67,6 +65,8 @@ class DrawVanilla(BalderMutation):
         name=None,
         brittle=False,
     ):
+
+        x = name or namegenerator.gen()
 
         nodes = [
             {
@@ -95,16 +95,29 @@ class DrawVanilla(BalderMutation):
             },
         ]
 
+        graph = {
+            "nodes": nodes,
+            "edges": [],
+            "globals": [],
+            "args": [],
+            "kwargs": [],
+            "returns": [],
+        }
+
+        diagram = models.Diagram.objects.create(name=x, creator=info.context.user)
+
         flow = models.Flow.objects.create(
-            graph={"nodes": nodes, "edges": [], "globals": []},
-            name=name or namegenerator.gen(),
+            diagram=diagram,
+            graph=graph,
+            hash=graph_hash(graph),
+            name=name,
             creator=info.context.user,
             brittle=brittle or False,
         )
-        return flow
+        return diagram
 
     class Meta:
-        type = types.Flow
+        type = types.Diagram
         operation = "drawvanilla"
 
 

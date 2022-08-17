@@ -1,7 +1,7 @@
 import graphene
 from graphene.types.generic import GenericScalar
 from flow.enums import EventTypeInput
-from flow.scalars import EventValue
+from flow.scalars import Any, EventValue
 
 
 class PositionInput(graphene.InputObjectType):
@@ -9,7 +9,7 @@ class PositionInput(graphene.InputObjectType):
     y = graphene.Float(required=True)
 
 
-class StreamType(graphene.Enum):
+class StreamKind(graphene.Enum):
     INT = "INT"
     STRING = "STRING"
     STRUCTURE = "STRUCTURE"
@@ -22,8 +22,30 @@ class StreamType(graphene.Enum):
 
 class StreamItemInput(graphene.InputObjectType):
     key = graphene.String(required=True)
-    type = StreamType(required=True)
+    kind = StreamKind(required=True)
     identifier = graphene.String(required=False)
+
+
+class ChildPortInput(graphene.InputObjectType):
+    identifier = graphene.String(description="The identifier")
+    kind = StreamKind(description="The type of this argument", required=True)
+
+
+class WidgetInput(graphene.InputObjectType):
+    query = graphene.String()
+    kind = graphene.String(description="The typename of the widget", required=True)
+
+
+class PortInput(graphene.InputObjectType):
+    identifier = graphene.String(description="The identifier")
+    key = graphene.String(description="The key of the arg", required=True)
+    name = graphene.String(description="The name of this argument")
+    label = graphene.String(description="The name of this argument")
+    default = Any(description="The default value of this port", required=False)
+    kind = StreamKind(description="The type of this argument", required=True)
+    description = graphene.String(description="The description of this argument")
+    child = graphene.Field(ChildPortInput, description="The child of this argument")
+    widget = graphene.Field(WidgetInput, description="The child of this argument")
 
 
 class NodeInput(graphene.InputObjectType):
@@ -36,6 +58,7 @@ class NodeInput(graphene.InputObjectType):
     kind = graphene.String()
     implementation = graphene.String(required=False)
     position = graphene.Field(PositionInput, required=True)
+    defaults = GenericScalar(required=False)
     extra = GenericScalar(required=False)
     instream = graphene.List(
         graphene.List(StreamItemInput, required=True), required=True
@@ -67,6 +90,9 @@ class GraphInput(graphene.InputObjectType):
     zoom = graphene.Float(required=False)
     nodes = graphene.List(NodeInput, required=True)
     edges = graphene.List(EdgeInput, required=True)
+    args = graphene.List(PortInput, required=True)
+    kwargs = graphene.List(PortInput, required=True)
+    returns = graphene.List(PortInput, required=True)
     globals = graphene.List(GlobalInput, required=True)
 
 
