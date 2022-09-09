@@ -7,11 +7,19 @@ from lok import bounced
 
 class Run(BalderQuery):
     class Arguments:
-        id = graphene.ID(required=True, description="The Id of the Graph")
+        id = graphene.ID(required=False, description="The Id of the Graph")
+        assignation = graphene.ID(
+            required=False, description="The assignation of the Graph"
+        )
 
     @bounced(anonymous=False)
-    def resolve(root, info, id=None):
-        graph = models.Run.objects.get(id=id)
+    def resolve(root, info, assignation=None, id=None):
+        if assignation:
+            graph = models.Run.objects.get(assignation=assignation)
+        elif id:
+            graph = models.Run.objects.get(id=id)
+        else:
+            raise Exception("No id or assignation provided")
         return graph
 
     class Meta:

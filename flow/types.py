@@ -5,7 +5,8 @@ import graphene
 from graphene.types.generic import GenericScalar
 from balder.registry import register_type
 from flow.inputs import StreamKind
-from flow.scalars import EventValue
+from flow.scalars import Any, EventValue
+from flow.enums import ReactiveImplementation
 
 
 class Position(graphene.ObjectType):
@@ -77,10 +78,18 @@ class FlowNode(graphene.Interface):
             return ReturnNode
 
 
+class StreamItemChild(graphene.ObjectType):
+    kind = StreamKind(required=True)
+    identifier = graphene.String(required=False)
+    child = graphene.Field(lambda: StreamItemChild, required=False)
+
+
 class StreamItem(graphene.ObjectType):
     key = graphene.String(required=True)
     kind = StreamKind(required=True)
     identifier = graphene.String(required=False)
+    nullable = graphene.Boolean(required=True)
+    child = graphene.Field(StreamItemChild, required=False)
 
 
 class FlowNodeCommons(graphene.Interface):
@@ -88,6 +97,7 @@ class FlowNodeCommons(graphene.Interface):
     outstream = graphene.List(graphene.List(StreamItem, required=True), required=True)
     constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
     constants = GenericScalar()
+    documentation = graphene.String()
 
 
 @register_type
@@ -103,19 +113,60 @@ class ArkitektNode(graphene.ObjectType):
         interfaces = (FlowNode, FlowNodeCommons)
 
 
+class Choice(graphene.ObjectType):
+    value = Any(required=True)
+    label = graphene.String(required=True)
+
+
 class Widget(graphene.ObjectType):
-    kind = graphene.String(required=True)
-    query = graphene.String()
+    kind = graphene.String(description="type", required=True)
+    query = graphene.String(description="Do we have a possible")
+    dependencies = graphene.List(
+        graphene.String, description="The dependencies of this port"
+    )
+    choices = graphene.List(Choice, description="The dependencies of this port")
+    max = graphene.Int(description="Max value for int widget")
+    min = graphene.Int(description="Max value for int widget")
+    placeholder = graphene.String(description="Placeholder for any widget")
+    as_paragraph = graphene.Boolean(description="Is this a paragraph")
+    hook = graphene.String(description="A hook for the app to call")
 
 
-class Port(graphene.ObjectType):
+class ReturnWidget(graphene.ObjectType):
+    kind = graphene.String(description="type", required=True)
+    query = graphene.String(description="Do we have a possible")
+    dependencies = graphene.List(
+        graphene.String, description="The dependencies of this port"
+    )
+    choices = graphene.List(Choice, description="The dependencies of this port")
+    max = graphene.Int(description="Max value for int widget")
+    min = graphene.Int(description="Max value for int widget")
+    placeholder = graphene.String(description="Placeholder for any widget")
+    as_paragraph = graphene.Boolean(description="Is this a paragraph")
+    hook = graphene.String(description="A hook for the app to call")
+
+
+class ArgPort(graphene.ObjectType):
     key = graphene.String(required=True)
+    nullable = graphene.Boolean(description="The key of the arg", required=True)
+    default = Any(required=False)
     label = graphene.String()
     identifier = graphene.String()
     name = graphene.String()
     kind = StreamKind(required=True)
     description = graphene.String()
     widget = graphene.Field(Widget)
+
+
+class ReturnPort(graphene.ObjectType):
+    key = graphene.String(required=True)
+    nullable = graphene.Boolean(description="The key of the arg", required=True)
+    label = graphene.String()
+    identifier = graphene.String()
+    name = graphene.String()
+    kind = StreamKind(required=True)
+    description = graphene.String()
+    widget = graphene.Field(ReturnWidget)
 
 
 @register_type
@@ -138,7 +189,7 @@ class ReturnNode(graphene.ObjectType):
 
 @register_type
 class ReactiveNode(graphene.ObjectType):
-    implementation = graphene.String()
+    implementation = graphene.Field(ReactiveImplementation, required=True)
 
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
@@ -201,9 +252,8 @@ class FlowGraph(graphene.ObjectType):
     nodes = graphene.List(FlowNode, required=True)
     edges = graphene.List(FlowEdge, required=True)
     globals = graphene.List(Global, required=True)
-    args = graphene.List(Port, required=True)
-    kwargs = graphene.List(Port, required=True)
-    returns = graphene.List(Port, required=True)
+    args = graphene.List(ArgPort, required=True)
+    returns = graphene.List(ReturnPort, required=True)
 
 
 class Flow(BalderObject):
@@ -214,6 +264,9 @@ class Flow(BalderObject):
 
     def resolve_screenshot(root, info, *args, **kwargs):
         return root.screenshot.url if root.screenshot else None
+
+    def resolve_name(root, info, *args, **kwargs):
+        return root.name + " saved " + str(root.created_at)
 
     class Meta:
         model = models.Flow
@@ -227,6 +280,17 @@ class Diagram(BalderObject):
 
     class Meta:
         model = models.Diagram
+
+
+class ReactiveTemplate(BalderObject):
+    name = graphene.String(required=True)
+    instream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    outstream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    implementation = graphene.Field(ReactiveImplementation, required=True)
+
+    class Meta:
+        model = models.ReactiveTemplate
 
 
 class Run(BalderObject):

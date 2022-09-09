@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth import get_user_model
 import namegenerator
-from flow.enums import EventType
+from flow.enums import EventType, ReactiveImplementation, ReactiveImplementationModel
 from flow.storage import PrivateMediaStorage
 import uuid
 
@@ -106,6 +106,20 @@ class RunEvent(models.Model):
 
     def __str__(self) -> str:
         return f"Event for {self.run}"
+
+
+class ReactiveTemplate(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=1000, null=True, blank=True)
+    implementation = models.CharField(
+        max_length=1000,
+        choices=ReactiveImplementationModel.choices,
+        default=ReactiveImplementationModel.ZIP.value,
+    )
+    instream = models.JSONField(null=True, blank=True, default=list)
+    outstream = models.JSONField(null=True, blank=True, default=list)
+    constream = models.JSONField(null=True, blank=True, default=list)
+    defaults = models.JSONField(null=True, blank=True)
 
 
 import flow.signals
