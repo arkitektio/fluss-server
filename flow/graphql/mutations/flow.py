@@ -138,3 +138,22 @@ class DeleteFlow(BalderMutation):
 
     class Meta:
         type = DeleteFlowReturn
+
+
+class DeleteWorkspaceReturn(graphene.ObjectType):
+    id = graphene.ID()
+
+
+class DeleteWorkspace(BalderMutation):
+    class Arguments:
+        id = graphene.ID(required=True, description="The Id of the Graph")
+
+    @bounced(anonymous=False)
+    def mutate(root, info, id=None):
+
+        graph = models.Diagram.objects.get(id=id)
+        graph.delete()
+        return {"id": id}
+
+    class Meta:
+        type = DeleteWorkspaceReturn

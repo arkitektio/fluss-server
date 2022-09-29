@@ -36,6 +36,8 @@ class ReactiveImplementationModel(TextChoices):
     SPLIT = "SPLIT", "SPLIT (Split the data)"
     OMIT = "OMIT", "OMIT (Omit the data)"
 
+    TO_LIST = "TO_LIST", "TO_LIST (Convert to list)"
+
 
 EventTypeInput = InputEnum.from_choices(EventType)
 ReactiveImplementation = InputEnum.from_choices(ReactiveImplementationModel)

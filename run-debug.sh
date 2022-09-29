@@ -8,6 +8,9 @@ python manage.py migrate
 echo "=> Ensuring Superusers..."
 python manage.py ensureadmin
 
+echo "=> Ensuring Reactives..."
+python manage.py ensurereactive
+
 echo "=> Collecting Static.."
 python manage.py collectstatic --noinput
 

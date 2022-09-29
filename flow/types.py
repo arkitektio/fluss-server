@@ -130,6 +130,7 @@ class Widget(graphene.ObjectType):
     placeholder = graphene.String(description="Placeholder for any widget")
     as_paragraph = graphene.Boolean(description="Is this a paragraph")
     hook = graphene.String(description="A hook for the app to call")
+    ward = graphene.String(description="A hook for the app to call")
 
 
 class ReturnWidget(graphene.ObjectType):
@@ -144,6 +145,21 @@ class ReturnWidget(graphene.ObjectType):
     placeholder = graphene.String(description="Placeholder for any widget")
     as_paragraph = graphene.Boolean(description="Is this a paragraph")
     hook = graphene.String(description="A hook for the app to call")
+    ward = graphene.String(description="A hook for the app to call")
+
+
+class ArgPortChild(graphene.ObjectType):
+    nullable = graphene.Boolean(required=False)
+    kind = StreamKind(required=True)
+    identifier = graphene.String(required=False)
+    child = graphene.Field(lambda: ArgPortChild, required=False)
+
+
+class ReturnPortChild(graphene.ObjectType):
+    nullable = graphene.Boolean(required=False)
+    kind = StreamKind(required=True)
+    identifier = graphene.String(required=False)
+    child = graphene.Field(lambda: ArgPortChild, required=False)
 
 
 class ArgPort(graphene.ObjectType):
@@ -154,6 +170,8 @@ class ArgPort(graphene.ObjectType):
     identifier = graphene.String()
     name = graphene.String()
     kind = StreamKind(required=True)
+    child = graphene.Field(ArgPortChild, required=False)
+    label = graphene.String()
     description = graphene.String()
     widget = graphene.Field(Widget)
 
@@ -161,6 +179,7 @@ class ArgPort(graphene.ObjectType):
 class ReturnPort(graphene.ObjectType):
     key = graphene.String(required=True)
     nullable = graphene.Boolean(description="The key of the arg", required=True)
+    child = graphene.Field(ReturnPortChild, required=False)
     label = graphene.String()
     identifier = graphene.String()
     name = graphene.String()

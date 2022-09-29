@@ -61,6 +61,8 @@ class Run(models.Model):
     assignation = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=100, null=True, blank=True)
 
+    created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
+
     def __str__(self) -> str:
         return f"{self.flow.name} - {self.assignation}"
 
@@ -105,7 +107,7 @@ class RunEvent(models.Model):
     value = models.JSONField(null=True, blank=True)
 
     def __str__(self) -> str:
-        return f"Event for {self.run}"
+        return f"Events for {self.run}"
 
 
 class ReactiveTemplate(models.Model):

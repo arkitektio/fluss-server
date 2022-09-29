@@ -129,7 +129,7 @@ class Command(BaseCommand):
                 "defaults": {},
             },
             {
-                "name": "Omit Node",
+                "name": "Omit",
                 "instream": [
                     [
                         {"key": "arg1", "kind": "UNSET", "nullable": False},
@@ -138,6 +138,22 @@ class Command(BaseCommand):
                 "outstream": [[]],
                 "constream": [],
                 "implementation": "OMIT",
+                "defaults": {},
+            },
+            {
+                "name": "To list",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "constream": [],
+                "implementation": "TO_LIST",
                 "defaults": {},
             },
         ]
