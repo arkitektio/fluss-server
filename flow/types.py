@@ -6,7 +6,7 @@ from graphene.types.generic import GenericScalar
 from balder.registry import register_type
 from flow.inputs import StreamKind
 from flow.scalars import Any, EventValue
-from flow.enums import ReactiveImplementation
+from flow.enums import ReactiveImplementation, MapStrategy
 
 
 class Position(graphene.ObjectType):
@@ -98,19 +98,26 @@ class FlowNodeCommons(graphene.Interface):
     constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
     constants = GenericScalar()
     documentation = graphene.String()
+    defaults = GenericScalar()
 
+
+class ReserveParams(graphene.ObjectType):
+    agents =  graphene.List(graphene.String, required=False)
 
 @register_type
 class ArkitektNode(graphene.ObjectType):
-    package = graphene.String()
-    interface = graphene.String()
+    hash = graphene.String(required=True)
     name = graphene.String()
     description = graphene.String()
     kind = graphene.String(required=True)
     defaults = GenericScalar(required=False)
+    map_strategy = graphene.Field(MapStrategy, required=True)
+    allow_local = graphene.Boolean(required=True)
+    reserve_params = graphene.Field(ReserveParams, required=True)
 
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
+
 
 
 class Choice(graphene.ObjectType):
@@ -250,9 +257,19 @@ class FancyEdge(graphene.ObjectType):
         interfaces = (FlowEdge, FlowEdgeCommons)
 
 
+class ConstantKind(graphene.Enum):
+    STRING = "STRING"
+    INT = "INT"
+    BOOL = "BOOL"
+    FLOAT = "FLOAT"
+
 class Constant(graphene.ObjectType):
     key = graphene.String(required=True)
-    value = graphene.String(required=True)
+    nullable = graphene.Boolean(description="The key of the arg", required=True)
+    default = Any(required=False)
+    label = graphene.String()
+    kind = ConstantKind(required=True)
+    description = graphene.String()
 
 
 class Global(graphene.ObjectType):
@@ -291,14 +308,19 @@ class Flow(BalderObject):
         model = models.Flow
 
 
-class Diagram(BalderObject):
+class Workspace(BalderObject):
+    restrict = graphene.List(graphene.String, required=True)
     latest_flow = graphene.Field(lambda: Flow, description="The latest flow")
 
     def resolve_latest_flow(self, info):
         return self.flows.order_by("-created_at").first()
 
     class Meta:
-        model = models.Diagram
+        model = models.Workspace
+
+
+
+
 
 
 class ReactiveTemplate(BalderObject):
@@ -307,6 +329,7 @@ class ReactiveTemplate(BalderObject):
     outstream = graphene.List(graphene.List(StreamItem, required=True), required=True)
     constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
     implementation = graphene.Field(ReactiveImplementation, required=True)
+    constants = graphene.List(Constant, required=False)
 
     class Meta:
         model = models.ReactiveTemplate

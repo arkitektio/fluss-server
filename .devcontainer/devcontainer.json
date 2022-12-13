@@ -20,9 +20,7 @@
 	"workspaceFolder": "/workspace",
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"terminal.integrated.shell.linux": null
-	},
+	
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
@@ -30,7 +28,7 @@
 		"njpwerner.autodocstring",
 		"ms-python.vscode-pylance",
 		"actboy168.tasks",
-		"usernamehw.errorlens",
+		"usernamehw.errorlens"
 	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

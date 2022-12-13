@@ -24,7 +24,7 @@ def graph_hash(graph_hash) -> str:
     return dhash.hexdigest()
 
 
-class UpdateDiagram(BalderMutation):
+class UpdateWorkspace(BalderMutation):
     class Arguments:
         id = graphene.ID(required=True)
         graph = graphene.Argument(GraphInput, required=False)
@@ -34,10 +34,11 @@ class UpdateDiagram(BalderMutation):
     @bounced(anonymous=False)
     def mutate(root, info, id, graph=None, brittle=False, screenshot=None):
 
-        diagram = models.Diagram.objects.get(id=id)
+        workspace = models.Workspace.objects.get(id=id)
 
         flow, cr = models.Flow.objects.get_or_create(
-            diagram=diagram,
+            workspace=workspace,
+            restrict=workspace.restrict,
             hash=graph_hash(graph),
             defaults={"graph": graph, "brittle": brittle},
         )
@@ -46,17 +47,18 @@ class UpdateDiagram(BalderMutation):
         flow.screenshot = screenshot or flow.screenshot
         flow.save()
 
-        return diagram
+        return workspace
 
     class Meta:
-        type = types.Diagram
-        operation = "updatediagram"
+        type = types.Workspace
+        operation = "updateworkspace"
 
 
 class DrawVanilla(BalderMutation):
     class Arguments:
         name = graphene.String(required=False)
         brittle = graphene.Boolean(default_value=False)
+        restrict = graphene.List(graphene.String, required=False, description="Do you want to restrict nodes to specific apps?")
 
     @bounced(anonymous=False)
     def mutate(
@@ -64,6 +66,7 @@ class DrawVanilla(BalderMutation):
         info,
         name=None,
         brittle=False,
+        restrict=None,
     ):
 
         x = name or namegenerator.gen()
@@ -104,20 +107,21 @@ class DrawVanilla(BalderMutation):
             "returns": [],
         }
 
-        diagram = models.Diagram.objects.create(name=x, creator=info.context.user)
+        workspace = models.Workspace.objects.create(name=x, creator=info.context.user, restrict=restrict or [])
 
         flow = models.Flow.objects.create(
-            diagram=diagram,
+            restrict=restrict or [],
+            workspace=workspace,
             graph=graph,
             hash=graph_hash(graph),
             name=name,
             creator=info.context.user,
             brittle=brittle or False,
         )
-        return diagram
+        return workspace
 
     class Meta:
-        type = types.Diagram
+        type = types.Workspace
         operation = "drawvanilla"
 
 
@@ -151,7 +155,7 @@ class DeleteWorkspace(BalderMutation):
     @bounced(anonymous=False)
     def mutate(root, info, id=None):
 
-        graph = models.Diagram.objects.get(id=id)
+        graph = models.Workspace.objects.get(id=id)
         graph.delete()
         return {"id": id}
 

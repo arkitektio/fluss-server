@@ -82,6 +82,14 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "CHUNK",
                 "defaults": {},
+                "constants": [{
+                    "key": "sleep",
+                    "kind": "FLOAT",
+                    "nullable": True,
+                    "default": None,
+                    "label": "Sleep  (ms)",
+                    "description": "Should the node sleep for a given amount of time after emitting the chunk",
+                }]
             },
             {
                 "name": "Split Node",
@@ -130,6 +138,7 @@ class Command(BaseCommand):
             },
             {
                 "name": "Omit",
+                "name": "Omit",
                 "instream": [
                     [
                         {"key": "arg1", "kind": "UNSET", "nullable": False},
@@ -156,9 +165,68 @@ class Command(BaseCommand):
                 "implementation": "TO_LIST",
                 "defaults": {},
             },
+            {
+                "name": "if",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                        
+                    ],
+                   [{"key": "condition", "kind": "BOOL", "nullable": False}]
+                ],
+                "outstream": [[ {"key": "true_arg", "kind": "BOOL", "nullable": False},],[{"key": "false_arg", "kind": "BOOL", "nullable": False}]],
+                "constream": [],
+                "implementation": "IF",
+                "defaults": {},
+            },
+            {
+                "name": "and",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},                        
+                    ],
+                ],
+                "outstream": [[ {"key": "true_arg", "kind": "BOOL", "nullable": False},],[{"key": "false_arg", "kind": "BOOL", "nullable": False}]],
+                "constream": [],
+                "implementation": "AND",
+                "defaults": {},
+            },
+            {
+                "name": "To list",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "constream": [],
+                "implementation": "TO_LIST",
+                "defaults": {},
+            },
+            {
+                "name": "For each",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "LIST", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "constream": [],
+                "implementation": "FOREACH",
+                "defaults": {},
+            },
         ]
 
         for node in reactiveNodes:
             r, _ = ReactiveTemplate.objects.update_or_create(
-                name=node.pop("name"), defaults=node
+                implementation=node.pop("implementation"), defaults=node
             )

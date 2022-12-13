@@ -1,6 +1,6 @@
 import graphene
 from graphene.types.generic import GenericScalar
-from flow.enums import EventTypeInput, ReactiveImplementation
+from flow.enums import EventTypeInput, ReactiveImplementation, MapStrategy
 from flow.scalars import Any, EventValue
 
 
@@ -93,13 +93,16 @@ class ReturnPortInput(graphene.InputObjectType):
     nullable = graphene.Boolean(description="Is this argument nullable", required=True)
 
 
+class ReserveParamsInput(graphene.InputObjectType):
+    agents = graphene.List(graphene.String, required=False)
+
 class NodeInput(graphene.InputObjectType):
     id = graphene.String(required=True)
     typename = graphene.String(required=True)
-    package = graphene.String(required=False)
+    hash = graphene.String(required=False)
+    interface = graphene.String(required=False) # for template nodes
     name = graphene.String(required=False)
     description = graphene.String(required=False)
-    interface = graphene.String(required=False)
     kind = graphene.String()
     implementation = graphene.Field(ReactiveImplementation, required=False)
     documentation = graphene.String(required=False)
@@ -115,6 +118,10 @@ class NodeInput(graphene.InputObjectType):
     constream = graphene.List(
         graphene.List(StreamItemInput, required=True), required=True
     )
+    map_strategy = graphene.Argument(MapStrategy, required=False)
+    allow_local = graphene.Boolean(required=False)
+    reserve_params = graphene.Argument(ReserveParamsInput, required=False)
+
 
 
 class EdgeInput(graphene.InputObjectType):

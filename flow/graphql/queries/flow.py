@@ -5,26 +5,26 @@ from flow import models, types, filters
 from lok import bounced
 
 
-class Diagram(BalderQuery):
+class Workspace(BalderQuery):
     class Arguments:
         id = graphene.ID(required=True, description="The Id of the Graph")
 
     @bounced(anonymous=False)
     def resolve(root, info, id=None):
-        graph = models.Diagram.objects.get(id=id)
+        graph = models.Workspace.objects.get(id=id)
         return graph
 
     class Meta:
-        type = types.Diagram
-        operation = "diagram"
+        type = types.Workspace
+        operation = "workspace"
 
 
-class Diagrams(BalderQuery):
+class Workspaces(BalderQuery):
     class Meta:
-        type = types.Diagram
+        type = types.Workspace
         list = True
-        filter = filters.DiagramFilter
-        operation = "diagrams"
+        filter = filters.WorkspaceFilter
+        operation = "workspaces"
 
 
 class Flows(BalderQuery):
@@ -48,9 +48,9 @@ class FlowDetail(BalderQuery):
         operation = "flow"
 
 
-class MyFlows(BalderQuery):
+class MyWorkspaces(BalderQuery):
     class Meta:
         list = True
         personal = "creator"
-        type = types.Diagram
-        operation = "mydiagrams"
+        type = types.Workspace
+        operation = "myworkspaces"

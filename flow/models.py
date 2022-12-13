@@ -9,9 +9,9 @@ import uuid
 # Create your models here.
 
 
-class Diagram(models.Model):
+class Workspace(models.Model):
     """Graph is a Template for a Template"""
-
+    restrict = models.JSONField(default=list, help_text="Restrict access to specific nodes for this diagram")
     name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
@@ -22,12 +22,13 @@ class Diagram(models.Model):
 
 
 class Flow(models.Model):
-    diagram = models.ForeignKey(
-        Diagram, on_delete=models.CASCADE, null=True, blank=True, related_name="flows"
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, null=True, blank=True, related_name="flows"
     )
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
     )
+    restrict = models.JSONField(default=list, help_text="Restrict access to specific nodes for this diagram")
     version = models.CharField(max_length=100, default="1.0alpha")
     name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
     nodes = models.JSONField(null=True, blank=True, default=list)
@@ -37,7 +38,7 @@ class Flow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     screenshot = models.ImageField(null=True, storage=PrivateMediaStorage())
     description = models.CharField(
-        max_length=50000, default="Add a Dessscription", blank=True, null=True
+        max_length=50000, default="Add a Desssscription", blank=True, null=True
     )
     brittle = models.BooleanField(
         default=False,
@@ -47,7 +48,7 @@ class Flow(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["diagram", "hash"],
+                fields=["workspace", "hash"],
                 name="Equal Reservation on this App by this Waiter is already in place",
             )
         ]
@@ -117,11 +118,13 @@ class ReactiveTemplate(models.Model):
         max_length=1000,
         choices=ReactiveImplementationModel.choices,
         default=ReactiveImplementationModel.ZIP.value,
+        unique=True,
     )
     instream = models.JSONField(null=True, blank=True, default=list)
     outstream = models.JSONField(null=True, blank=True, default=list)
     constream = models.JSONField(null=True, blank=True, default=list)
     defaults = models.JSONField(null=True, blank=True)
+    constants = models.JSONField(null=True, blank=True, default=list)
 
 
 import flow.signals
