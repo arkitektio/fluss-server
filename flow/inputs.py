@@ -121,6 +121,9 @@ class NodeInput(graphene.InputObjectType):
     map_strategy = graphene.Argument(MapStrategy, required=False)
     allow_local = graphene.Boolean(required=False)
     reserve_params = graphene.Argument(ReserveParamsInput, required=False)
+    assign_timeout = graphene.Float(required=False, default_value=2000)
+    yield_timeout = graphene.Float(required=False, default_value=2000)
+    reserve_timeout = graphene.Float(required=False, default_value=2000)    
 
 
 

@@ -113,6 +113,9 @@ class ArkitektNode(graphene.ObjectType):
     defaults = GenericScalar(required=False)
     map_strategy = graphene.Field(MapStrategy, required=True)
     allow_local = graphene.Boolean(required=True)
+    assign_timeout = graphene.Float(required=True)
+    yield_timeout = graphene.Float(required=True)
+    reserve_timeout = graphene.Float(required=True)
     reserve_params = graphene.Field(ReserveParams, required=True)
 
     class Meta:
