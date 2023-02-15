@@ -89,7 +89,24 @@ class Command(BaseCommand):
                     "default": None,
                     "label": "Sleep  (ms)",
                     "description": "Should the node sleep for a given amount of time after emitting the chunk",
-                }]
+                },
+                {
+                    "key": "iterations",
+                    "kind": "INT",
+                    "nullable": False,
+                    "default": 1,
+                    "label": "Iterations",
+                    "description": "How many times should the node go through the list",
+                },
+                {
+                    "key": "iteration_sleep",
+                    "kind": "FLOAT",
+                    "nullable": True,
+                    "default": None,
+                    "label": "Iteration Sleep (ms)",
+                    "description": "How long should the node sleep between iterations",
+                }
+                ]
             },
             {
                 "name": "Split Node",

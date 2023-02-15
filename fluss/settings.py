@@ -23,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = conf.server.secret_key
+SECRET_KEY = conf.django.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = conf.server.debug or False
+DEBUG = conf.django.debug or False
 
-ALLOWED_HOSTS = conf.server.hosts
+ALLOWED_HOSTS = conf.django.hosts
 
 STATIC_ROOT = "/var/www/static"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -42,9 +42,9 @@ LOK = {
 
 SUPERUSERS = [
     {
-        "USERNAME": conf.server.admin.username,
-        "EMAIL": conf.server.admin.email,
-        "PASSWORD": conf.server.admin.password,
+        "USERNAME": conf.django.admin.username,
+        "EMAIL": conf.django.admin.email,
+        "PASSWORD": conf.django.admin.password,
     }
 ]
 
@@ -85,7 +85,7 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_EXPIRE = 3600
 
 
-AWS_STORAGE_BUCKET_NAME = conf.minio.bucket
+AWS_STORAGE_BUCKET_NAME = conf.minio.buckets[0].name
 AWS_DEFAULT_ACL = "private"
 AWS_S3_USE_SSL = True
 AWS_S3_SECURE_URLS = False  # Should resort to True if using in Production behind TLS
@@ -141,12 +141,12 @@ ASGI_APPLICATION = "fluss.asgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": conf.postgres.db_name,
-        "USER": conf.postgres.user,
-        "PASSWORD": conf.postgres.password,
-        "HOST": conf.postgres.host,
-        "PORT": conf.postgres.port,
+        "ENGINE": conf.db.engine,
+        "NAME": conf.db.db_name,
+        "USER": conf.db.username,
+        "PASSWORD": conf.db.password,
+        "HOST": conf.db.host,
+        "PORT": conf.db.port,
     }
 }
 
