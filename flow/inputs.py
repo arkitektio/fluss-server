@@ -68,7 +68,7 @@ class ReturnWidgetInput(graphene.InputObjectType):
     ward = graphene.String(description="A ward for the app to call")
 
 
-class ArgPortInput(graphene.InputObjectType):
+class PortInput(graphene.InputObjectType):
     identifier = graphene.String(description="The identifier")
     key = graphene.String(description="The key of the arg", required=True)
     name = graphene.String(description="The name of this argument")
@@ -76,20 +76,9 @@ class ArgPortInput(graphene.InputObjectType):
     kind = StreamKind(description="The type of this argument", required=True)
     description = graphene.String(description="The description of this argument")
     child = graphene.Field(ChildPortInput, description="The child of this argument")
-    widget = graphene.Field(WidgetInput, description="The child of this argument")
+    assign_widget = graphene.Field(WidgetInput, description="The child of this argument")
+    return_widget = graphene.Field(ReturnWidgetInput, description="The child of this argument")
     default = Any(description="The key of the arg", required=False)
-    nullable = graphene.Boolean(description="Is this argument nullable", required=True)
-
-
-class ReturnPortInput(graphene.InputObjectType):
-    identifier = graphene.String(description="The identifier")
-    key = graphene.String(description="The key of the arg", required=True)
-    name = graphene.String(description="The name of this argument")
-    label = graphene.String(description="The name of this argument")
-    kind = StreamKind(description="The type of this argument", required=True)
-    description = graphene.String(description="The description of this argument")
-    child = graphene.Field(ChildPortInput, description="The child of this argument")
-    widget = graphene.Field(ReturnWidgetInput, description="The child of this argument")
     nullable = graphene.Boolean(description="Is this argument nullable", required=True)
 
 
@@ -146,8 +135,8 @@ class GraphInput(graphene.InputObjectType):
     zoom = graphene.Float(required=False)
     nodes = graphene.List(NodeInput, required=True)
     edges = graphene.List(EdgeInput, required=True)
-    args = graphene.List(ArgPortInput, required=True)
-    returns = graphene.List(ReturnPortInput, required=True)
+    args = graphene.List(PortInput, required=True)
+    returns = graphene.List(PortInput, required=True)
     globals = graphene.List(GlobalInput, required=True)
 
 

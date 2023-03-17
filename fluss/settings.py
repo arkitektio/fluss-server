@@ -67,6 +67,8 @@ INSTALLED_APPS = [
     "graphene_django",
     "balder",
     "flow",
+    "perms",
+    "komment"
 ]
 
 
@@ -156,6 +158,7 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [(conf.redis.host, conf.redis.port)],
+            "prefix": "fluss"
         },
     },
 }
@@ -164,6 +167,9 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 )
+
+COMMENTABLE_APPS = ["flow"]
+SHARABLE_APPS = ["flow"]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

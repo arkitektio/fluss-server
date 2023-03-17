@@ -150,29 +150,18 @@ class ReturnWidget(graphene.ObjectType):
         graphene.String, description="The dependencies of this port"
     )
     choices = graphene.List(Choice, description="The dependencies of this port")
-    max = graphene.Int(description="Max value for int widget")
-    min = graphene.Int(description="Max value for int widget")
-    placeholder = graphene.String(description="Placeholder for any widget")
-    as_paragraph = graphene.Boolean(description="Is this a paragraph")
-    hook = graphene.String(description="A hook for the app to call")
-    ward = graphene.String(description="A hook for the app to call")
 
 
-class ArgPortChild(graphene.ObjectType):
+class PortChild(graphene.ObjectType):
     nullable = graphene.Boolean(required=False)
     kind = StreamKind(required=True)
     identifier = graphene.String(required=False)
-    child = graphene.Field(lambda: ArgPortChild, required=False)
+    child = graphene.Field(lambda: PortChild, required=False)
 
 
-class ReturnPortChild(graphene.ObjectType):
-    nullable = graphene.Boolean(required=False)
-    kind = StreamKind(required=True)
-    identifier = graphene.String(required=False)
-    child = graphene.Field(lambda: ArgPortChild, required=False)
 
 
-class ArgPort(graphene.ObjectType):
+class Port(graphene.ObjectType):
     key = graphene.String(required=True)
     nullable = graphene.Boolean(description="The key of the arg", required=True)
     default = Any(required=False)
@@ -180,22 +169,12 @@ class ArgPort(graphene.ObjectType):
     identifier = graphene.String()
     name = graphene.String()
     kind = StreamKind(required=True)
-    child = graphene.Field(ArgPortChild, required=False)
+    child = graphene.Field(PortChild, required=False)
     label = graphene.String()
     description = graphene.String()
-    widget = graphene.Field(Widget)
+    assign_widget = graphene.Field(Widget)
+    return_widget = graphene.Field(ReturnWidget)
 
-
-class ReturnPort(graphene.ObjectType):
-    key = graphene.String(required=True)
-    nullable = graphene.Boolean(description="The key of the arg", required=True)
-    child = graphene.Field(ReturnPortChild, required=False)
-    label = graphene.String()
-    identifier = graphene.String()
-    name = graphene.String()
-    kind = StreamKind(required=True)
-    description = graphene.String()
-    widget = graphene.Field(ReturnWidget)
 
 
 @register_type
@@ -291,8 +270,8 @@ class FlowGraph(graphene.ObjectType):
     nodes = graphene.List(FlowNode, required=True)
     edges = graphene.List(FlowEdge, required=True)
     globals = graphene.List(Global, required=True)
-    args = graphene.List(ArgPort, required=True)
-    returns = graphene.List(ReturnPort, required=True)
+    args = graphene.List(Port, required=True)
+    returns = graphene.List(Port, required=True)
 
 
 class Flow(BalderObject):

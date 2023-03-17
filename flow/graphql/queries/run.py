@@ -12,7 +12,6 @@ class Run(BalderQuery):
             required=False, description="The assignation of the Graph"
         )
 
-    @bounced(anonymous=False)
     def resolve(root, info, assignation=None, id=None):
         if assignation:
             graph = models.Run.objects.get(assignation=assignation)
@@ -32,7 +31,7 @@ class EventsBetween(BalderQuery):
         min = graphene.Int(required=False)
         max = graphene.Int(required=False)
 
-    @bounced(anonymous=False)
+    @bounced()
     def resolve(root, info, run, min=0, max=None):
         snapshot = (
             models.Snapshot.objects.filter(run_id=run, t__lte=min)
