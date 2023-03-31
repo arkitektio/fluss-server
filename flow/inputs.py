@@ -76,8 +76,12 @@ class PortInput(graphene.InputObjectType):
     kind = StreamKind(description="The type of this argument", required=True)
     description = graphene.String(description="The description of this argument")
     child = graphene.Field(ChildPortInput, description="The child of this argument")
-    assign_widget = graphene.Field(WidgetInput, description="The child of this argument")
-    return_widget = graphene.Field(ReturnWidgetInput, description="The child of this argument")
+    assign_widget = graphene.Field(
+        WidgetInput, description="The child of this argument"
+    )
+    return_widget = graphene.Field(
+        ReturnWidgetInput, description="The child of this argument"
+    )
     default = Any(description="The key of the arg", required=False)
     nullable = graphene.Boolean(description="Is this argument nullable", required=True)
 
@@ -85,11 +89,12 @@ class PortInput(graphene.InputObjectType):
 class ReserveParamsInput(graphene.InputObjectType):
     agents = graphene.List(graphene.String, required=False)
 
+
 class NodeInput(graphene.InputObjectType):
     id = graphene.String(required=True)
     typename = graphene.String(required=True)
     hash = graphene.String(required=False)
-    interface = graphene.String(required=False) # for template nodes
+    interface = graphene.String(required=False)  # for template nodes
     name = graphene.String(required=False)
     description = graphene.String(required=False)
     kind = graphene.String()
@@ -112,8 +117,7 @@ class NodeInput(graphene.InputObjectType):
     reserve_params = graphene.Argument(ReserveParamsInput, required=False)
     assign_timeout = graphene.Float(required=False, default_value=2000)
     yield_timeout = graphene.Float(required=False, default_value=2000)
-    reserve_timeout = graphene.Float(required=False, default_value=2000)    
-
+    reserve_timeout = graphene.Float(required=False, default_value=2000)
 
 
 class EdgeInput(graphene.InputObjectType):
@@ -145,3 +149,4 @@ class RunEventInput(graphene.InputObjectType):
     type = EventTypeInput(required=True)
     source = graphene.String(required=True)
     value = EventValue(required=False)
+    caused_by = graphene.List(graphene.Int, required=True)

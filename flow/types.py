@@ -338,6 +338,7 @@ class RunEvent(BalderObject):
     value = EventValue(required=False)
     handle = graphene.String(required=True)
     source = graphene.String(required=True)
+    caused_by = graphene.List(graphene.Int, required=False)
 
     class Meta:
         model = models.RunEvent

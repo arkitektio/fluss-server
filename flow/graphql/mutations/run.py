@@ -109,11 +109,18 @@ class Track(BalderMutation):
         type = graphene.Argument(EventTypeInput, required=True)
         run = graphene.ID(required=True)
         value = EventValue(required=False)
+        caused_by = graphene.List(graphene.Int, required=True)
 
     @bounced(anonymous=False)
-    def mutate(root, info, run, source, handle, type, t, value=None):
+    def mutate(root, info, run, source, handle, type, t, caused_by, value=None):
         log = models.RunEvent.objects.create(
-            run_id=run, source=source, handle=handle, type=type, value=value, t=t
+            run_id=run,
+            source=source,
+            handle=handle,
+            type=type,
+            value=value,
+            t=t,
+            caused_by=caused_by,
         )
         return log
 

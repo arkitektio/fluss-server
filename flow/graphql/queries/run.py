@@ -31,7 +31,6 @@ class EventsBetween(BalderQuery):
         min = graphene.Int(required=False)
         max = graphene.Int(required=False)
 
-    @bounced()
     def resolve(root, info, run, min=0, max=None):
         snapshot = (
             models.Snapshot.objects.filter(run_id=run, t__lte=min)

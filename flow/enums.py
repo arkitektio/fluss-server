@@ -2,26 +2,23 @@ from balder.enum import InputEnum
 from django.db.models import TextChoices
 import graphene
 
-class EventType(TextChoices):
-    """Variety expresses the Type of Representation we are dealing with"""
 
-    NEXT = "NEXT", "NEXT (Value represent Labels)"
-    ERROR = "ERROR", "Error (Value represent Intensity)"
-    COMPLETE = "COMPLETE", "COMPLETE (First three channel represent RGB)"
-    UNKNOWN = "UNKNOWN", "UNKNOWN (Value represent Intensity)"
+class EventType(TextChoices):
+    """Event Type for the Event Operator"""
+
+    NEXT = "NEXT", "NEXT (Value represent Item)"
+    ERROR = "ERROR", "Error (Value represent Exception)"
+    COMPLETE = "COMPLETE", "COMPLETE (Value is none)"
+    UNKNOWN = "UNKNOWN", "UNKNOWN (Should never be used)"
 
 
 class MapStrategy(graphene.Enum):
-    """Variety expresses the Type of Representation we are dealing with"""
+    """Maping Strategy for the Map Operator"""
 
     MAP = "MAP"
     MERGEMAP = "MERGEMAP"
     SWITCHMAP = "SWITCHMAP"
     CONCATMAP = "CONCATMAP"
-
-
-
-
 
 
 class ReactiveImplementationModel(TextChoices):
@@ -51,9 +48,7 @@ class ReactiveImplementationModel(TextChoices):
 
     TO_LIST = "TO_LIST", "TO_LIST (Convert to list)"
 
-
     FOREACH = "FOREACH", "FOREACH (Foreach element in list)"
-
 
     IF = "IF", "IF (If condition is met)"
     AND = "AND", "AND (AND condition)"

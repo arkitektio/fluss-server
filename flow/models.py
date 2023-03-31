@@ -11,7 +11,10 @@ import uuid
 
 class Workspace(models.Model):
     """Graph is a Template for a Template"""
-    restrict = models.JSONField(default=list, help_text="Restrict access to specific nodes for this diagram")
+
+    restrict = models.JSONField(
+        default=list, help_text="Restrict access to specific nodes for this diagram"
+    )
     name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
@@ -28,7 +31,9 @@ class Flow(models.Model):
     creator = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True, blank=True
     )
-    restrict = models.JSONField(default=list, help_text="Restrict access to specific nodes for this diagram")
+    restrict = models.JSONField(
+        default=list, help_text="Restrict access to specific nodes for this diagram"
+    )
     version = models.CharField(max_length=100, default="1.0alpha")
     name = models.CharField(max_length=100, null=True, default=namegenerator.gen)
     nodes = models.JSONField(null=True, blank=True, default=list)
@@ -55,7 +60,6 @@ class Flow(models.Model):
 
 
 class Run(models.Model):
-
     flow = models.ForeignKey(
         Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="runs"
     )
@@ -69,7 +73,6 @@ class Run(models.Model):
 
 
 class Snapshot(models.Model):
-
     run = models.ForeignKey(
         Run, on_delete=models.CASCADE, null=True, blank=True, related_name="snapshots"
     )
@@ -79,7 +82,6 @@ class Snapshot(models.Model):
 
 
 class RunLog(models.Model):
-
     run = models.ForeignKey(
         Run, on_delete=models.CASCADE, null=True, blank=True, related_name="logs"
     )
@@ -91,7 +93,6 @@ class RunLog(models.Model):
 
 
 class RunEvent(models.Model):
-
     run = models.ForeignKey(
         Run, on_delete=models.CASCADE, null=True, blank=True, related_name="events"
     )
@@ -102,6 +103,7 @@ class RunEvent(models.Model):
         default=EventType.UNKNOWN.value,
     )
     t = models.IntegerField()
+    caused_by = models.JSONField(default=list, blank=True)
     source = models.CharField(max_length=1000)
     handle = models.CharField(max_length=1000)
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
