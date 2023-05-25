@@ -47,6 +47,60 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "WITHLATEST",
                 "defaults": {},
+            },#
+            {
+                "name": "Gate",
+                "instream": [
+                    [
+                        {"key": "value", "kind": "UNSET", "nullable": False},
+                    ],
+                    [
+                        {"key": "gate", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [
+                        {"key": "gated_value", "kind": "UNSET", "nullable": False},
+                    ]
+                ],
+                "constream": [],
+                "implementation": "GATE",
+                "defaults": {},
+                "constants": [{
+                    "key": "forward_first",
+                    "kind": "BOOL",
+                    "nullable": True,
+                    "default": True,
+                    "label": "Forward first",
+                    "description": "Should the node forward the first value it receives or wait for the gate to open?",
+                }]
+            },
+            {
+                "name": "All",
+                "instream": [
+                    [
+                        {"key": "value", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [
+                        {"key": "ensure_value", "kind": "UNSET", "nullable": False},
+                    ],
+                    [
+                        {"key": "false", "kind": "BOOL", "nullable": False},
+                    ],
+                ],
+                "constream": [],
+                "implementation": "ALL",
+                "defaults": {},
+                "constants": [{
+                    "key": "list_length",
+                    "kind": "BOOL",
+                    "nullable": True,
+                    "default": True,
+                    "label": "Empty lists are empy?",
+                    "description": "Are empty lists considered empty?",
+                }]
             },
             {
                 "name": "Combine Latest Node",
@@ -151,6 +205,20 @@ class Command(BaseCommand):
                 ],
                 "constream": [],
                 "implementation": "BUFFER_UNTIL",
+                "defaults": {},
+            },
+            {
+                "name": "Ensure",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": True},
+                    ],
+                ],
+                "outstream": [
+                    [{"key": "arg1", "kind": "UNSET", "nullable": False}],
+                ],
+                "constream": [],
+                "implementation": "ENSURE",
                 "defaults": {},
             },
             {

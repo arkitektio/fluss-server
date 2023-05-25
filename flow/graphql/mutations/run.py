@@ -8,7 +8,7 @@ from graphene.types.generic import GenericScalar
 from flow.enums import EventTypeInput
 from flow.scalars import EventValue
 from flow.inputs import RunEventInput
-
+from flow.utils import fill_created
 logger = logging.getLogger(__name__)
 
 
@@ -16,11 +16,12 @@ class Start(BalderMutation):
     class Arguments:
         assignation = graphene.ID(required=True)
         flow = graphene.ID(required=True)
+        snapshot_interval = graphene.Int(required=False)
 
     @bounced(anonymous=False)
-    def mutate(root, info, assignation, flow):
+    def mutate(root, info, assignation, flow, snapshot_interval=None):
         run, created = models.Run.objects.get_or_create(
-            flow_id=flow, assignation=assignation
+            flow_id=flow, assignation=assignation, snapshot_interval=snapshot_interval, defaults=fill_created(info)
         )
         return run
 
@@ -127,3 +128,26 @@ class Track(BalderMutation):
     class Meta:
         type = types.RunEvent
         operation = "track"
+
+
+class PinRun(BalderMutation):
+    """Pin Run
+    
+    This mutation pins an Runs and returns the pinned Run."""
+
+    class Arguments:
+        id = graphene.ID(required=True, description="The ID of the representation")
+        pin = graphene.Boolean(required=True, description="The pin state")
+
+    @bounced()
+    def mutate(root, info, id, pin, **kwargs):
+        rep = models.Run.objects.get(id=id)
+        if pin:
+            rep.pinned_by.add(info.context.user)
+        else:
+            rep.pinned_by.remove(info.context.user)
+        rep.save()
+        return rep
+
+    class Meta:
+        type = types.Run

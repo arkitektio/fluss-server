@@ -6,7 +6,16 @@ from graphene.types.generic import GenericScalar
 from balder.registry import register_type
 from flow.inputs import StreamKind
 from flow.scalars import Any, EventValue
-from flow.enums import ReactiveImplementation, MapStrategy
+from flow.enums import ReactiveImplementation, MapStrategy, Scope, ContractStatus
+
+
+
+class PinnableMixin:
+    pinned = graphene.Boolean(default_value=False)
+
+    def resolve_pinned(root, info, *args, **kwargs):
+        return root.pinned_by.filter(id=info.context.user.id).exists()
+
 
 
 class Position(graphene.ObjectType):
@@ -62,6 +71,7 @@ class FlowReturn(graphene.ObjectType):
 class FlowNode(graphene.Interface):
     id = graphene.String(required=True)
     position = graphene.Field(Position, required=True)
+    parent_node = graphene.Field(graphene.ID, required=False)
     typename = graphene.String(required=True)
 
     @classmethod
@@ -74,53 +84,27 @@ class FlowNode(graphene.Interface):
             return ArgNode
         if instance["typename"] == "KwargNode":
             return KwargNode
+        if instance["typename"] == "LocalNode":
+            return LocalNode
         if instance["typename"] == "ReturnNode":
             return ReturnNode
+        if instance["typename"] == "GraphNode":
+            return GraphNode
 
 
 class StreamItemChild(graphene.ObjectType):
     kind = StreamKind(required=True)
+    scope = Scope(required=True)
+    nullable = graphene.Boolean(required=True)
     identifier = graphene.String(required=False)
     child = graphene.Field(lambda: StreamItemChild, required=False)
 
+    def resolve_scope(self, info):
+        return self.get("scope", Scope.GLOBAL)
+    
 
-class StreamItem(graphene.ObjectType):
-    key = graphene.String(required=True)
-    kind = StreamKind(required=True)
-    identifier = graphene.String(required=False)
-    nullable = graphene.Boolean(required=True)
-    child = graphene.Field(StreamItemChild, required=False)
-
-
-class FlowNodeCommons(graphene.Interface):
-    instream = graphene.List(graphene.List(StreamItem, required=True), required=True)
-    outstream = graphene.List(graphene.List(StreamItem, required=True), required=True)
-    constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
-    constants = GenericScalar()
-    documentation = graphene.String()
-    defaults = GenericScalar()
-
-
-class ReserveParams(graphene.ObjectType):
-    agents =  graphene.List(graphene.String, required=False)
-
-@register_type
-class ArkitektNode(graphene.ObjectType):
-    hash = graphene.String(required=True)
-    name = graphene.String()
-    description = graphene.String()
-    kind = graphene.String(required=True)
-    defaults = GenericScalar(required=False)
-    map_strategy = graphene.Field(MapStrategy, required=True)
-    allow_local = graphene.Boolean(required=True)
-    assign_timeout = graphene.Float(required=True)
-    yield_timeout = graphene.Float(required=True)
-    reserve_timeout = graphene.Float(required=True)
-    reserve_params = graphene.Field(ReserveParams, required=True)
-
-    class Meta:
-        interfaces = (FlowNode, FlowNodeCommons)
-
+    def resolve_nullable(self, info):
+        return self.get("nullable", False)
 
 
 class Choice(graphene.ObjectType):
@@ -152,11 +136,38 @@ class ReturnWidget(graphene.ObjectType):
     choices = graphene.List(Choice, description="The dependencies of this port")
 
 
-class PortChild(graphene.ObjectType):
-    nullable = graphene.Boolean(required=False)
+
+
+
+class StreamItem(graphene.ObjectType):
+    key = graphene.String(required=True)
     kind = StreamKind(required=True)
+    scope = Scope(required=True)
+    identifier = graphene.String(required=False)
+    nullable = graphene.Boolean(required=True)
+    child = graphene.Field(StreamItemChild, required=False)
+
+    def resolve_scope(self, info):
+        return self.get("scope", Scope.GLOBAL)
+
+    def resolve_nullable(self, info):
+        return self.get("nullable", False)
+
+class PortChild(graphene.ObjectType):
+    nullable = graphene.Boolean(required=True)
+    kind = StreamKind(required=True)
+    scope = Scope(required=True)
     identifier = graphene.String(required=False)
     child = graphene.Field(lambda: PortChild, required=False)
+    assign_widget = graphene.Field(Widget, description="Description of the Widget")
+    return_widget = graphene.Field(ReturnWidget, description="A return widget")
+    
+
+    def resolve_scope(self, info):
+        return self.get("scope", Scope.GLOBAL)
+    
+    def resolve_nullable(self, info):
+        return self.get("nullable", False)
 
 
 
@@ -164,16 +175,78 @@ class PortChild(graphene.ObjectType):
 class Port(graphene.ObjectType):
     key = graphene.String(required=True)
     nullable = graphene.Boolean(description="The key of the arg", required=True)
+    scope = Scope(required=True)
     default = Any(required=False)
     label = graphene.String()
     identifier = graphene.String()
-    name = graphene.String()
     kind = StreamKind(required=True)
     child = graphene.Field(PortChild, required=False)
     label = graphene.String()
     description = graphene.String()
     assign_widget = graphene.Field(Widget)
     return_widget = graphene.Field(ReturnWidget)
+
+    def resolve_scope(self, info):
+        return self.get("scope", Scope.GLOBAL)
+
+
+class FlowNodeCommons(graphene.Interface):
+    instream = graphene.List(graphene.List(Port, required=True), required=True)
+    outstream = graphene.List(graphene.List(Port, required=True), required=True)
+    constream = graphene.List(graphene.List(Port, required=True), required=True)
+    constants = GenericScalar()
+    documentation = graphene.String()
+    defaults = GenericScalar()
+
+
+
+class Binds(graphene.ObjectType):
+    templates = graphene.List(graphene.String, required=False)
+    clients = graphene.List(graphene.String, required=False)
+
+@register_type
+class ArkitektNode(graphene.ObjectType):
+    hash = graphene.String(required=True)
+    name = graphene.String()
+    description = graphene.String()
+    kind = graphene.String(required=True)
+    defaults = GenericScalar(required=False)
+    map_strategy = graphene.Field(MapStrategy, required=True)
+    allow_local = graphene.Boolean(required=True)
+    assign_timeout = graphene.Float(required=True)
+    yield_timeout = graphene.Float(required=True)
+    reserve_timeout = graphene.Float(required=True)
+    binds = graphene.Field(Binds, required=False)
+
+    class Meta:
+        interfaces = (FlowNode, FlowNodeCommons)
+
+
+@register_type
+class LocalNode(graphene.ObjectType):
+    hash = graphene.String(required=True)
+    interface = graphene.String(required=True)
+    name = graphene.String()
+    description = graphene.String()
+    kind = graphene.String(required=True)
+    defaults = GenericScalar(required=False)
+    map_strategy = graphene.Field(MapStrategy, required=True)
+    allow_local = graphene.Boolean(required=True)
+    assign_timeout = graphene.Float(required=True)
+    yield_timeout = graphene.Float(required=True)
+
+    class Meta:
+        interfaces = (FlowNode, FlowNodeCommons)
+
+
+@register_type
+class GraphNode(graphene.ObjectType):
+    hash = graphene.String(required=True)
+    name = graphene.String()
+
+    class Meta:
+        interfaces = (FlowNode, FlowNodeCommons)
+
 
 
 
@@ -245,23 +318,10 @@ class ConstantKind(graphene.Enum):
     BOOL = "BOOL"
     FLOAT = "FLOAT"
 
-class Constant(graphene.ObjectType):
-    key = graphene.String(required=True)
-    nullable = graphene.Boolean(description="The key of the arg", required=True)
-    default = Any(required=False)
-    label = graphene.String()
-    kind = ConstantKind(required=True)
-    description = graphene.String()
-
 
 class Global(graphene.ObjectType):
-    locked = graphene.Boolean(required=False)
-    key = graphene.String(required=True)
-    typename = graphene.String(required=True)
-    identifier = graphene.String(required=False)
-    value = GenericScalar(required=False)
-    widget = GenericScalar(required=False)
-    mapped = graphene.List(graphene.String, required=False)
+    to_keys = graphene.List(graphene.String, required=True)
+    port = graphene.Field(Port, required=True)
 
 
 class FlowGraph(graphene.ObjectType):
@@ -274,7 +334,7 @@ class FlowGraph(graphene.ObjectType):
     returns = graphene.List(Port, required=True)
 
 
-class Flow(BalderObject):
+class Flow(BalderObject, PinnableMixin):
     zoom = graphene.Float()
     position = graphene.List(graphene.Int)
     graph = graphene.Field(FlowGraph, required=True)
@@ -290,7 +350,7 @@ class Flow(BalderObject):
         model = models.Flow
 
 
-class Workspace(BalderObject):
+class Workspace(BalderObject, PinnableMixin):
     restrict = graphene.List(graphene.String, required=True)
     latest_flow = graphene.Field(lambda: Flow, description="The latest flow")
 
@@ -307,17 +367,17 @@ class Workspace(BalderObject):
 
 class ReactiveTemplate(BalderObject):
     name = graphene.String(required=True)
-    instream = graphene.List(graphene.List(StreamItem, required=True), required=True)
-    outstream = graphene.List(graphene.List(StreamItem, required=True), required=True)
-    constream = graphene.List(graphene.List(StreamItem, required=True), required=True)
+    instream = graphene.List(graphene.List(Port, required=True), required=True)
+    outstream = graphene.List(graphene.List(Port, required=True), required=True)
+    constream = graphene.List(graphene.List(Port, required=True), required=True)
     implementation = graphene.Field(ReactiveImplementation, required=True)
-    constants = graphene.List(Constant, required=False)
+    constants = graphene.List(Port, required=False)
 
     class Meta:
         model = models.ReactiveTemplate
 
 
-class Run(BalderObject):
+class Run(BalderObject, PinnableMixin):
     latest_snapshot = graphene.Field(lambda: Snapshot)
 
     def resolve_latest_snapshot(root, info, *args, **kwargs):
@@ -347,3 +407,28 @@ class RunEvent(BalderObject):
 class Snapshot(BalderObject):
     class Meta:
         model = models.Snapshot
+
+
+class Condition(BalderObject, PinnableMixin):
+    latest_snapshot = graphene.Field(lambda: ConditionSnapshot)
+
+    def resolve_latest_snapshot(root, info, *args, **kwargs):
+        return root.snapshots.order_by("-created_at").first()
+
+    class Meta:
+        model = models.Condition
+
+
+
+class ConditionEvent(BalderObject):
+    value = graphene.String(required=True)
+    state = graphene.Field(ContractStatus, required=True)
+    source = graphene.String(required=False)
+
+    class Meta:
+        model = models.ConditionEvent
+
+
+class ConditionSnapshot(BalderObject):
+    class Meta:
+        model = models.ConditionSnapshot

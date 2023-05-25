@@ -1,11 +1,11 @@
-from flow.models import Graph
-from flow import diagram
-from asgiref.sync import sync_to_async
+from django.contrib.auth import get_user_model
 
-@sync_to_async
-def get_diagram_for_arkitekt_template_id(template_id) -> diagram.Diagram:
-    graph = Graph.objects.get(template__arkitekt_id=template_id)
-    return diagram.Diagram(**graph.diagram)
+def fill_created(info, imitator = None ):
+    creator = info.context.user or (
+            get_user_model().objects.get(sub=imitator) if imitator else None
+        )
+    return {"created_by": creator, "created_through": info.context.client}
+
 
 
 

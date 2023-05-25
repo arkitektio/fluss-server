@@ -76,8 +76,17 @@ class Runs(BalderQuery):
     class Meta:
         type = types.Run
         list = True
+        paginate = True
         filter = filters.RunFilter
 
+class MyRuns(BalderQuery):
+    class Meta:
+        type = types.Run
+        list = True
+        personal = "created_by"
+        operation= "myruns"
+        paginate = True
+        filter = filters.RunFilter
 
 class RunLogs(BalderQuery):
     class Meta:

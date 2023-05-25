@@ -10,7 +10,7 @@ from graphene.types.generic import GenericScalar
 from balder.types.scalars import ImageFile
 import namegenerator
 import hashlib
-
+from flow.utils import fill_created
 logger = logging.getLogger(__name__)
 
 
@@ -41,6 +41,7 @@ class UpdateWorkspace(BalderMutation):
             restrict=workspace.restrict,
             hash=graph_hash(graph),
             defaults={"graph": graph, "brittle": brittle},
+            **fill_created(info)
         )
 
         flow.brittle = brittle or flow.brittle
@@ -52,6 +53,33 @@ class UpdateWorkspace(BalderMutation):
     class Meta:
         type = types.Workspace
         operation = "updateworkspace"
+
+
+class ImportFlow(BalderMutation):
+    class Arguments:
+        name = graphene.String(required=False)
+        graph = graphene.Argument(GraphInput, required=False)
+
+    @bounced(anonymous=False)
+    def mutate(root, info, name, graph=None, brittle=False):
+
+        workspace = models.Workspace.objects.create(name=name)
+
+        flow, cr = models.Flow.objects.get_or_create(
+            workspace=workspace,
+            hash=graph_hash(graph),
+            defaults={"graph": graph, "brittle": brittle, **fill_created(info)},
+
+        )
+
+        flow.save()
+
+        return workspace
+
+    class Meta:
+        type = types.Workspace
+        operation = "importflow"
+
 
 
 class DrawVanilla(BalderMutation):
@@ -94,7 +122,7 @@ class DrawVanilla(BalderMutation):
                 "instream": [[]],
                 "outstream": [[]],
                 "constream": [[]],
-                "position": {"x": 750, "y": 100},
+                "position": {"x": 750, "y": 400},
             },
         ]
 
@@ -117,6 +145,7 @@ class DrawVanilla(BalderMutation):
             name=name,
             creator=info.context.user,
             brittle=brittle or False,
+            **fill_created(info)
         )
         return workspace
 
@@ -161,3 +190,49 @@ class DeleteWorkspace(BalderMutation):
 
     class Meta:
         type = DeleteWorkspaceReturn
+
+
+class PinFlow(BalderMutation):
+    """Pin Run
+    
+    This mutation pins an Runs and returns the pinned Run."""
+
+    class Arguments:
+        id = graphene.ID(required=True, description="The ID of the representation")
+        pin = graphene.Boolean(required=True, description="The pin state")
+
+    @bounced()
+    def mutate(root, info, id, pin, **kwargs):
+        rep = models.Flow.objects.get(id=id)
+        if pin:
+            rep.pinned_by.add(info.context.user)
+        else:
+            rep.pinned_by.remove(info.context.user)
+        rep.save()
+        return rep
+
+    class Meta:
+        type = types.Flow
+
+
+class PinWorkspace(BalderMutation):
+    """Pin Run
+    
+    This mutation pins an Runs and returns the pinned Run."""
+
+    class Arguments:
+        id = graphene.ID(required=True, description="The ID of the representation")
+        pin = graphene.Boolean(required=True, description="The pin state")
+
+    @bounced()
+    def mutate(root, info, id, pin, **kwargs):
+        rep = models.Workspace.objects.get(id=id)
+        if pin:
+            rep.pinned_by.add(info.context.user)
+        else:
+            rep.pinned_by.remove(info.context.user)
+        rep.save()
+        return rep
+
+    class Meta:
+        type = types.Workspace

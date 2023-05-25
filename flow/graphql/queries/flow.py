@@ -22,6 +22,7 @@ class Workspaces(BalderQuery):
     class Meta:
         type = types.Workspace
         list = True
+        paginate = True
         filter = filters.WorkspaceFilter
         operation = "workspaces"
 
@@ -30,8 +31,19 @@ class Flows(BalderQuery):
     class Meta:
         type = types.Flow
         list = True
+        paginate = True
         filter = filters.FlowFilter
         operation = "flows"
+
+class MyFlows(BalderQuery):
+    class Meta:
+        type = types.Flow
+        list = True
+        paginate = True
+        personal = "created_by"
+        filter = filters.FlowFilter
+        operation = "myflows"
+
 
 
 class FlowDetail(BalderQuery):
@@ -50,5 +62,7 @@ class MyWorkspaces(BalderQuery):
     class Meta:
         list = True
         personal = "creator"
+        filter = filters.WorkspaceFilter
+        paginate = True
         type = types.Workspace
         operation = "myworkspaces"

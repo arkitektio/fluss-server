@@ -567,7 +567,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "lok"
-version = "0.1.17"
+version = "0.2.0"
 description = "lok is a jwt middleware that works with django channels"
 category = "main"
 optional = false
@@ -972,6 +972,17 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "p
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "whitenoise"
+version = "6.4.0"
+description = "Radically simplified static file serving for WSGI applications"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+brotli = ["Brotli"]
+
+[[package]]
 name = "wrapt"
 version = "1.14.1"
 description = "Module for decorators, wrappers and monkey patching."
@@ -1010,7 +1021,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "51de0e5471e49c3b6e291a3480dab4a6727d34446235df4512a4cd696a7adb71"
+content-hash = "f4e76718e0980814c8707cfc4b2ac7c58f4a08913a9a881ddb32615f3b297514"
 
 [metadata.files]
 aiohttp = [
@@ -1404,8 +1415,8 @@ jmespath = [
     {file = "jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"},
 ]
 lok = [
-    {file = "lok-0.1.17-py3-none-any.whl", hash = "sha256:8e77a35dc7c276ee15d08cce82f068d7c62b0ebee12a3802acc2c68f95bb577b"},
-    {file = "lok-0.1.17.tar.gz", hash = "sha256:e51abc12e3c16039330d1347f39071780077aeb4d04165f7685334611f8120d3"},
+    {file = "lok-0.2.0-py3-none-any.whl", hash = "sha256:1023fd028cb5e55e6557232f348c08bdf5d4d211bc6b0221b64a670bed804098"},
+    {file = "lok-0.2.0.tar.gz", hash = "sha256:f06fca8a5ccabdc1ee426216942a0aa5c279403b8603eca6a9de43fc9f2dd666"},
 ]
 msgpack = [
     {file = "msgpack-1.0.4-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:4ab251d229d10498e9a2f3b1e68ef64cb393394ec477e3370c457f9430ce9250"},
@@ -1756,6 +1767,10 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.26.12-py2.py3-none-any.whl", hash = "sha256:b930dd878d5a8afb066a637fbb35144fe7901e3b209d1cd4f524bd0e9deee997"},
     {file = "urllib3-1.26.12.tar.gz", hash = "sha256:3fa96cf423e6987997fc326ae8df396db2a8b7c667747d47ddd8ecba91f4a74e"},
+]
+whitenoise = [
+    {file = "whitenoise-6.4.0-py3-none-any.whl", hash = "sha256:599dc6ca57e48929dfeffb2e8e187879bfe2aed0d49ca419577005b7f2cc930b"},
+    {file = "whitenoise-6.4.0.tar.gz", hash = "sha256:a02d6660ad161ff17e3042653c8e3f5ecbb2a2481a006bde125b9efb9a30113a"},
 ]
 wrapt = [
     {file = "wrapt-1.14.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:1b376b3f4896e7930f1f772ac4b064ac12598d1c38d04907e696cc4d794b43d3"},
