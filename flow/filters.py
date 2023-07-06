@@ -26,6 +26,23 @@ class IDChoiceFilter(django_filters.MultipleChoiceFilter):
 
         super().__init__(*args, **kwargs, field_name="pk")
 
+class MultiStringField(forms.TypedMultipleChoiceField):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def overwritten_type(self, **kwargs):
+        return graphene.List(graphene.String, **kwargs)
+    
+
+@convert_form_field.register(MultiStringField)
+def convert_form_field_to_string_list(field):
+    return field.overwritten_type(required=field.required)
+    
+class MultiStringFilter(django_filters.MultipleChoiceFilter):
+    field_class = MultiStringField
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 class PinnedFilterMixin(django_filters.FilterSet):
     pinned = django_filters.BooleanFilter(
@@ -59,7 +76,7 @@ class TimeFilterMixin(django_filters.FilterSet):
     created_day = django_filters.DateTimeFilter(
         field_name="created_at", method="my_created_day_filter"
     )
-    created_while = django_filters.BaseInFilter(
+    created_while = MultiStringFilter(
         field_name="created_while", method="my_created_while_filter"
     )
     order = django_filters.OrderingFilter(fields={"created_at": "time"})

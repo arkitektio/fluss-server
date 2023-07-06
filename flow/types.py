@@ -9,13 +9,11 @@ from flow.scalars import Any, EventValue
 from flow.enums import ReactiveImplementation, MapStrategy, Scope, ContractStatus
 
 
-
 class PinnableMixin:
     pinned = graphene.Boolean(default_value=False)
 
     def resolve_pinned(root, info, *args, **kwargs):
         return root.pinned_by.filter(id=info.context.user.id).exists()
-
 
 
 class Position(graphene.ObjectType):
@@ -98,10 +96,10 @@ class StreamItemChild(graphene.ObjectType):
     nullable = graphene.Boolean(required=True)
     identifier = graphene.String(required=False)
     child = graphene.Field(lambda: StreamItemChild, required=False)
+    variants = graphene.List(lambda: StreamItemChild, required=False)
 
     def resolve_scope(self, info):
         return self.get("scope", Scope.GLOBAL)
-    
 
     def resolve_nullable(self, info):
         return self.get("nullable", False)
@@ -136,9 +134,6 @@ class ReturnWidget(graphene.ObjectType):
     choices = graphene.List(Choice, description="The dependencies of this port")
 
 
-
-
-
 class StreamItem(graphene.ObjectType):
     key = graphene.String(required=True)
     kind = StreamKind(required=True)
@@ -146,30 +141,30 @@ class StreamItem(graphene.ObjectType):
     identifier = graphene.String(required=False)
     nullable = graphene.Boolean(required=True)
     child = graphene.Field(StreamItemChild, required=False)
+    variants = graphene.List(StreamItemChild, required=False)
 
     def resolve_scope(self, info):
         return self.get("scope", Scope.GLOBAL)
 
     def resolve_nullable(self, info):
         return self.get("nullable", False)
+
 
 class PortChild(graphene.ObjectType):
     nullable = graphene.Boolean(required=True)
     kind = StreamKind(required=True)
     scope = Scope(required=True)
     identifier = graphene.String(required=False)
+    variants = graphene.List(lambda: PortChild, required=False)
     child = graphene.Field(lambda: PortChild, required=False)
     assign_widget = graphene.Field(Widget, description="Description of the Widget")
     return_widget = graphene.Field(ReturnWidget, description="A return widget")
-    
 
     def resolve_scope(self, info):
         return self.get("scope", Scope.GLOBAL)
-    
+
     def resolve_nullable(self, info):
         return self.get("nullable", False)
-
-
 
 
 class Port(graphene.ObjectType):
@@ -179,6 +174,7 @@ class Port(graphene.ObjectType):
     default = Any(required=False)
     label = graphene.String()
     identifier = graphene.String()
+    variants = graphene.List(lambda: PortChild, required=False)
     kind = StreamKind(required=True)
     child = graphene.Field(PortChild, required=False)
     label = graphene.String()
@@ -199,10 +195,21 @@ class FlowNodeCommons(graphene.Interface):
     defaults = GenericScalar()
 
 
+class RetriableNode(graphene.Interface):
+    max_retries = graphene.Int(required=True)
+    retry_delay = graphene.Int(required=True)
+
+    def resolve_max_retries(self, info):
+        return self.get("max_retries", 0)
+
+    def resolve_retry_delay(self, info):
+        return self.get("retry_delay", 1000)
+
 
 class Binds(graphene.ObjectType):
     templates = graphene.List(graphene.String, required=False)
     clients = graphene.List(graphene.String, required=False)
+
 
 @register_type
 class ArkitektNode(graphene.ObjectType):
@@ -219,7 +226,7 @@ class ArkitektNode(graphene.ObjectType):
     binds = graphene.Field(Binds, required=False)
 
     class Meta:
-        interfaces = (FlowNode, FlowNodeCommons)
+        interfaces = (FlowNode, FlowNodeCommons, RetriableNode)
 
 
 @register_type
@@ -234,9 +241,10 @@ class LocalNode(graphene.ObjectType):
     allow_local = graphene.Boolean(required=True)
     assign_timeout = graphene.Float(required=True)
     yield_timeout = graphene.Float(required=True)
+    retry_sleep_ms = graphene.Int(required=True)
 
     class Meta:
-        interfaces = (FlowNode, FlowNodeCommons)
+        interfaces = (FlowNode, FlowNodeCommons, RetriableNode)
 
 
 @register_type
@@ -246,8 +254,6 @@ class GraphNode(graphene.ObjectType):
 
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
-
-
 
 
 @register_type
@@ -361,10 +367,6 @@ class Workspace(BalderObject, PinnableMixin):
         model = models.Workspace
 
 
-
-
-
-
 class ReactiveTemplate(BalderObject):
     name = graphene.String(required=True)
     instream = graphene.List(graphene.List(Port, required=True), required=True)
@@ -417,7 +419,6 @@ class Condition(BalderObject, PinnableMixin):
 
     class Meta:
         model = models.Condition
-
 
 
 class ConditionEvent(BalderObject):

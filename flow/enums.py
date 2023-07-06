@@ -20,7 +20,6 @@ class MapStrategy(graphene.Enum):
     ORDERED = "ORDERED"
 
 
-
 class Scope(graphene.Enum):
     """Scope of the Port"""
 
@@ -30,6 +29,7 @@ class Scope(graphene.Enum):
 
 class ContractStatus(graphene.Enum):
     """Scope of the Port"""
+
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
 
@@ -60,6 +60,20 @@ class ReactiveImplementationModel(TextChoices):
     OMIT = "OMIT", "OMIT (Omit the data)"
     ENSURE = "ENSURE", "ENSURE (Ensure the data (discards None in the stream))"
 
+    # Basic Operations
+    ADD = "ADD", "ADD (Add a number to the data)"
+    SUBTRACT = "SUBTRACT", "SUBTRACT (Subtract a number from the data)"
+    MULTIPLY = "MULTIPLY", "MULTIPLY (Multiply the data with a number)"
+    DIVIDE = "DIVIDE", "DIVIDE (Divide the data with a number)"
+    MODULO = "MODULO", "MODULO (Modulo the data with a number)"
+    POWER = "POWER", "POWER (Power the data with a number)"
+
+    # String Operations
+    PREFIX = "PREFIX", "PREFIX (Prefix the data with a string)"
+    SUFFIX = "SUFFIX", "SUFFIX (Suffix the data with a string)"
+
+    # Filter operations
+    FILTER = "FILTER", "FILTER (Filter the data of a union)"
 
     GATE = "GATE", "GATE (Gate the data, first value is gated, second is gate)"
 

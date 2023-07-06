@@ -18,24 +18,32 @@ class StreamKind(graphene.Enum):
     BOOL = "BOOL"
     ENUM = "ENUM"
     DICT = "DICT"
+    UNION = "UNION"
     UNSET = "UNSET"
 
 
 class StreamItemChildInput(graphene.InputObjectType):
     kind = StreamKind(required=True)
-    scope = graphene.Argument(Scope, description="The scope of this argument", required=True)
+    scope = graphene.Argument(
+        Scope, description="The scope of this argument", required=True
+    )
     identifier = graphene.String(required=False)
     nullable = graphene.Boolean(required=True)
+    variants = graphene.List(lambda: StreamItemChildInput, required=False)
     child = graphene.Field(lambda: StreamItemChildInput, required=False)
 
 
 class StreamItemInput(graphene.InputObjectType):
     key = graphene.String(required=True)
     kind = StreamKind(required=True)
-    scope = graphene.Argument(Scope, description="The scope of this argument", required=True)
+    scope = graphene.Argument(
+        Scope, description="The scope of this argument", required=True
+    )
     identifier = graphene.String(required=False)
     nullable = graphene.Boolean(required=True)
+    variants = graphene.List(lambda: StreamItemChildInput, required=False)
     child = graphene.Field(StreamItemChildInput, required=False)
+
 
 class ChoiceInput(graphene.InputObjectType):
     value = Any(required=True)
@@ -64,21 +72,22 @@ class ReturnWidgetInput(graphene.InputObjectType):
     ward = graphene.String(description="A ward for the app to call")
 
 
-
 class ChildPortInput(graphene.InputObjectType):
     nullable = graphene.Boolean(required=False)
-    scope = graphene.Argument(Scope, description="The scope of this argument", required=True)
+    scope = graphene.Argument(
+        Scope, description="The scope of this argument", required=True
+    )
     identifier = graphene.String(description="The identifier")
     kind = StreamKind(description="The type of this argument", required=True)
     child = graphene.Field(lambda: ChildPortInput, required=False)
+    variants = graphene.List(lambda: ChildPortInput, required=False)
     assign_widget = graphene.Field(WidgetInput, description="Description of the Widget")
     return_widget = graphene.Field(ReturnWidgetInput, description="A return widget")
-    
+
 
 class ChoiceInput(graphene.InputObjectType):
     value = Any(required=True)
     label = graphene.String(required=True)
-
 
 
 class PortInput(graphene.InputObjectType):
@@ -87,9 +96,12 @@ class PortInput(graphene.InputObjectType):
     name = graphene.String(description="The name of this argument")
     label = graphene.String(description="The name of this argument")
     kind = StreamKind(description="The type of this argument", required=True)
-    scope = graphene.Argument(Scope, description="The scope of this argument", required=True)
+    scope = graphene.Argument(
+        Scope, description="The scope of this argument", required=True
+    )
     description = graphene.String(description="The description of this argument")
     child = graphene.Field(ChildPortInput, description="The child of this argument")
+    variants = graphene.List(lambda: ChildPortInput, required=False)
     assign_widget = graphene.Field(
         WidgetInput, description="The child of this argument"
     )
@@ -105,7 +117,6 @@ class BindsInput(graphene.InputObjectType):
     clients = graphene.List(graphene.String, required=False)
 
 
-
 class NodeInput(graphene.InputObjectType):
     id = graphene.String(required=True)
     typename = graphene.String(required=True)
@@ -119,21 +130,17 @@ class NodeInput(graphene.InputObjectType):
     position = graphene.Field(PositionInput, required=True)
     defaults = GenericScalar(required=False)
     extra = GenericScalar(required=False)
-    instream = graphene.List(
-        graphene.List(PortInput, required=True), required=True
-    )
-    outstream = graphene.List(
-        graphene.List(PortInput, required=True), required=True
-    )
-    constream = graphene.List(
-        graphene.List(PortInput, required=True), required=True
-    )
+    instream = graphene.List(graphene.List(PortInput, required=True), required=True)
+    outstream = graphene.List(graphene.List(PortInput, required=True), required=True)
+    constream = graphene.List(graphene.List(PortInput, required=True), required=True)
     map_strategy = graphene.Argument(MapStrategy, required=False)
     allow_local = graphene.Boolean(required=False)
     binds = graphene.Argument(BindsInput, required=False)
-    assign_timeout = graphene.Float(required=False, default_value=2000)
-    yield_timeout = graphene.Float(required=False, default_value=2000)
-    reserve_timeout = graphene.Float(required=False, default_value=2000)
+    assign_timeout = graphene.Float(required=False, default_value=100000)
+    yield_timeout = graphene.Float(required=False, default_value=100000)
+    max_retries = graphene.Int(required=False, default_value=3)
+    retry_delay = graphene.Int(required=False, default_value=5000)
+    reserve_timeout = graphene.Float(required=False, default_value=100000)
     parent_node = graphene.ID(required=False)
 
 

@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "WITHLATEST",
                 "defaults": {},
-            },#
+            },  #
             {
                 "name": "Gate",
                 "instream": [
@@ -66,14 +66,16 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "GATE",
                 "defaults": {},
-                "constants": [{
-                    "key": "forward_first",
-                    "kind": "BOOL",
-                    "nullable": True,
-                    "default": True,
-                    "label": "Forward first",
-                    "description": "Should the node forward the first value it receives or wait for the gate to open?",
-                }]
+                "constants": [
+                    {
+                        "key": "forward_first",
+                        "kind": "BOOL",
+                        "nullable": True,
+                        "default": True,
+                        "label": "Forward first",
+                        "description": "Should the node forward the first value it receives or wait for the gate to open?",
+                    }
+                ],
             },
             {
                 "name": "All",
@@ -93,14 +95,16 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "ALL",
                 "defaults": {},
-                "constants": [{
-                    "key": "list_length",
-                    "kind": "BOOL",
-                    "nullable": True,
-                    "default": True,
-                    "label": "Empty lists are empy?",
-                    "description": "Are empty lists considered empty?",
-                }]
+                "constants": [
+                    {
+                        "key": "list_length",
+                        "kind": "BOOL",
+                        "nullable": True,
+                        "default": True,
+                        "label": "Empty lists are empy?",
+                        "description": "Are empty lists considered empty?",
+                    }
+                ],
             },
             {
                 "name": "Combine Latest Node",
@@ -136,31 +140,32 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "CHUNK",
                 "defaults": {},
-                "constants": [{
-                    "key": "sleep",
-                    "kind": "FLOAT",
-                    "nullable": True,
-                    "default": None,
-                    "label": "Sleep  (ms)",
-                    "description": "Should the node sleep for a given amount of time after emitting the chunk",
-                },
-                {
-                    "key": "iterations",
-                    "kind": "INT",
-                    "nullable": False,
-                    "default": 1,
-                    "label": "Iterations",
-                    "description": "How many times should the node go through the list",
-                },
-                {
-                    "key": "iteration_sleep",
-                    "kind": "FLOAT",
-                    "nullable": True,
-                    "default": None,
-                    "label": "Iteration Sleep (ms)",
-                    "description": "How long should the node sleep between iterations",
-                }
-                ]
+                "constants": [
+                    {
+                        "key": "sleep",
+                        "kind": "FLOAT",
+                        "nullable": True,
+                        "default": None,
+                        "label": "Sleep  (ms)",
+                        "description": "Should the node sleep for a given amount of time after emitting the chunk",
+                    },
+                    {
+                        "key": "iterations",
+                        "kind": "INT",
+                        "nullable": False,
+                        "default": 1,
+                        "label": "Iterations",
+                        "description": "How many times should the node go through the list",
+                    },
+                    {
+                        "key": "iteration_sleep",
+                        "kind": "FLOAT",
+                        "nullable": True,
+                        "default": None,
+                        "label": "Iteration Sleep (ms)",
+                        "description": "How long should the node sleep between iterations",
+                    },
+                ],
             },
             {
                 "name": "Split Node",
@@ -175,6 +180,78 @@ class Command(BaseCommand):
                 "constream": [],
                 "implementation": "SPLIT",
                 "defaults": {},
+            },
+            {
+                "name": "Add",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [{"key": "added", "kind": "UNSET", "nullable": False}],
+                ],
+                "constream": [],
+                "implementation": "ADD",
+                "defaults": {},
+                "constants": [
+                    {
+                        "key": "sleep",
+                        "kind": "FLOAT",
+                        "nullable": True,
+                        "default": None,
+                        "label": "Sleep  (ms)",
+                        "description": "Should the node sleep for a given amount of time after emitting the chunk",
+                    },
+                ],
+            },
+            {
+                "name": "Filter",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [{"key": "added", "kind": "UNSET", "nullable": False}],
+                ],
+                "constream": [],
+                "implementation": "FILTER",
+                "defaults": {},
+                "constants": [
+                    {
+                        "key": "index",
+                        "kind": "INT",
+                        "nullable": True,
+                        "default": None,
+                        "label": "Index",
+                        "description": "The type index to filter for",
+                    },
+                ],
+            },
+            {
+                "name": "Add",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [{"key": "added", "kind": "UNSET", "nullable": False}],
+                ],
+                "constream": [],
+                "implementation": "ADD",
+                "defaults": {},
+                "constants": [
+                    {
+                        "key": "number",
+                        "kind": "FLOAT",
+                        "nullable": True,
+                        "default": None,
+                        "label": "Number",
+                        "description": "The number to add to each stream item",
+                    },
+                ],
             },
             {
                 "name": "Buffer complete",
@@ -255,11 +332,15 @@ class Command(BaseCommand):
                 "instream": [
                     [
                         {"key": "arg1", "kind": "UNSET", "nullable": False},
-                        
                     ],
-                   [{"key": "condition", "kind": "BOOL", "nullable": False}]
+                    [{"key": "condition", "kind": "BOOL", "nullable": False}],
                 ],
-                "outstream": [[ {"key": "true_arg", "kind": "BOOL", "nullable": False},],[{"key": "false_arg", "kind": "BOOL", "nullable": False}]],
+                "outstream": [
+                    [
+                        {"key": "true_arg", "kind": "BOOL", "nullable": False},
+                    ],
+                    [{"key": "false_arg", "kind": "BOOL", "nullable": False}],
+                ],
                 "constream": [],
                 "implementation": "IF",
                 "defaults": {},
@@ -269,10 +350,15 @@ class Command(BaseCommand):
                 "instream": [
                     [
                         {"key": "arg1", "kind": "UNSET", "nullable": False},
-                        {"key": "arg1", "kind": "UNSET", "nullable": False},                        
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
                     ],
                 ],
-                "outstream": [[ {"key": "true_arg", "kind": "BOOL", "nullable": False},],[{"key": "false_arg", "kind": "BOOL", "nullable": False}]],
+                "outstream": [
+                    [
+                        {"key": "true_arg", "kind": "BOOL", "nullable": False},
+                    ],
+                    [{"key": "false_arg", "kind": "BOOL", "nullable": False}],
+                ],
                 "constream": [],
                 "implementation": "AND",
                 "defaults": {},
