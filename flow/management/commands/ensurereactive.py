@@ -30,6 +30,25 @@ class Command(BaseCommand):
                 "defaults": {},
             },
             {
+                "name": "Delay_Until",
+                "instream": [
+                    [
+                        {"key": "arg1", "kind": "UNSET", "nullable": False},
+                    ],
+                    [
+                        {"key": "signal", "kind": "UNSET", "nullable": False},
+                    ],
+                ],
+                "outstream": [
+                    [
+                        {"key": "return0", "kind": "UNSET", "nullable": False},
+                    ]
+                ],
+                "constream": [],
+                "implementation": "DELAY_UNTIL",
+                "defaults": {},
+            },
+            {
                 "name": "With Latest Node",
                 "instream": [
                     [

@@ -68,6 +68,7 @@ class WidgetInput(graphene.InputObjectType):
 class ReturnWidgetInput(graphene.InputObjectType):
     kind = graphene.String(description="type", required=True)
     query = graphene.String(description="Do we have a possible")
+    choices = graphene.List(ChoiceInput, description="The dependencies of this port")
     hook = graphene.String(description="A hook for the app to call")
     ward = graphene.String(description="A ward for the app to call")
 
@@ -126,7 +127,6 @@ class NodeInput(graphene.InputObjectType):
     description = graphene.String(required=False)
     kind = graphene.String()
     implementation = graphene.Field(ReactiveImplementation, required=False)
-    documentation = graphene.String(required=False)
     position = graphene.Field(PositionInput, required=True)
     defaults = GenericScalar(required=False)
     extra = GenericScalar(required=False)

@@ -76,6 +76,8 @@ class FlowNode(graphene.Interface):
     def resolve_type(cls, instance, info):
         if instance["typename"] == "ArkitektNode":
             return ArkitektNode
+        if instance["typename"] == "ArkitektFilterNode":
+            return ArkitektFilterNode
         if instance["typename"] == "ReactiveNode":
             return ReactiveNode
         if instance["typename"] == "ArgNode":
@@ -187,12 +189,19 @@ class Port(graphene.ObjectType):
 
 
 class FlowNodeCommons(graphene.Interface):
+    name = graphene.String(required=True)
     instream = graphene.List(graphene.List(Port, required=True), required=True)
     outstream = graphene.List(graphene.List(Port, required=True), required=True)
     constream = graphene.List(graphene.List(Port, required=True), required=True)
     constants = GenericScalar()
-    documentation = graphene.String()
+    description = graphene.String(required=True)
     defaults = GenericScalar()
+
+    def resolve_name(self, info):
+        return self.get("name", "")
+
+    def resolve_description(self, info):
+        return self.get("description", "No description")
 
 
 class RetriableNode(graphene.Interface):
@@ -213,11 +222,34 @@ class Binds(graphene.ObjectType):
 
 @register_type
 class ArkitektNode(graphene.ObjectType):
+    """A map node that utilizes
+    a call to the associated rekuest node
+    run a task
+    """
+
     hash = graphene.String(required=True)
-    name = graphene.String()
-    description = graphene.String()
     kind = graphene.String(required=True)
-    defaults = GenericScalar(required=False)
+    map_strategy = graphene.Field(MapStrategy, required=True)
+    allow_local = graphene.Boolean(required=True)
+    assign_timeout = graphene.Float(required=True)
+    yield_timeout = graphene.Float(required=True)
+    reserve_timeout = graphene.Float(required=True)
+    binds = graphene.Field(Binds, required=False)
+
+    class Meta:
+        interfaces = (FlowNode, FlowNodeCommons, RetriableNode)
+
+
+@register_type
+class ArkitektFilterNode(graphene.ObjectType):
+    """A filter node that utilizes
+    a call to the associated rekuest node
+    to filter a stream based on a predicate
+    (the rekuest node must return a boolean)
+    """
+
+    hash = graphene.String(required=True)
+    kind = graphene.String(required=True)
     map_strategy = graphene.Field(MapStrategy, required=True)
     allow_local = graphene.Boolean(required=True)
     assign_timeout = graphene.Float(required=True)
@@ -233,8 +265,6 @@ class ArkitektNode(graphene.ObjectType):
 class LocalNode(graphene.ObjectType):
     hash = graphene.String(required=True)
     interface = graphene.String(required=True)
-    name = graphene.String()
-    description = graphene.String()
     kind = graphene.String(required=True)
     defaults = GenericScalar(required=False)
     map_strategy = graphene.Field(MapStrategy, required=True)
@@ -250,7 +280,6 @@ class LocalNode(graphene.ObjectType):
 @register_type
 class GraphNode(graphene.ObjectType):
     hash = graphene.String(required=True)
-    name = graphene.String()
 
     class Meta:
         interfaces = (FlowNode, FlowNodeCommons)
@@ -350,7 +379,7 @@ class Flow(BalderObject, PinnableMixin):
         return root.screenshot.url if root.screenshot else None
 
     def resolve_name(root, info, *args, **kwargs):
-        return root.name + " saved " + str(root.created_at)
+        return root.name or "Untitled"
 
     class Meta:
         model = models.Flow

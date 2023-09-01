@@ -54,6 +54,10 @@ class ReactiveImplementationModel(TextChoices):
         "BUFFER_UNTIL (Buffer values until signal is send)",
     )
 
+    # Delay
+    DELAY = "DELAY", "DELAY (Delay the data)"
+    DELAY_UNTIL = "DELAY_UNTIL", "DELAY_UNTIL (Delay the data until signal is send)"
+
     # Transformation
     CHUNK = "CHUNK", "CHUNK (Chunk the data)"
     SPLIT = "SPLIT", "SPLIT (Split the data)"
