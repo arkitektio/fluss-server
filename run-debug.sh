@@ -17,5 +17,5 @@ python manage.py collectstatic --noinput
 
 # Start the first process
 echo "=> Starting Server"
-python manage.py runserver 0.0.0.0:8070 
+python manage.py runserver 0.0.0.0:80 
 

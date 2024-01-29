@@ -63,11 +63,15 @@ class ImportFlow(BalderMutation):
     @bounced(anonymous=False)
     def mutate(root, info, name, graph=None, brittle=False):
 
-        workspace = models.Workspace.objects.create(name=name)
+        print("IMPORTING FLOW")
+
+        workspace = models.Workspace.objects.create(name=name, creator=info.context.user, **fill_created(info))
 
         flow, cr = models.Flow.objects.get_or_create(
             workspace=workspace,
             hash=graph_hash(graph),
+            name=name,
+            creator=info.context.user,
             defaults={"graph": graph, "brittle": brittle, **fill_created(info)},
 
         )

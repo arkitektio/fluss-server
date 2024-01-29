@@ -43,7 +43,7 @@ LOK = {
 SUPERUSERS = [
     {
         "USERNAME": conf.django.admin.username,
-        "EMAIL": conf.django.admin.email,
+        "EMAIL": "fake@fake.com",
         "PASSWORD": conf.django.admin.password,
     }
 ]
@@ -88,7 +88,7 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_EXPIRE = 3600
 
 
-AWS_STORAGE_BUCKET_NAME = conf.minio.buckets[0].name
+AWS_STORAGE_BUCKET_NAME = conf.minio.buckets.media
 AWS_DEFAULT_ACL = "private"
 AWS_S3_USE_SSL = True
 AWS_S3_SECURE_URLS = False  # Should resort to True if using in Production behind TLS

@@ -110,6 +110,7 @@ class StreamItemChild(graphene.ObjectType):
 class Choice(graphene.ObjectType):
     value = Any(required=True)
     label = graphene.String(required=True)
+    description = graphene.String(required=False)
 
 
 class Widget(graphene.ObjectType):
@@ -119,8 +120,9 @@ class Widget(graphene.ObjectType):
         graphene.String, description="The dependencies of this port"
     )
     choices = graphene.List(Choice, description="The dependencies of this port")
-    max = graphene.Int(description="Max value for int widget")
-    min = graphene.Int(description="Max value for int widget")
+    max = graphene.Float(description="Max value for int widget")
+    min = graphene.Float(description="Max value for int widget")
+    step = graphene.Float(description="Max value for int widget")
     placeholder = graphene.String(description="Placeholder for any widget")
     as_paragraph = graphene.Boolean(description="Is this a paragraph")
     hook = graphene.String(description="A hook for the app to call")
@@ -129,7 +131,7 @@ class Widget(graphene.ObjectType):
 
 class ReturnWidget(graphene.ObjectType):
     kind = graphene.String(description="type", required=True)
-    query = graphene.String(description="Do we have a possible")
+    query = graphene.String(description="The graphql query for this port")
     dependencies = graphene.List(
         graphene.String, description="The dependencies of this port"
     )

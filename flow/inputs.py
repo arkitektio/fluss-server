@@ -48,6 +48,7 @@ class StreamItemInput(graphene.InputObjectType):
 class ChoiceInput(graphene.InputObjectType):
     value = Any(required=True)
     label = graphene.String(required=True)
+    description = graphene.String(required=False)
 
 
 class WidgetInput(graphene.InputObjectType):
@@ -57,8 +58,9 @@ class WidgetInput(graphene.InputObjectType):
         graphene.String, description="The dependencies of this port"
     )
     choices = graphene.List(ChoiceInput, description="The dependencies of this port")
-    max = graphene.Int(description="Max value for int widget")
-    min = graphene.Int(description="Max value for int widget")
+    max = graphene.Float(description="Max value for int widget")
+    min = graphene.Float(description="Max value for int widget")
+    step = graphene.Float(description="Max value for int widget")
     placeholder = graphene.String(description="Placeholder for any widget")
     as_paragraph = graphene.Boolean(description="Is this a paragraph")
     hook = graphene.String(description="A hook for the app to call")
