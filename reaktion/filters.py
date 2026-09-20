@@ -10,7 +10,8 @@ import datetime
 
 import kante
 import strawberry
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+from embeddings.search import hybrid_search
 from kante.types import Info
 
 from reaktion import enums, models
@@ -31,6 +32,21 @@ class TitleSearchFilterMixin:
     @kante.filter_field(description="Search by title (case-insensitive substring)")
     def search(self, info: Info, value: str, prefix: str) -> Q:
         return Q(**{f"{prefix}title__icontains": value})
+
+
+@strawberry.input
+class SemanticTitleSearchFilterMixin:
+    """``search`` = substring of the title OR semantic similarity to title + description.
+
+    For the models that carry an embedding (``embeddings.models.EmbeddedDescriptionMixin``:
+    Workspace, Flow). Substring hits rank first, then by similarity; nested use (``prefix``)
+    stays lexical.
+    """
+
+    @kante.filter_field(description="Search by title (case-insensitive substring) or by the meaning of the query against title and description. Substring matches rank first, then by similarity; an explicit `ordering` replaces that ranking")
+    def search(self, info: Info, queryset: QuerySet, value: str, prefix: str) -> tuple[QuerySet, Q]:
+        """Annotate the distance and OR the semantic predicate onto the substring one."""
+        return hybrid_search(queryset, prefix, value, Q(**{f"{prefix}title__icontains": value}))
 
 
 @strawberry.input
@@ -58,12 +74,12 @@ class PinnedFilterMixin:
 
 
 @kante.filter_type(models.Workspace)
-class WorkspaceFilter(IdsFilterMixin, TitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class WorkspaceFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
     pass
 
 
 @kante.filter_type(models.Flow)
-class FlowFilter(IdsFilterMixin, TitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class FlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
     pass
 
 

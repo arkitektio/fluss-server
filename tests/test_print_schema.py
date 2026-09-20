@@ -44,3 +44,10 @@ def test_value_map_inputs_default_to_null_not_an_empty_object():
     assert "constantsMap: ValueMap = null" in sdl
     assert "globalsMap: ValueMap = null" in sdl
     assert "ValueMap = {}" not in sdl
+
+
+def test_embedding_columns_stay_out_of_the_schema():
+    """The vector columns are storage, not API: no type or input may expose them."""
+    from fluss_server.schema import schema
+
+    assert "embedding" not in str(schema).lower()

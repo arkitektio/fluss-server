@@ -8,12 +8,19 @@ from django.db import models
 
 # Create your models here.
 from django_choices_field import TextChoicesField
+from embeddings.models import EmbeddedDescriptionMixin, embedding_indexes
 
 from . import enums
 
 
-class Workspace(models.Model):
-    """Graph is a Template for a Template"""
+class Workspace(EmbeddedDescriptionMixin, models.Model):
+    """Graph is a Template for a Template
+
+    Carries an embedding of its title + description (``EmbeddedDescriptionMixin``) so the
+    workspace list's ``search`` finds it by what it is about, not only by a substring.
+    """
+
+    embedding_source_fields = ("title", "description")
 
     restrict = models.JSONField(
         default=list,
@@ -37,8 +44,16 @@ class Workspace(models.Model):
     def __str__(self):
         return f"{self.title}"
 
+    class Meta:
+        # The embedding healer's "any row not by the current model?" probe.
+        indexes = [*embedding_indexes("workspace")]
 
-class Flow(models.Model):
+
+class Flow(EmbeddedDescriptionMixin, models.Model):
+    """One saved version of a workspace's graph; embeds its title + description for ``search``."""
+
+    embedding_source_fields = ("title", "description")
+
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, null=True, blank=True, related_name="flows")
     creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     restrict = models.JSONField(default=list, help_text="Restrict access to specific nodes for this diagram")
@@ -73,6 +88,8 @@ class Flow(models.Model):
                 name="Equal Reservation on this App by this Waiter is already in place",
             )
         ]
+        # The embedding healer's "any row not by the current model?" probe.
+        indexes = [*embedding_indexes("flow")]
 
 
 class ReactiveTemplate(models.Model):
