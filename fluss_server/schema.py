@@ -1,4 +1,5 @@
 import strawberry
+from fluss_server.logs import QuietErrorsSchema
 import kante
 from strawberry_django.optimizer import DjangoOptimizerExtension
 from reaktion import types, models
@@ -98,7 +99,11 @@ class Subscription:
     )
 
 
-schema = kante.Schema(
+class Schema(QuietErrorsSchema, kante.Schema):
+    """kante.Schema, logging expected resolver errors as one line and bugs with a traceback (see logs.py)."""
+
+
+schema = Schema(
     query=Query,
     mutation=Mutation,
     subscription=Subscription,

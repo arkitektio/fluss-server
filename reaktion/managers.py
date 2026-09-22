@@ -94,7 +94,6 @@ def build_params(
         individual_queries.append(count_condition)
 
     full_sql = "SELECT id FROM facade_node WHERE " + " AND ".join(individual_queries)
-    print(full_sql, all_params)
     return full_sql, all_params
 
 
