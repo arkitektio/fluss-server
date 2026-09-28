@@ -19,6 +19,16 @@ EXPECTED = {
     "@fluss/flow": [
         "CREATED"
     ],
+    "@fluss/pythonflow": [
+        "CREATED",
+        "UPDATED",
+        "DELETED"
+    ],
+    "@fluss/pythonrun": [
+        "CREATED",
+        "UPDATED",
+        "DELETED"
+    ],
     "@fluss/run": [
         "CREATED",
         "UPDATED",
@@ -97,3 +107,21 @@ def test_a_save_is_signalled_signed_by_this_instance(intake):
     assert received["path"] == "/agi/signal/fluss"
     verified = trust.verify("POST", received["path"], received["body"], received["headers"]["Authorization"], audience="live.arkitekt.rekuest")
     assert verified.issuer == "live.arkitekt.fluss"
+
+
+@pytest.mark.django_db(transaction=True)
+def test_publishing_a_python_flow_is_signalled_with_its_status_and_effect(intake):
+    from reaktion.models import PythonFlow
+
+    org = _organization()
+    flow = PythonFlow.objects.create(
+        organization=org, title="moves", source="def main(): pass", runtime="monty-0.1", hash="h",
+        manifest=[{"alias": "move_stage", "action_hash": "a", "effect": "PHYSICAL"}],
+    )
+    flow.status = "PUBLISHED"
+    flow.save()
+
+    created, updated = intake.of("@fluss/pythonflow", count=2)
+    assert (created["json"]["kind"], created["json"]["object"]) == ("CREATED", str(flow.pk))
+    assert updated["json"]["kind"] == "UPDATED"
+    assert updated["json"]["descriptors"] == {"@fluss/status": "PUBLISHED", "@fluss/physical": True}

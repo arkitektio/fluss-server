@@ -24,6 +24,19 @@ class FlowOrder:
     id: auto
 
 
+@strawberry_django.order_type(models.PythonFlow)
+class PythonFlowOrder:
+    created_at: auto
+    title: auto
+    id: auto
+
+
+@strawberry_django.order_type(models.PythonRun)
+class PythonRunOrder:
+    created_at: auto
+    id: auto
+
+
 @strawberry_django.order_type(models.ReactiveTemplate)
 class ReactiveTemplateOrder:
     title: auto

@@ -1,5 +1,6 @@
+import keyword
 from strawberry.experimental import pydantic
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
 from rekuest_core.inputs import models as rimodels
 from rekuest_core.inputs import types as ritypes
 from rekuest_core import enums as renums
@@ -294,3 +295,97 @@ class TrackInput:
     message: str | None = None
     source: str | None = None
     handle: str | None = None
+
+
+# --- Python flows ------------------------------------------------------------------------
+
+
+class ManifestEntryInputModel(BaseModel):
+    alias: str = Field(description="The name the action is injected under in the source")
+    action_hash: str
+    app: str | None = None
+    key: str | None = None
+    version: str | None = None
+    effect: renums.EffectClass = renums.EffectClass.NONE
+
+    @field_validator("alias")
+    @classmethod
+    def _alias_is_an_identifier(cls, value: str) -> str:
+        if not value.isidentifier() or keyword.iskeyword(value):
+            raise ValueError(f"A manifest alias must be a Python identifier, not {value!r}")
+        return value
+
+
+@pydantic.input(ManifestEntryInputModel, description="One action a Python flow may call, as the executor's validation resolved it.")
+class ManifestEntryInput:
+    alias: str
+    action_hash: str
+    app: str | None = None
+    key: str | None = None
+    version: str | None = None
+    effect: renums.EffectClass = renums.EffectClass.NONE
+
+
+class CreatePythonFlowInputModel(BaseModel):
+    source: str
+    entrypoint: str = "main"
+    title: str | None = None
+    description: str | None = None
+    previous: str | None = None
+    args: list[rimodels.ArgPortInputModel] = Field(default_factory=list)
+    returns: list[rimodels.ReturnPortInputModel] = Field(default_factory=list)
+    manifest: list[ManifestEntryInputModel] = Field(default_factory=list)
+    runtime: str
+
+    @field_validator("entrypoint")
+    @classmethod
+    def _entrypoint_is_an_identifier(cls, value: str) -> str:
+        if not value.isidentifier():
+            raise ValueError(f"The entrypoint must be a Python identifier, not {value!r}")
+        return value
+
+    @field_validator("manifest")
+    @classmethod
+    def _aliases_are_unique(cls, value: list[ManifestEntryInputModel]) -> list[ManifestEntryInputModel]:
+        aliases = [entry.alias for entry in value]
+        duplicates = sorted({alias for alias in aliases if aliases.count(alias) > 1})
+        if duplicates:
+            raise ValueError(f"Manifest aliases must be unique; duplicated: {', '.join(duplicates)}")
+        return value
+
+
+@pydantic.input(CreatePythonFlowInputModel, description="A new PythonFlow version, carrying the report the executor's validation produced for its source.")
+class CreatePythonFlowInput:
+    source: str
+    entrypoint: str = "main"
+    title: str | None = None
+    description: str | None = None
+    previous: strawberry.ID | None = None
+    args: list[ritypes.ArgPortInput]
+    returns: list[ritypes.ReturnPortInput]
+    manifest: list[ManifestEntryInput]
+    runtime: str
+
+
+@strawberry.input(description="Change a PythonFlow's title or description; its source, manifest and runtime are immutable.")
+class UpdatePythonFlowInput:
+    id: strawberry.ID
+    title: str | None = None
+    description: str | None = None
+
+
+@strawberry.input(description="Refers to one PythonFlow version.")
+class PythonFlowRefInput:
+    id: strawberry.ID
+
+
+@strawberry.input(description="Start (or reuse) the run of a published PythonFlow for a task.")
+class CreatePythonRunInput:
+    flow: strawberry.ID
+    task_id: strawberry.ID
+
+
+@strawberry.input(description="Finish a PythonRun.")
+class ClosePythonRunInput:
+    run: strawberry.ID
+    status: enums.PythonRunStatus = enums.PythonRunStatus.COMPLETED

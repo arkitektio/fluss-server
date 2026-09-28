@@ -31,6 +31,9 @@ class Query:
     reactive_template = kante.django_field(resolver=queries.reactive_template, description="Fetch a single reactive template by id.")
     events_between = kante.django_field(resolver=queries.events_between, description="Fetch the events of a run between two logical times, seeded from the latest snapshot at or before the lower bound.")
 
+    python_flows: list[types.PythonFlow] = kante.django_field(description="List all Python flow versions in your organization.")
+    python_runs: list[types.PythonRun] = kante.django_field(description="List all Python flow runs in your organization.")
+
     # Stats
     workspace_stats: types.WorkspaceStats = strawberry.field(resolver=types.WorkspaceStatsResolver, description="Aggregate statistics over the workspaces in your organization.")
 
@@ -45,6 +48,14 @@ class Query:
     @kante.django_field(description="Fetch a single flow by id.")
     def flow(self, info: Info, id: strawberry.ID) -> types.Flow:
         return get_for_org(models.Flow, info, id=id)
+
+    @kante.django_field(description="Fetch a single Python flow version by id.")
+    def python_flow(self, info: Info, id: strawberry.ID) -> types.PythonFlow:
+        return get_for_org(models.PythonFlow, info, id=id)
+
+    @kante.django_field(description="Fetch a single Python flow run by id.")
+    def python_run(self, info: Info, id: strawberry.ID) -> types.PythonRun:
+        return get_for_org(models.PythonRun, info, id=id)
 
     @kante.django_field(description="Fetch a single run snapshot by id.")
     def snapshot(self, info: Info, id: strawberry.ID) -> types.Snapshot:
@@ -86,6 +97,34 @@ class Mutation:
     track = kante.django_mutation(
         resolver=mutations.track,
         description="Record a single run event (a value, error or completion) for a run.",
+    )
+    create_python_flow = kante.django_mutation(
+        resolver=mutations.create_python_flow,
+        description="Store a new DRAFT Python flow version (or return the existing one with the same content in its lineage).",
+    )
+    update_python_flow = kante.django_mutation(
+        resolver=mutations.update_python_flow,
+        description="Change a Python flow version's title or description.",
+    )
+    publish_python_flow = kante.django_mutation(
+        resolver=mutations.publish_python_flow,
+        description="Publish a DRAFT (or re-publish an ARCHIVED) Python flow version, so it is registered as an action.",
+    )
+    archive_python_flow = kante.django_mutation(
+        resolver=mutations.archive_python_flow,
+        description="Archive a PUBLISHED Python flow version, so it is no longer registered.",
+    )
+    delete_python_flow = kante.django_mutation(
+        resolver=mutations.delete_python_flow,
+        description="Delete a DRAFT Python flow version.",
+    )
+    create_python_run = kante.django_mutation(
+        resolver=mutations.create_python_run,
+        description="Start (or reuse) the run of a published Python flow version for a task.",
+    )
+    close_python_run = kante.django_mutation(
+        resolver=mutations.close_python_run,
+        description="Finish a Python flow run as COMPLETED or FAILED.",
     )
 
 

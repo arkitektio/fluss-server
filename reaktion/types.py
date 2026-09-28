@@ -397,6 +397,96 @@ class Workspace:
         return self.flows.order_by("-created_at").first()
 
 
+class ManifestEntryModel(BaseModel):
+    alias: str = Field(description="The name the action is injected under in the source.")
+    action_hash: str = Field(description="The hash of the action definition that is called.")
+    app: str | None = Field(default=None, description="The app that provides the action, if pinned.")
+    key: str | None = Field(default=None, description="The key of the action within its app, if pinned.")
+    version: str | None = Field(default=None, description="The version of the app, if pinned.")
+    effect: renums.EffectClass = Field(default=renums.EffectClass.NONE, description="Whether calling the action touches the real world (PHYSICAL).")
+
+
+@pydantic.type(ManifestEntryModel, description="One action a Python flow may call. The manifest is the flow's permission boundary: the executor injects only these.")
+class ManifestEntry:
+    alias: str
+    action_hash: str
+    app: str | None
+    key: str | None
+    version: str | None
+    effect: renums.EffectClass
+
+
+@kante.django_type(
+    models.PythonFlow,
+    filters=filters.PythonFlowFilter,
+    ordering=order.PythonFlowOrder,
+    pagination=True,
+    description=(
+        "A PythonFlow is one immutable version of a flow written as Python source. Versions of the "
+        "same flow share a lineage; identical content within a lineage is deduplicated. Only "
+        "PUBLISHED versions are registered as actions."
+    ),
+)
+class PythonFlow:
+    id: strawberry.ID = kante.django_field(description="The unique identifier of this version.")
+    title: str = kante.django_field(description="A human-readable title for the flow.")
+    description: str | None = kante.django_field(description="An optional longer description of what the flow does.")
+    created_at: datetime.datetime = kante.django_field(description="The time at which this version was created.")
+    lineage: strawberry.ID = kante.django_field(description="Shared by every version of the same flow.")
+    previous: Optional["PythonFlow"] = kante.django_field(description="The version this one was derived from, if any.")
+    next_versions: list["PythonFlow"] = kante.django_field(description="The versions derived from this one.")
+    source: str = kante.django_field(description="The Python source of the flow.")
+    entrypoint: str = kante.django_field(description="The function in the source that is called.")
+    runtime: str = kante.django_field(description="The executor runtime (interpreter + helpers) the source was validated against.")
+    status: enums.PythonFlowStatus = kante.django_field(description="DRAFT, PUBLISHED (registered as an action) or ARCHIVED.")
+    hash: str = kante.django_field(description="A content hash over source, entrypoint, manifest and runtime.")
+    runs: list["PythonRun"] = kante.django_field(description="The runs of this version.")
+
+    @classmethod
+    def get_queryset(cls, queryset, info, **kwargs):
+        return build_prescoped_queryset(info, queryset)
+
+    @kante.django_field(description="The arguments of the entrypoint, as rekuest ports.")
+    def args(self, info: Info) -> list[rtypes.ArgPort]:
+        return [rmodels.ArgPortModel(**port) for port in self.args]
+
+    @kante.django_field(description="The return values of the entrypoint, as rekuest ports.")
+    def returns(self, info: Info) -> list[rtypes.ReturnPort]:
+        return [rmodels.ReturnPortModel(**port) for port in self.returns]
+
+    @kante.django_field(description="Every action the source may call, under the name it is injected as.")
+    def manifest(self, info: Info) -> list[ManifestEntry]:
+        return [ManifestEntryModel(**entry) for entry in self.manifest]
+
+    @kante.django_field(description="Whether any action in the manifest has a PHYSICAL effect.")
+    def physical(self, info: Info) -> bool:
+        return self.is_physical
+
+    @kante.django_field(description="Every version in this flow's lineage, oldest first.")
+    def versions(self, info: Info) -> list["PythonFlow"]:
+        return list(models.PythonFlow.objects.filter(organization_id=self.organization_id, lineage=self.lineage).order_by("created_at", "id"))
+
+
+@kante.django_type(
+    models.PythonRun,
+    filters=filters.PythonRunFilter,
+    ordering=order.PythonRunOrder,
+    pagination=True,
+    description="A PythonRun is one execution of a published PythonFlow for a task; its step-by-step history is that task's child tasks in rekuest.",
+)
+class PythonRun:
+    id: strawberry.ID = kante.django_field(description="The unique identifier of the run.")
+    flow: PythonFlow = kante.django_field(description="The version that is executed.")
+    task_id: strawberry.ID = kante.django_field(description="The id of the rekuest task that runs the flow.")
+    status: enums.PythonRunStatus = kante.django_field(description="RUNNING, COMPLETED or FAILED.")
+    created_at: datetime.datetime = kante.django_field(description="The time at which the run started.")
+    finished_at: datetime.datetime | None = kante.django_field(description="The time at which the run finished, if it has.")
+
+    @classmethod
+    def get_queryset(cls, queryset, info, **kwargs):
+        return build_prescoped_queryset(info, queryset, field="flow__organization")
+
+
 WorkspaceStats, WorkspaceStatsResolver = create_stats_type(
     model=models.Workspace,
     filters=filters.WorkspaceFilter,

@@ -12,6 +12,18 @@ class RunEventKindChoices(TextChoices):
     UNKNOWN = "UNKNOWN", "UNKNOWN (Should never be used)"
 
 
+class PythonFlowStatusChoices(TextChoices):
+    DRAFT = "DRAFT", "DRAFT (Stored, not registered as an action)"
+    PUBLISHED = "PUBLISHED", "PUBLISHED (Registered as an action)"
+    ARCHIVED = "ARCHIVED", "ARCHIVED (No longer registered; kept for its runs)"
+
+
+class PythonRunStatusChoices(TextChoices):
+    RUNNING = "RUNNING", "RUNNING"
+    COMPLETED = "COMPLETED", "COMPLETED"
+    FAILED = "FAILED", "FAILED"
+
+
 class ReactiveImplementationChoices(TextChoices):
     # Combination
     ZIP = "ZIP", "ZIP (Zip the data)"
@@ -192,3 +204,17 @@ class DemandKind(str, Enum):
 
     ARGS = "args"
     RETURNS = "returns"
+
+
+@strawberry.enum(description="The lifecycle of a PythonFlow version: only PUBLISHED versions are registered as actions.")
+class PythonFlowStatus(str, Enum):
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    ARCHIVED = "ARCHIVED"
+
+
+@strawberry.enum(description="The status of a PythonRun.")
+class PythonRunStatus(str, Enum):
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"

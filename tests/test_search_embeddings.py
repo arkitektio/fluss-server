@@ -15,7 +15,7 @@ from django.test import override_settings
 
 from embeddings import engine
 from embeddings.healer import reembed_all, reembed_stale
-from reaktion.models import Flow, Workspace
+from reaktion.models import Flow, PythonFlow, Workspace
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]
 
@@ -43,9 +43,22 @@ def _flow(ctx, title: str, description: str | None = None) -> Flow:
     return Flow.objects.create(title=title, description=description, hash=uuid.uuid4().hex, creator=ctx.request.user, organization=ctx.request.organization)
 
 
+PYTHON_FLOWS = """
+query ($filters: PythonFlowFilter, $ordering: [PythonFlowOrder!]) {
+  pythonFlows(filters: $filters, ordering: $ordering) { title }
+}
+"""
+
+
+@sync_to_async
+def _python_flow(ctx, title: str, description: str | None = None) -> PythonFlow:
+    return PythonFlow.objects.create(title=title, description=description, source="def main(): pass", runtime="monty-0.1", hash=uuid.uuid4().hex, creator=ctx.request.user, organization=ctx.request.organization)
+
+
 MODELS = [
     pytest.param(Workspace, _workspace, WORKSPACES, "workspaces", id="workspace"),
     pytest.param(Flow, _flow, FLOWS, "flows", id="flow"),
+    pytest.param(PythonFlow, _python_flow, PYTHON_FLOWS, "pythonFlows", id="pythonflow"),
 ]
 
 

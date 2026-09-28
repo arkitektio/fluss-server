@@ -15,7 +15,7 @@ from rekuest_service import Service, organization_of
 service = Service("fluss", description="Workflows and their runs.")
 
 # The models whose name + description are embedded (see ``embeddings.healer``).
-_EMBEDDED_MODELS = (models.Workspace, models.Flow)
+_EMBEDDED_MODELS = (models.Workspace, models.Flow, models.PythonFlow)
 
 
 # --- Signals ------------------------------------------------------------------------------
@@ -33,6 +33,18 @@ service.model_signal(
     descriptors=lambda run: {"@fluss/status": str(run.status)},
     descriptor_keys=("@fluss/status",),
     description="A flow run started, changed status (e.g. completed) or was deleted.",
+)
+service.model_signal(
+    models.PythonFlow, "@fluss/pythonflow", kinds=("CREATED", "UPDATED", "DELETED"), organization=organization_of(),
+    descriptors=lambda flow: {"@fluss/status": str(flow.status), "@fluss/physical": flow.is_physical},
+    descriptor_keys=("@fluss/status", "@fluss/physical"),
+    description="A Python flow version was created, published or archived (UPDATED), or a draft deleted.",
+)
+service.model_signal(
+    models.PythonRun, "@fluss/pythonrun", kinds=("CREATED", "UPDATED", "DELETED"), organization=organization_of("flow.organization"),
+    descriptors=lambda run: {"@fluss/status": str(run.status)},
+    descriptor_keys=("@fluss/status",),
+    description="A Python flow run started, finished (COMPLETED/FAILED) or was deleted.",
 )
 service.model_signal(models.Workspace, "@fluss/workspace", kinds=("CREATED", "UPDATED", "DELETED"), organization=organization_of(), description="A workspace was created, changed or deleted.")
 

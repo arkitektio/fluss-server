@@ -83,6 +83,32 @@ class FlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilter
     pass
 
 
+@kante.filter_type(models.PythonFlow)
+class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+    @kante.filter_field(description="Filter by lifecycle status")
+    def status(self, info: Info, value: list[enums.PythonFlowStatus], prefix: str) -> Q:
+        return Q(**{f"{prefix}status__in": value})
+
+    @kante.filter_field(description="Filter to the versions of one flow")
+    def lineage(self, info: Info, value: strawberry.ID, prefix: str) -> Q:
+        return Q(**{f"{prefix}lineage": value})
+
+
+@kante.filter_type(models.PythonRun)
+class PythonRunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+    @kante.filter_field(description="Search by task id (case-insensitive substring)")
+    def search(self, info: Info, value: str, prefix: str) -> Q:
+        return Q(**{f"{prefix}task_id__icontains": value})
+
+    @kante.filter_field(description="Filter by run status")
+    def status(self, info: Info, value: list[enums.PythonRunStatus], prefix: str) -> Q:
+        return Q(**{f"{prefix}status__in": value})
+
+    @kante.filter_field(description="Filter to the runs of these PythonFlow versions")
+    def flows(self, info: Info, value: list[strawberry.ID], prefix: str) -> Q:
+        return Q(**{f"{prefix}flow_id__in": value})
+
+
 @kante.filter_type(models.ReactiveTemplate)
 class ReactiveTemplateFilter(IdsFilterMixin, TitleSearchFilterMixin):
     @kante.filter_field(description="Filter by reactive implementation")
