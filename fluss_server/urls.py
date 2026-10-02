@@ -22,23 +22,13 @@ from django.urls import include
 from .schema import schema
 from health_check.views import MainView
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from rekuest_service.views import answers_challenge
 from kante.path import dynamicpath
 from fluss_server.service import service as rekuest_service
 
-def fakts_challenge(request):
-    """
-    Placeholder view for the .well-known/fakts-challenge endpoint.
-    This should be replaced with the actual logic to handle the challenge.
-    """
-    return HttpResponse("Fakts Challenge Endpoint", status=200)
-
-
-
 urlpatterns = [
     dynamicpath("admin/", admin.site.urls),
-    dynamicpath("ht",  csrf_exempt(MainView.as_view()), name="health_check"),
-    dynamicpath(".well-known/fakts-challenge", fakts_challenge, name="fakts-challenge"),
+    dynamicpath("ht",  answers_challenge(csrf_exempt(MainView.as_view())), name="health_check"),
     # The hub's rekuest runs this service's periodic work through here (internal network only).
     *rekuest_service.urls,
 ]
