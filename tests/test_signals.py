@@ -76,7 +76,7 @@ class _Intake:
 @pytest.fixture
 def intake(settings):
     server = _Intake()
-    settings.REKUEST_HOOK = {"REKUEST_URL": server.url, "SERVICE": "fluss"}
+    settings.REKUEST_SERVICE = {"REKUEST_URL": server.url, "SERVICE": "fluss"}
     settings.INSTANCE = {
         "PRIVATE_KEY": KEY.as_pem(private=True).decode(),
         "TRUST_JWKS": {"keys": [{**trust.public_jwk(KEY), "service": "live.arkitekt.fluss"}]},
@@ -93,6 +93,24 @@ def _organization():
 
 def test_the_manifest_declares_every_model_signal():
     assert {s["identifier"]: s["kinds"] for s in service.manifest()["signals"]} == EXPECTED
+
+
+def test_the_manifest_lists_what_fluss_hosts_with_its_descriptors():
+    hosted = {s["identifier"]: s for s in service.manifest()["structures"]}
+    # Everything fluss hosts is signalled.
+    assert set(hosted) == set(EXPECTED)
+    assert hosted["@fluss/workspace"]["label"] == "Workspace"
+    assert hosted["@fluss/workspace"]["descriptors"] == []
+    assert [(d["key"], d["type"]) for d in hosted["@fluss/flow"]["descriptors"]] == [
+        ("@fluss/version", "STRING"),
+        ("@fluss/n_nodes", "INT"),
+        ("@fluss/n_edges", "INT"),
+        ("@fluss/brittle", "BOOL"),
+    ]
+    assert {"key": "@fluss/physical", "type": "BOOL", "description": "Whether its source may call an action with a PHYSICAL effect"} in hosted["@fluss/pythonflow"]["descriptors"]
+    # A signal carries exactly the keys its structure declares.
+    signalled = {s["identifier"]: s["descriptors"] for s in service.manifest()["signals"]}
+    assert signalled == {identifier: [d["key"] for d in s["descriptors"]] for identifier, s in hosted.items()}
 
 
 @pytest.mark.django_db(transaction=True)

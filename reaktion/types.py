@@ -12,6 +12,7 @@ from rekuest_core.objects import types as rtypes
 from rekuest_core.objects import models as rmodels
 from rekuest_core import enums as renums
 from strawberry import LazyType
+from strawberry.scalars import JSON
 from kante.types import Info
 from .type_gen import create_stats_type
 
@@ -30,6 +31,20 @@ def build_prescoper(field="organization"):
         return build_prescoped_queryset(info, queryset, field=field)
 
     return prescoper
+
+
+DESCRIPTORS_DESCRIPTION = (
+    "This object's descriptors, a flat mapping of key to value: the facts about it that an action's port can `require` and a trigger can test "
+    "(e.g. `@fluss/status`). The keys are the ones fluss declares for this structure, and the values are the ones a signal about the object carries. "
+    "Empty for a structure that declares none"
+)
+
+
+def resolve_descriptors(root) -> JSON:  # noqa: ANN001 - the model instance behind any hosted type
+    """The descriptors of a hosted object, from its structure's declaration (``fluss_server.service``)."""
+    from fluss_server.service import service  # the declaration imports reaktion.models
+
+    return service.describe(root)
 
 
 class PositionModel(BaseModel):
@@ -355,6 +370,7 @@ class Graph:
 )
 class Flow:
     id: strawberry.ID = kante.django_field(description="The unique identifier of the flow.")
+    descriptors: JSON = kante.django_field(resolver=resolve_descriptors, description=DESCRIPTORS_DESCRIPTION)
     title: str = kante.django_field(description="A human-readable title for the flow.")
     description: str | None = kante.django_field(description="An optional longer description of what the flow does.")
     created_at: datetime.datetime = kante.django_field(description="The time at which the flow was created.")
@@ -383,6 +399,7 @@ class Flow:
 )
 class Workspace:
     id: strawberry.ID = kante.django_field(description="The unique identifier of the workspace.")
+    descriptors: JSON = kante.django_field(resolver=resolve_descriptors, description=DESCRIPTORS_DESCRIPTION)
     title: str = kante.django_field(description="A human-readable title for the workspace.")
     description: str | None = kante.django_field(description="An optional longer description of the workspace.")
     created_at: datetime.datetime = kante.django_field(description="The time at which the workspace was created.")
@@ -429,6 +446,7 @@ class ManifestEntry:
 )
 class PythonFlow:
     id: strawberry.ID = kante.django_field(description="The unique identifier of this version.")
+    descriptors: JSON = kante.django_field(resolver=resolve_descriptors, description=DESCRIPTORS_DESCRIPTION)
     title: str = kante.django_field(description="A human-readable title for the flow.")
     description: str | None = kante.django_field(description="An optional longer description of what the flow does.")
     created_at: datetime.datetime = kante.django_field(description="The time at which this version was created.")
@@ -476,6 +494,7 @@ class PythonFlow:
 )
 class PythonRun:
     id: strawberry.ID = kante.django_field(description="The unique identifier of the run.")
+    descriptors: JSON = kante.django_field(resolver=resolve_descriptors, description=DESCRIPTORS_DESCRIPTION)
     flow: PythonFlow = kante.django_field(description="The version that is executed.")
     task_id: strawberry.ID = kante.django_field(description="The id of the rekuest task that runs the flow.")
     status: enums.PythonRunStatus = kante.django_field(description="RUNNING, COMPLETED or FAILED.")
@@ -546,6 +565,7 @@ class ReactiveTemplate:
 )
 class Run:
     id: strawberry.ID = kante.django_field(description="The unique identifier of the run.")
+    descriptors: JSON = kante.django_field(resolver=resolve_descriptors, description=DESCRIPTORS_DESCRIPTION)
     created_at: datetime.datetime = kante.django_field(description="The time at which the run was started.")
     events: list["RunEvent"] = kante.django_field(description="All events emitted during this run, in order.")
     flow: "Flow" = kante.django_field(description="The flow that is being executed by this run.")
