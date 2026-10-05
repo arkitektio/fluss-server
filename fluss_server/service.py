@@ -1,4 +1,4 @@
-"""fluss as a service of the hub: what exists here (vendored ``rekuest_service``).
+"""fluss as a service of the hub: what exists here (``arkitekt_service.service``).
 
 Two separate declarations, read by rekuest from the service's manifest (``*service.urls`` in
 ``urls.py``) and catalogued hub-wide:
@@ -16,7 +16,7 @@ agent's to say (``fluss_server.hook_agent``), a different thing with its own con
 
 
 from reaktion import models
-from rekuest_service import Descriptor, Service, organization_of
+from arkitekt_service.service import Descriptor, Service, organization_of
 
 service = Service("fluss", description="Workflows and their runs.")
 
