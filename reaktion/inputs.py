@@ -306,7 +306,7 @@ class ManifestEntryInputModel(BaseModel):
     app: str | None = None
     key: str | None = None
     version: str | None = None
-    effect: renums.EffectClass = renums.EffectClass.NONE
+    effect: renums.Effects = renums.Effects.UNKNOWN
 
     @field_validator("alias")
     @classmethod
@@ -323,7 +323,7 @@ class ManifestEntryInput:
     app: str | None = None
     key: str | None = None
     version: str | None = None
-    effect: renums.EffectClass = renums.EffectClass.NONE
+    effect: renums.Effects = renums.Effects.UNKNOWN
 
 
 class CreatePythonFlowInputModel(BaseModel):

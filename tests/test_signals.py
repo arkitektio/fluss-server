@@ -107,7 +107,7 @@ def test_the_manifest_lists_what_fluss_hosts_with_its_descriptors():
         ("@fluss/n_edges", "INT"),
         ("@fluss/brittle", "BOOL"),
     ]
-    assert {"key": "@fluss/physical", "type": "BOOL", "description": "Whether its source may call an action with a PHYSICAL effect"} in hosted["@fluss/pythonflow"]["descriptors"]
+    assert {"key": "@fluss/physical", "type": "BOOL", "description": "Whether its source may call an action with an IRREVERSIBLE effect"} in hosted["@fluss/pythonflow"]["descriptors"]
     # A signal carries exactly the keys its structure declares.
     signalled = {s["identifier"]: s["descriptors"] for s in service.manifest()["signals"]}
     assert signalled == {identifier: [d["key"] for d in s["descriptors"]] for identifier, s in hosted.items()}
@@ -134,7 +134,7 @@ def test_publishing_a_python_flow_is_signalled_with_its_status_and_effect(intake
     org = _organization()
     flow = PythonFlow.objects.create(
         organization=org, title="moves", source="def main(): pass", runtime="monty-0.1", hash="h",
-        manifest=[{"alias": "move_stage", "action_hash": "a", "effect": "PHYSICAL"}],
+        manifest=[{"alias": "move_stage", "action_hash": "a", "effect": "IRREVERSIBLE"}],
     )
     flow.status = "PUBLISHED"
     flow.save()

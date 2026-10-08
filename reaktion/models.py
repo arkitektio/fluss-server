@@ -203,7 +203,7 @@ class PythonFlow(EmbeddedDescriptionMixin, models.Model):
     @property
     def is_physical(self) -> bool:
         """Whether the source may call an action that touches the real world."""
-        return any(entry.get("effect") == "PHYSICAL" for entry in self.manifest or [])
+        return any(entry.get("effect") == "IRREVERSIBLE" for entry in self.manifest or [])
 
 
 class PythonRun(models.Model):

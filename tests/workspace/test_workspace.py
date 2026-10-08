@@ -89,6 +89,20 @@ async def test_update_workspace_round_trips_a_valid_graph(aexecute, make_workspa
     assert read.data["flow"]["graph"]["nodes"][0]["outs"][0][0]["children"][0]["identifier"] == "@mikro/image"
 
 
+async def test_update_workspace_accepts_an_enum_port_naming_its_enum(aexecute, make_workspace):
+    """An ENUM port may carry the identifier of the enum its choices came from, as the SDK sends it."""
+    ws = await make_workspace(title="Enum")
+    port = {"key": "positioner", "kind": "ENUM", "nullable": False, "identifier": "@stage/positioner", "choices": [{"value": "x", "label": "X"}, {"value": "y", "label": "Y"}]}
+    graph = {"nodes": [_node("1", "ARGS", [[]], [[port]]), _node("2", "RETURNS", [[]], [[]])], "edges": [], "globals": []}
+    res = await aexecute(UPDATE_WORKSPACE, {"input": {"workspace": str(ws.id), "graph": graph, "title": "Enum"}})
+    assert not res.errors, res.errors
+
+    flow = await Flow.objects.aget(workspace_id=ws.id, title="Enum")
+    read = await aexecute("query($id: ID!) { flow(id: $id) { graph { nodes { outs { key kind identifier } } } } }", {"id": str(flow.id)})
+    assert not read.errors, read.errors
+    assert read.data["flow"]["graph"]["nodes"][0]["outs"][0][0] == {"key": "positioner", "kind": "ENUM", "identifier": "@stage/positioner"}
+
+
 async def test_update_workspace_defaults_omitted_value_maps(aexecute, make_workspace):
     """``constantsMap``/``globalsMap`` are optional on the wire but always stored as maps.
 

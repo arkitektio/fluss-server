@@ -420,7 +420,7 @@ class ManifestEntryModel(BaseModel):
     app: str | None = Field(default=None, description="The app that provides the action, if pinned.")
     key: str | None = Field(default=None, description="The key of the action within its app, if pinned.")
     version: str | None = Field(default=None, description="The version of the app, if pinned.")
-    effect: renums.EffectClass = Field(default=renums.EffectClass.NONE, description="Whether calling the action touches the real world (PHYSICAL).")
+    effect: renums.Effects = Field(default=renums.Effects.UNKNOWN, description="What calling the action again would do to the world. IRREVERSIBLE marks the flow physical.")
 
 
 @pydantic.type(ManifestEntryModel, description="One action a Python flow may call. The manifest is the flow's permission boundary: the executor injects only these.")
@@ -430,7 +430,7 @@ class ManifestEntry:
     app: str | None
     key: str | None
     version: str | None
-    effect: renums.EffectClass
+    effect: renums.Effects
 
 
 @kante.django_type(
@@ -476,7 +476,7 @@ class PythonFlow:
     def manifest(self, info: Info) -> list[ManifestEntry]:
         return [ManifestEntryModel(**entry) for entry in self.manifest]
 
-    @kante.django_field(description="Whether any action in the manifest has a PHYSICAL effect.")
+    @kante.django_field(description="Whether any action in the manifest has an IRREVERSIBLE effect.")
     def physical(self, info: Info) -> bool:
         return self.is_physical
 

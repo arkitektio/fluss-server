@@ -1,6 +1,10 @@
 """PythonFlow versions and runs, executed against the schema on a real Postgres."""
 
+from importlib import import_module
+
 import pytest
+from asgiref.sync import sync_to_async
+from django.apps import apps
 
 from reaktion.models import PythonFlow, PythonRun
 
@@ -119,9 +123,32 @@ async def test_title_and_description_change_in_place(aexecute):
     assert (await PythonFlow.objects.aget(id=flow["id"])).hash == flow["hash"]
 
 
-async def test_a_physical_action_marks_the_flow_physical(aexecute):
-    flow = await _create(aexecute, manifest=[{"alias": "move_stage", "actionHash": "h", "effect": "PHYSICAL"}])
+async def test_an_irreversible_action_marks_the_flow_physical(aexecute):
+    flow = await _create(aexecute, manifest=[{"alias": "move_stage", "actionHash": "h", "effect": "IRREVERSIBLE"}])
     assert flow["physical"] is True
+
+
+async def test_an_undeclared_effect_is_unknown_and_not_physical(aexecute):
+    flow = await _create(aexecute, manifest=[{"alias": "segment", "actionHash": "h"}, {"alias": "snap", "actionHash": "g", "effect": "REPEATABLE"}])
+    assert [entry["effect"] for entry in flow["manifest"]] == ["UNKNOWN", "REPEATABLE"]
+    assert flow["physical"] is False
+
+
+async def test_stored_physical_manifests_are_migrated_to_irreversible(aexecute):
+    flow = await _create(aexecute, manifest=[{"alias": "move_stage", "actionHash": "h", "effect": "NONE"}, {"alias": "segment", "actionHash": "g", "effect": "NONE"}])
+    old = [{"alias": "move_stage", "action_hash": "h", "effect": "PHYSICAL"}, {"alias": "segment", "action_hash": "g", "effect": "NONE"}]
+    await PythonFlow.objects.filter(id=flow["id"]).aupdate(manifest=old)
+
+    migration = import_module("reaktion.migrations.0005_manifest_effects")
+    await sync_to_async(migration.physical_to_irreversible)(apps, None)
+
+    row = await PythonFlow.objects.aget(id=flow["id"])
+    assert [entry["effect"] for entry in row.manifest] == ["IRREVERSIBLE", "NONE"]
+    assert row.is_physical
+    assert row.hash == flow["hash"]
+
+    await sync_to_async(migration.irreversible_to_physical)(apps, None)
+    assert (await PythonFlow.objects.aget(id=flow["id"])).manifest == old
 
 
 # --- validation --------------------------------------------------------------------------

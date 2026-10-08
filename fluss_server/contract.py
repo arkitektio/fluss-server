@@ -62,7 +62,7 @@ HOSTS = Hosts(
             description="A Python flow: one immutable version of a flow written as Python source.",
             descriptors=[
                 Descriptor(key="@fluss/status", type="STRING", description="Its lifecycle: DRAFT, PUBLISHED or ARCHIVED"),
-                Descriptor(key="@fluss/physical", type="BOOL", description="Whether its source may call an action with a PHYSICAL effect"),
+                Descriptor(key="@fluss/physical", type="BOOL", description="Whether its source may call an action with an IRREVERSIBLE effect"),
             ],
         ),
         Structure(

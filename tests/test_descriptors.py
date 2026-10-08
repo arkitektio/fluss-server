@@ -45,7 +45,7 @@ def _seed(ctx) -> dict:
     run = Run.objects.create(flow=flow, task_id=uuid.uuid4().hex)
     python_flow = PythonFlow.objects.create(
         organization=org, creator=user, title="moves", source="def main(): pass", runtime="monty-0.1", hash=uuid.uuid4().hex, status="PUBLISHED",
-        manifest=[{"alias": "move_stage", "action_hash": "a", "effect": "PHYSICAL"}],
+        manifest=[{"alias": "move_stage", "action_hash": "a", "effect": "IRREVERSIBLE"}],
     )
     python_run = PythonRun.objects.create(flow=python_flow, task_id=uuid.uuid4().hex)
     return {"workspace": workspace, "flow": flow, "run": run, "pythonFlow": python_flow, "pythonRun": python_run}
