@@ -5,7 +5,8 @@ is declared once, as data, in ``fluss_server.contract`` (``hosts``), so that a h
 image. This module only binds it: each structure to its model and to what computes its
 descriptors, each signal to the saves and deletes that send it. A structure the contract does not
 declare cannot be bound, and one it declares that nothing binds here stops the service at its
-start. The GraphQL types answer ``descriptors`` from the same binding (``reaktion.types``).
+start. Each described row stores its descriptors on every save (``stored_descriptors``): the
+GraphQL types answer ``descriptors`` from there, and a filter's ``requires`` reads it in SQL.
 
 Hosting announces nothing by itself: a structure with no signal below is hosted silently.
 
@@ -17,6 +18,7 @@ agent's to say (``fluss_server.hook_agent``), a different thing with its own con
 from reaktion import models
 from arkitekt_service.service import Service, organization_of
 
+from fluss_server import descriptors
 from fluss_server.contract import contract
 
 service = Service("fluss", hosts=contract.description.hosts, description="Workflows and their runs.")
@@ -25,23 +27,10 @@ service = Service("fluss", hosts=contract.description.hosts, description="Workfl
 # --- Structures: what fluss hosts -----------------------------------------------------
 
 workspace = service.structure(models.Workspace, "@fluss/workspace")
-flow = service.structure(
-    models.Flow,
-    "@fluss/flow",
-    describe=lambda flow: {
-        "@fluss/version": flow.version,
-        "@fluss/n_nodes": len(flow.nodes or []),
-        "@fluss/n_edges": len(flow.edges or []),
-        "@fluss/brittle": bool(flow.brittle),
-    },
-)
-run = service.structure(models.Run, "@fluss/run", describe=lambda run: {"@fluss/status": str(run.status)})
-pythonflow = service.structure(
-    models.PythonFlow,
-    "@fluss/pythonflow",
-    describe=lambda flow: {"@fluss/status": str(flow.status), "@fluss/physical": flow.is_physical},
-)
-pythonrun = service.structure(models.PythonRun, "@fluss/pythonrun", describe=lambda run: {"@fluss/status": str(run.status)})
+flow = service.structure(models.Flow, "@fluss/flow", describe=descriptors.flow_descriptors)
+run = service.structure(models.Run, "@fluss/run", describe=descriptors.run_descriptors)
+pythonflow = service.structure(models.PythonFlow, "@fluss/pythonflow", describe=descriptors.python_flow_descriptors)
+pythonrun = service.structure(models.PythonRun, "@fluss/pythonrun", describe=descriptors.run_descriptors)
 
 
 # --- Signals: what fluss announces -----------------------------------------------------

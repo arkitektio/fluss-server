@@ -13,8 +13,22 @@ import strawberry
 from django.db.models import Q, QuerySet
 from embeddings.search import hybrid_search
 from kante.types import Info
+from rekuest_core.inputs.types import RequiresInput
 
 from reaktion import enums, models
+
+
+# --- descriptors: a port's requires ------------------------------------------
+
+
+REQUIRES_DESCRIPTION = "Filter to the objects satisfying every one of these descriptor constraints: the `requires` of a port (`RequiresInput`), handed on unchanged, so a picker offers what the port accepts. Answered from the stored descriptors, in one indexed query"
+
+
+def requires(model: type, value: list[RequiresInput], prefix: str) -> Q:
+    """A port's ``requires`` on the stored descriptors of ``model``'s rows."""
+    from fluss_server.service import service  # it imports the models this module filters
+
+    return service.requires(model, value, prefix)
 
 
 # --- reusable mixins ---------------------------------------------------------
@@ -80,7 +94,9 @@ class WorkspaceFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtF
 
 @kante.filter_type(models.Flow)
 class FlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
-    pass
+    @kante.filter_field(description=REQUIRES_DESCRIPTION)
+    def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
+        return requires(models.Flow, value, prefix)
 
 
 @kante.filter_type(models.PythonFlow)
@@ -92,6 +108,10 @@ class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAt
     @kante.filter_field(description="Filter to the versions of one flow")
     def lineage(self, info: Info, value: strawberry.ID, prefix: str) -> Q:
         return Q(**{f"{prefix}lineage": value})
+
+    @kante.filter_field(description=REQUIRES_DESCRIPTION)
+    def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
+        return requires(models.PythonFlow, value, prefix)
 
 
 @kante.filter_type(models.PythonRun)
@@ -108,6 +128,10 @@ class PythonRunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
     def flows(self, info: Info, value: list[strawberry.ID], prefix: str) -> Q:
         return Q(**{f"{prefix}flow_id__in": value})
 
+    @kante.filter_field(description=REQUIRES_DESCRIPTION)
+    def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
+        return requires(models.PythonRun, value, prefix)
+
 
 @kante.filter_type(models.ReactiveTemplate)
 class ReactiveTemplateFilter(IdsFilterMixin, TitleSearchFilterMixin):
@@ -121,6 +145,10 @@ class RunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
     @kante.filter_field(description="Search by task id (case-insensitive substring)")
     def search(self, info: Info, value: str, prefix: str) -> Q:
         return Q(**{f"{prefix}task_id__icontains": value})
+
+    @kante.filter_field(description=REQUIRES_DESCRIPTION)
+    def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
+        return requires(models.Run, value, prefix)
 
 
 @kante.filter_type(models.Snapshot)

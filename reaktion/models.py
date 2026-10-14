@@ -1,6 +1,8 @@
 import uuid
 
+from arkitekt_service.service.described import Described
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.indexes import GinIndex
 from authentikate.models import Organization, User
 
 # Create your models here.
@@ -49,7 +51,7 @@ class Workspace(EmbeddedDescriptionMixin, models.Model):
         indexes = [*embedding_indexes("workspace")]
 
 
-class Flow(EmbeddedDescriptionMixin, models.Model):
+class Flow(EmbeddedDescriptionMixin, Described):
     """One saved version of a workspace's graph; embeds its title + description for ``search``."""
 
     embedding_source_fields = ("title", "description")
@@ -89,7 +91,7 @@ class Flow(EmbeddedDescriptionMixin, models.Model):
             )
         ]
         # The embedding healer's "any row not by the current model?" probe.
-        indexes = [*embedding_indexes("flow")]
+        indexes = [*embedding_indexes("flow"), GinIndex(fields=["stored_descriptors"], name="flow_desc_gin", opclasses=["jsonb_path_ops"])]
 
 
 class ReactiveTemplate(models.Model):
@@ -116,7 +118,7 @@ class ReactiveTemplate(models.Model):
 
 
 # Montoring Classes
-class Run(models.Model):
+class Run(Described):
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="runs")
 
     task_id = models.CharField(null=True, blank=True, max_length=1000)
@@ -129,6 +131,9 @@ class Run(models.Model):
         help_text="The users that have pinned the position",
     )
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
+
+    class Meta:
+        indexes = [GinIndex(fields=["stored_descriptors"], name="run_desc_gin", opclasses=["jsonb_path_ops"])]
 
     def __str__(self) -> str:
         return f"{self.flow.workspace} - {self.task_id}"
@@ -164,7 +169,7 @@ class RunEvent(models.Model):
 
 
 
-class PythonFlow(EmbeddedDescriptionMixin, models.Model):
+class PythonFlow(EmbeddedDescriptionMixin, Described):
     """One immutable version of a flow written as Python source (not a graph).
 
     Versions of the same flow share a ``lineage`` (minted on the first, copied from ``previous``
@@ -195,7 +200,7 @@ class PythonFlow(EmbeddedDescriptionMixin, models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["organization", "lineage", "hash"], name="pyflow_unique_version")]
-        indexes = [*embedding_indexes("pyflow")]
+        indexes = [*embedding_indexes("pyflow"), GinIndex(fields=["stored_descriptors"], name="pyflow_desc_gin", opclasses=["jsonb_path_ops"])]
 
     def __str__(self) -> str:
         return f"{self.title} ({self.hash[:8]})"
@@ -206,7 +211,7 @@ class PythonFlow(EmbeddedDescriptionMixin, models.Model):
         return any(entry.get("effect") == "IRREVERSIBLE" for entry in self.manifest or [])
 
 
-class PythonRun(models.Model):
+class PythonRun(Described):
     """One execution of a published PythonFlow; its step-by-step history is the rekuest task tree."""
 
     # Only drafts can be deleted (see ``delete_python_flow``) and drafts never run, so a flow
@@ -220,6 +225,7 @@ class PythonRun(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["flow", "task_id"], name="pyrun_unique_task")]
+        indexes = [GinIndex(fields=["stored_descriptors"], name="pyrun_desc_gin", opclasses=["jsonb_path_ops"])]
 
 
 class Trace(models.Model):

@@ -83,6 +83,9 @@ def intake(settings):
     }
     yield server
     server.server.shutdown()
+    # Closed, not only stopped: a signal still queued for this intake is refused at once
+    # instead of holding the one sender thread until its timeout.
+    server.server.server_close()
 
 
 def _organization():
@@ -102,10 +105,12 @@ def test_the_manifest_lists_what_fluss_hosts_with_its_descriptors():
     assert hosted["@fluss/workspace"]["label"] == "Workspace"
     assert hosted["@fluss/workspace"]["descriptors"] == []
     assert [(d["key"], d["type"]) for d in hosted["@fluss/flow"]["descriptors"]] == [
-        ("@fluss/version", "STRING"),
         ("@fluss/n_nodes", "INT"),
         ("@fluss/n_edges", "INT"),
-        ("@fluss/brittle", "BOOL"),
+        ("@fluss/n_globals", "INT"),
+        ("@fluss/node_kinds", "LIST"),
+        ("@fluss/n_args", "INT"),
+        ("@fluss/n_returns", "INT"),
     ]
     assert {"key": "@fluss/physical", "type": "BOOL", "description": "Whether its source may call an action with an IRREVERSIBLE effect"} in hosted["@fluss/pythonflow"]["descriptors"]
     # A signal carries exactly the keys its structure declares.
@@ -142,4 +147,4 @@ def test_publishing_a_python_flow_is_signalled_with_its_status_and_effect(intake
     created, updated = intake.of("@fluss/pythonflow", count=2)
     assert (created["json"]["kind"], created["json"]["object"]) == ("CREATED", str(flow.pk))
     assert updated["json"]["kind"] == "UPDATED"
-    assert updated["json"]["descriptors"] == {"@fluss/status": "PUBLISHED", "@fluss/physical": True}
+    assert updated["json"]["descriptors"] == {"@fluss/status": "PUBLISHED", "@fluss/physical": True, "@fluss/effect": "IRREVERSIBLE", "@fluss/runtime": "monty-0.1", "@fluss/n_args": 0, "@fluss/n_returns": 0}
