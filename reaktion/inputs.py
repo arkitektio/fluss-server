@@ -303,6 +303,9 @@ class TrackInput:
 class ManifestEntryInputModel(BaseModel):
     alias: str = Field(description="The name the action is injected under in the source")
     action_hash: str
+    kind: renums.ActionKind = Field(description="The action's kind: a Python flow can only call FUNCTION actions")
+    args: list[rimodels.ArgPortInputModel] = Field(default_factory=list, description="The action's arg ports, which the source's calls are checked against")
+    returns: list[rimodels.ReturnPortInputModel] = Field(default_factory=list, description="The action's return ports, which the source's use of its results is checked against")
     app: str | None = None
     key: str | None = None
     version: str | None = None
@@ -315,27 +318,30 @@ class ManifestEntryInputModel(BaseModel):
             raise ValueError(f"A manifest alias must be a Python identifier, not {value!r}")
         return value
 
+    @property
+    def hash(self) -> str:
+        """The action's hash, as a manifest action names it."""
+        return self.action_hash
 
-@pydantic.input(ManifestEntryInputModel, description="One action a Python flow may call, as the executor's validation resolved it.")
+
+@pydantic.input(ManifestEntryInputModel, description="One action a Python flow may call, with the ports of that action: the source is checked against them, and only the hash is stored.")
 class ManifestEntryInput:
     alias: str
     action_hash: str
+    kind: renums.ActionKind
+    args: list[ritypes.ArgPortInput]
+    returns: list[ritypes.ReturnPortInput]
     app: str | None = None
     key: str | None = None
     version: str | None = None
     effect: renums.Effects = renums.Effects.UNKNOWN
 
 
-class CreatePythonFlowInputModel(BaseModel):
+class PythonFlowSourceInputModel(BaseModel):
     source: str
     entrypoint: str = "main"
-    title: str | None = None
-    description: str | None = None
-    previous: str | None = None
-    args: list[rimodels.ArgPortInputModel] = Field(default_factory=list)
-    returns: list[rimodels.ReturnPortInputModel] = Field(default_factory=list)
     manifest: list[ManifestEntryInputModel] = Field(default_factory=list)
-    runtime: str
+    structures: list[str] = Field(default_factory=list, description="Structure identifiers the entrypoint's signature uses that no action mentions")
 
     @field_validator("entrypoint")
     @classmethod
@@ -354,17 +360,32 @@ class CreatePythonFlowInputModel(BaseModel):
         return value
 
 
-@pydantic.input(CreatePythonFlowInputModel, description="A new PythonFlow version, carrying the report the executor's validation produced for its source.")
+@pydantic.input(PythonFlowSourceInputModel, description="A Python flow's source and the actions it may call: what validatePythonFlow checks.")
+class PythonFlowSourceInput:
+    source: str
+    entrypoint: str = "main"
+    manifest: list[ManifestEntryInput]
+    structures: list[str]
+
+
+class CreatePythonFlowInputModel(PythonFlowSourceInputModel):
+    title: str | None = None
+    description: str | None = None
+    previous: str | None = None
+
+
+@pydantic.input(
+    CreatePythonFlowInputModel,
+    description="A new PythonFlow version: its source and the actions it may call. The server validates it and derives its ports and runtime.",
+)
 class CreatePythonFlowInput:
     source: str
     entrypoint: str = "main"
     title: str | None = None
     description: str | None = None
     previous: strawberry.ID | None = None
-    args: list[ritypes.ArgPortInput]
-    returns: list[ritypes.ReturnPortInput]
     manifest: list[ManifestEntryInput]
-    runtime: str
+    structures: list[str]
 
 
 @strawberry.input(description="Change a PythonFlow's title or description; its source, manifest and runtime are immutable.")

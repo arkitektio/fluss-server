@@ -13,8 +13,8 @@ class RunEventKindChoices(TextChoices):
 
 
 class PythonFlowStatusChoices(TextChoices):
-    DRAFT = "DRAFT", "DRAFT (Stored, not registered as an action)"
-    PUBLISHED = "PUBLISHED", "PUBLISHED (Registered as an action)"
+    DRAFT = "DRAFT", "DRAFT (Stored, cannot run)"
+    PUBLISHED = "PUBLISHED", "PUBLISHED (Runs, and can be deployed as an action)"
     ARCHIVED = "ARCHIVED", "ARCHIVED (No longer registered; kept for its runs)"
 
 
@@ -22,6 +22,7 @@ class PythonRunStatusChoices(TextChoices):
     RUNNING = "RUNNING", "RUNNING"
     COMPLETED = "COMPLETED", "COMPLETED"
     FAILED = "FAILED", "FAILED"
+    CANCELLED = "CANCELLED", "CANCELLED"
 
 
 class ReactiveImplementationChoices(TextChoices):
@@ -206,7 +207,7 @@ class DemandKind(str, Enum):
     RETURNS = "returns"
 
 
-@strawberry.enum(description="The lifecycle of a PythonFlow version: only PUBLISHED versions are registered as actions.")
+@strawberry.enum(description="The lifecycle of a PythonFlow version: only PUBLISHED versions run, and only they can be deployed as actions (a higher-order implementation of run_python_flow).")
 class PythonFlowStatus(str, Enum):
     DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"
@@ -218,3 +219,4 @@ class PythonRunStatus(str, Enum):
     RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
+    CANCELLED = "CANCELLED"

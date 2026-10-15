@@ -433,6 +433,30 @@ class ManifestEntry:
     effect: renums.Effects
 
 
+@strawberry.type(description="One problem with a Python flow's source.")
+class PythonFlowDiagnostic:
+    message: str = strawberry.field(description="What is wrong, as the checker reports it.")
+    line: int | None = strawberry.field(description="The line of the source it is on, when known.")
+
+
+@strawberry.type(description="What validating a Python flow's source found: the ports, stubs and runtime a version of it would be stored with, or why it would be refused.")
+class PythonFlowValidation:
+    ok: bool = strawberry.field(description="Whether createPythonFlow would store this source.")
+    diagnostics: list[PythonFlowDiagnostic] = strawberry.field(description="Why it would not, when it would not.")
+    stubs: str = strawberry.field(description="The stubs the source is checked against: the manifest's actions and the structures they use, for an editor's completion.")
+    runtime: str = strawberry.field(description="The interpreter and helpers the source was checked against.")
+    stored_args: strawberry.Private[list[dict]]
+    stored_returns: strawberry.Private[list[dict]]
+
+    @strawberry.field(description="The entrypoint's arguments, as rekuest ports (empty unless ok).")
+    def args(self) -> list[rtypes.ArgPort]:
+        return [rmodels.ArgPortModel(**port) for port in self.stored_args]
+
+    @strawberry.field(description="The entrypoint's return values, as rekuest ports (empty unless ok).")
+    def returns(self) -> list[rtypes.ReturnPort]:
+        return [rmodels.ReturnPortModel(**port) for port in self.stored_returns]
+
+
 @kante.django_type(
     models.PythonFlow,
     filters=filters.PythonFlowFilter,
@@ -441,7 +465,7 @@ class ManifestEntry:
     description=(
         "A PythonFlow is one immutable version of a flow written as Python source. Versions of the "
         "same flow share a lineage; identical content within a lineage is deduplicated. Only "
-        "PUBLISHED versions are registered as actions."
+        "PUBLISHED versions run, and only they can be deployed as actions."
     ),
 )
 class PythonFlow:
@@ -456,7 +480,7 @@ class PythonFlow:
     source: str = kante.django_field(description="The Python source of the flow.")
     entrypoint: str = kante.django_field(description="The function in the source that is called.")
     runtime: str = kante.django_field(description="The executor runtime (interpreter + helpers) the source was validated against.")
-    status: enums.PythonFlowStatus = kante.django_field(description="DRAFT, PUBLISHED (registered as an action) or ARCHIVED.")
+    status: enums.PythonFlowStatus = kante.django_field(description="DRAFT, PUBLISHED (runs, and can be deployed as an action) or ARCHIVED.")
     hash: str = kante.django_field(description="A content hash over source, entrypoint, manifest and runtime.")
     runs: list["PythonRun"] = kante.django_field(description="The runs of this version.")
 

@@ -47,19 +47,35 @@ LIST = """
 query ($filters: PythonFlowFilter) { pythonFlows(filters: $filters) { id status } }
 """
 
-SOURCE = "def main(x: int) -> int:\n    return segment(x)\n"
+VALIDATE = """
+query ($input: PythonFlowSourceInput!) {
+  validatePythonFlow(input: $input) {
+    ok stubs runtime
+    diagnostics { message line }
+    args { key kind nullable default }
+    returns { key kind }
+  }
+}
+"""
+
+SOURCE = "async def main(x: int, times: int = 2) -> int:\n    return await segment(x)\n"
+
+
+def _action(alias: str, action_hash: str, effect: str | None = None, **overrides) -> dict:
+    """A manifest entry for an INT -> INT FUNCTION action, with its ports."""
+    return {
+        "alias": alias,
+        "actionHash": action_hash,
+        "kind": "FUNCTION",
+        "args": [{"key": "x", "kind": "INT", "nullable": False}],
+        "returns": [{"key": "return0", "kind": "INT", "nullable": False}],
+        **({"effect": effect} if effect else {}),
+        **overrides,
+    }
 
 
 def _input(source: str = SOURCE, **overrides) -> dict:
-    return {
-        "source": source,
-        "title": "Segment",
-        "args": [{"key": "x", "kind": "INT", "nullable": False}],
-        "returns": [{"key": "return0", "kind": "INT", "nullable": False}],
-        "manifest": [{"alias": "segment", "actionHash": "abc123", "effect": "NONE"}],
-        "runtime": "monty-0.1/helpers-1",
-        **overrides,
-    }
+    return {"source": source, "title": "Segment", "manifest": [_action("segment", "abc123", "NONE")], **overrides}
 
 
 async def _create(aexecute, context=None, **overrides) -> dict:
@@ -78,10 +94,11 @@ async def _published(aexecute, **overrides) -> dict:
 # --- versions ----------------------------------------------------------------------------
 
 
-async def test_create_stores_a_draft_with_typed_ports(aexecute, authenticated_context):
+async def test_create_stores_a_draft_with_the_ports_its_source_declares(aexecute, authenticated_context):
     flow = await _create(aexecute)
     assert flow["status"] == "DRAFT"
-    assert flow["args"] == [{"key": "x", "kind": "INT"}]
+    assert flow["args"] == [{"key": "x", "kind": "INT"}, {"key": "times", "kind": "INT"}]
+    assert flow["returns"] == [{"key": "return0", "kind": "INT"}]
     assert flow["manifest"] == [{"alias": "segment", "actionHash": "abc123", "effect": "NONE"}]
     assert flow["physical"] is False
     row = await PythonFlow.objects.aget(id=flow["id"])
@@ -124,18 +141,18 @@ async def test_title_and_description_change_in_place(aexecute):
 
 
 async def test_an_irreversible_action_marks_the_flow_physical(aexecute):
-    flow = await _create(aexecute, manifest=[{"alias": "move_stage", "actionHash": "h", "effect": "IRREVERSIBLE"}])
+    flow = await _create(aexecute, manifest=[_action("segment", "abc123"), _action("move_stage", "h", "IRREVERSIBLE")])
     assert flow["physical"] is True
 
 
 async def test_an_undeclared_effect_is_unknown_and_not_physical(aexecute):
-    flow = await _create(aexecute, manifest=[{"alias": "segment", "actionHash": "h"}, {"alias": "snap", "actionHash": "g", "effect": "REPEATABLE"}])
+    flow = await _create(aexecute, manifest=[_action("segment", "h"), _action("snap", "g", "REPEATABLE")])
     assert [entry["effect"] for entry in flow["manifest"]] == ["UNKNOWN", "REPEATABLE"]
     assert flow["physical"] is False
 
 
 async def test_stored_physical_manifests_are_migrated_to_irreversible(aexecute):
-    flow = await _create(aexecute, manifest=[{"alias": "move_stage", "actionHash": "h", "effect": "NONE"}, {"alias": "segment", "actionHash": "g", "effect": "NONE"}])
+    flow = await _create(aexecute, manifest=[_action("move_stage", "h", "NONE"), _action("segment", "g", "NONE")])
     old = [{"alias": "move_stage", "action_hash": "h", "effect": "PHYSICAL"}, {"alias": "segment", "action_hash": "g", "effect": "NONE"}]
     await PythonFlow.objects.filter(id=flow["id"]).aupdate(manifest=old)
 
@@ -157,17 +174,64 @@ async def test_stored_physical_manifests_are_migrated_to_irreversible(aexecute):
 @pytest.mark.parametrize(
     "overrides, message",
     [
-        ({"manifest": [{"alias": "segment", "actionHash": "a"}, {"alias": "segment", "actionHash": "b"}]}, "unique"),
-        ({"manifest": [{"alias": "not an identifier", "actionHash": "a"}]}, "identifier"),
-        ({"manifest": [{"alias": "lambda", "actionHash": "a"}]}, "identifier"),
+        ({"manifest": [_action("segment", "a"), _action("segment", "b")]}, "unique"),
+        ({"manifest": [_action("not an identifier", "a")]}, "identifier"),
+        ({"manifest": [_action("lambda", "a")]}, "identifier"),
         ({"entrypoint": "main()"}, "identifier"),
-        ({"args": [{"key": "xs", "kind": "LIST", "nullable": False}]}, "exactly one child"),
+        ({"manifest": [_action("segment", "a", args=[{"key": "xs", "kind": "LIST", "nullable": False}])]}, "exactly one child"),
     ],
 )
-async def test_a_malformed_report_is_rejected(aexecute, overrides, message):
+async def test_a_malformed_input_is_rejected(aexecute, overrides, message):
     res = await aexecute(CREATE, {"input": _input(**overrides)})
     assert res.errors and message in res.errors[0].message
     assert not await PythonFlow.objects.aexists()
+
+
+@pytest.mark.parametrize(
+    "overrides, message",
+    [
+        ({"source": "async def main(x: int) -> int:\n    return await segment('no int')\n"}, "line 2"),
+        ({"source": "async def main(x: int) -> int:\n    return await snap(x)\n"}, "snap"),
+        ({"source": "def main(x: int) -> int:\n    return x\n"}, "async def"),
+        ({"source": "async def main(x) -> int:\n    return x\n"}, "annotation"),
+        ({"manifest": [_action("segment", "a", kind="GENERATOR")]}, "FUNCTION"),
+    ],
+    ids=["type-error", "outside-the-manifest", "not-async", "unannotated", "generator-action"],
+)
+async def test_a_source_that_does_not_validate_is_refused(aexecute, overrides, message):
+    res = await aexecute(CREATE, {"input": _input(**overrides)})
+    assert res.errors and "does not validate" in res.errors[0].message, res.errors
+    assert message in res.errors[0].message, res.errors[0].message
+    assert not await PythonFlow.objects.aexists()
+
+
+async def test_the_ports_are_derived_never_taken_from_the_client(aexecute):
+    res = await aexecute(CREATE, {"input": _input(args=[{"key": "y", "kind": "STRING", "nullable": False}])})
+    assert res.errors and "args" in res.errors[0].message
+    assert not await PythonFlow.objects.aexists()
+
+
+async def test_a_new_signature_is_a_new_version(aexecute):
+    first = await _create(aexecute)
+    second = await _create(aexecute, source=SOURCE.replace("times: int = 2", "times: int = 3"), previous=first["id"])
+    assert second["id"] != first["id"]
+
+
+async def test_validating_a_source_stores_nothing_and_reports_its_ports_and_stubs(aexecute):
+    res = await aexecute(VALIDATE, {"input": {"source": SOURCE, "manifest": [_action("segment", "abc123")]}})
+    assert not res.errors, res.errors
+    report = res.data["validatePythonFlow"]
+    assert report["ok"] and report["diagnostics"] == []
+    assert report["args"] == [{"key": "x", "kind": "INT", "nullable": False, "default": None}, {"key": "times", "kind": "INT", "nullable": False, "default": 2}]
+    assert "async def segment(x: int) -> int: ..." in report["stubs"]
+    assert report["runtime"].startswith("monty-")
+    assert not await PythonFlow.objects.aexists()
+
+    res = await aexecute(VALIDATE, {"input": {"source": SOURCE.replace("segment(x)", "segment('no')"), "manifest": [_action("segment", "abc123")]}})
+    assert not res.errors, res.errors
+    report = res.data["validatePythonFlow"]
+    assert not report["ok"] and report["args"] == []
+    assert "segment" in report["diagnostics"][0]["message"]
 
 
 # --- lifecycle ---------------------------------------------------------------------------
@@ -251,6 +315,33 @@ async def test_a_run_of_a_published_flow(aexecute):
     assert not res.errors, res.errors
     assert res.data["closePythonRun"]["status"] == "FAILED"
     assert res.data["closePythonRun"]["finishedAt"]
+
+
+async def test_a_run_is_closed_once(aexecute):
+    flow = await _published(aexecute)
+    run = (await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})).data["createPythonRun"]
+
+    res = await aexecute(CLOSE_RUN, {"input": {"run": run["id"], "status": "CANCELLED"}})
+    assert not res.errors, res.errors
+    assert res.data["closePythonRun"]["status"] == "CANCELLED"
+
+    again = await aexecute(CLOSE_RUN, {"input": {"run": run["id"], "status": "COMPLETED"}})
+    assert again.errors and "RUNNING" in again.errors[0].message
+    assert (await PythonRun.objects.aget(id=run["id"])).status == "CANCELLED"
+
+
+async def test_a_resumed_task_reopens_its_closed_run(aexecute):
+    """An agent that died after closing the run, before its task ended: the task runs again."""
+    flow = await _published(aexecute)
+    run = (await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})).data["createPythonRun"]
+    await aexecute(CLOSE_RUN, {"input": {"run": run["id"], "status": "COMPLETED"}})
+    created_at = (await PythonRun.objects.aget(id=run["id"])).created_at
+
+    res = await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})
+    assert not res.errors, res.errors
+    assert (res.data["createPythonRun"]["id"], res.data["createPythonRun"]["status"]) == (run["id"], "RUNNING")
+    reopened = await PythonRun.objects.aget(id=run["id"])
+    assert (reopened.finished_at, reopened.created_at) == (None, created_at)
 
 
 async def test_a_draft_cannot_be_run(aexecute):

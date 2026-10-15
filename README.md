@@ -29,7 +29,7 @@ GraphQL is served at `/graphql` (HTTP and WebSocket), with the SDL at `/schema`.
 | --- | --- |
 | `createWorkspace`, `updateWorkspace` | Create a workspace with its first flow; save a graph, which upserts the flow for it. |
 | `createRun`, `track`, `snapshot`, `closeRun`, `deleteRun` | The lifecycle an executing agent drives: start (or reuse) the run for a task, record each event, capture state, finish. |
-| `createPythonFlow`, `updatePythonFlow`, `publishPythonFlow`, `archivePythonFlow`, `deletePythonFlow` | Version a Python flow. Publishing registers it as an action; only drafts can be deleted. |
+| `createPythonFlow`, `updatePythonFlow`, `publishPythonFlow`, `archivePythonFlow`, `deletePythonFlow` | Version a Python flow. Only a published version runs, and only it can be deployed as an action (a client deploys it as a higher-order implementation of `run_python_flow`); only drafts can be deleted. |
 | `createPythonRun`, `closePythonRun` | Start and finish the run of a published Python flow. |
 | `workspaces`, `flow`, `run`, `runForTask`, `pythonFlows`, `pythonRuns`, `reactiveTemplates` | The stored rows. |
 | `eventsBetween` | A run's events between two logical times, seeded from the latest snapshot before the lower bound. |

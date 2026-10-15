@@ -33,6 +33,10 @@ class Query:
 
     python_flows: list[types.PythonFlow] = kante.django_field(description="List all Python flow versions in your organization.")
     python_runs: list[types.PythonRun] = kante.django_field(description="List all Python flow runs in your organization.")
+    validate_python_flow = kante.django_field(
+        resolver=queries.validate_python_flow,
+        description="Check a Python flow's source against the actions it may call, as createPythonFlow would, without storing it: its ports, stubs and runtime, or why it would be refused.",
+    )
 
     # Stats
     workspace_stats: types.WorkspaceStats = strawberry.field(resolver=types.WorkspaceStatsResolver, description="Aggregate statistics over the workspaces in your organization.")
@@ -100,7 +104,7 @@ class Mutation:
     )
     create_python_flow = kante.django_mutation(
         resolver=mutations.create_python_flow,
-        description="Store a new DRAFT Python flow version (or return the existing one with the same content in its lineage).",
+        description="Validate a Python flow's source against the actions it may call and store it as a new DRAFT version, with the ports and runtime the validation derives (or return the existing one with the same content in its lineage). A source that does not validate is refused.",
     )
     update_python_flow = kante.django_mutation(
         resolver=mutations.update_python_flow,
@@ -108,11 +112,11 @@ class Mutation:
     )
     publish_python_flow = kante.django_mutation(
         resolver=mutations.publish_python_flow,
-        description="Publish a DRAFT (or re-publish an ARCHIVED) Python flow version, so it is registered as an action.",
+        description="Publish a DRAFT (or re-publish an ARCHIVED) Python flow version, so it can run and be deployed as an action.",
     )
     archive_python_flow = kante.django_mutation(
         resolver=mutations.archive_python_flow,
-        description="Archive a PUBLISHED Python flow version, so it is no longer registered.",
+        description="Archive a PUBLISHED Python flow version, so it no longer runs (its runs keep pointing at it).",
     )
     delete_python_flow = kante.django_mutation(
         resolver=mutations.delete_python_flow,

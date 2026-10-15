@@ -176,7 +176,7 @@ class PythonFlow(EmbeddedDescriptionMixin, Described):
     on each next one); identical content within a lineage is the same row. ``args``, ``returns``
     and ``manifest`` are what the executor's validation derived from the source -- the manifest
     lists every action the code may call and is its permission boundary. Only PUBLISHED versions
-    are registered as actions.
+    run; a client deploys one as an action (a higher-order implementation of ``run_python_flow``).
     """
 
     embedding_source_fields = ("title", "description")

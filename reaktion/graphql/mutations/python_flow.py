@@ -15,28 +15,34 @@ from django.db import transaction
 from django.utils import timezone
 from kante.types import Info
 
-from reaktion import enums, inputs, models, types
+from reaktion import enums, inputs, models, python_flows, types
 from reaktion.hashers import hash_python_flow
 from reaktion.scoping import for_org, get_for_org
 
 logger = logging.getLogger(__name__)
 
 Status = enums.PythonFlowStatusChoices
+RunStatus = enums.PythonRunStatusChoices
 
 
 def create_python_flow(info: Info, input: inputs.CreatePythonFlowInput) -> types.PythonFlow:
+    """Validate the source and store what the validation derived; a source that does not validate is refused."""
     request = info.context.request
-    # Validate the ports and manifest through their pydantic models and store the normalised dump.
     model = input.to_pydantic()
-    manifest = [entry.model_dump(mode="json") for entry in model.manifest]
+    report = python_flows.validate(model)
+    if not report.ok:
+        raise ValueError(python_flows.refusal(report))
+    manifest = python_flows.manifest(report)
 
     previous = get_for_org(models.PythonFlow, info, id=model.previous) if model.previous else None
     lineage = previous.lineage if previous else uuid.uuid4()
 
+    # Ports are derived from source, entrypoint and the manifest's actions, so the hash need not
+    # cover them: identical content derives identical ports.
     flow, created = models.PythonFlow.objects.get_or_create(
         organization=request.organization,
         lineage=lineage,
-        hash=hash_python_flow(model.source, model.entrypoint, manifest, model.runtime),
+        hash=hash_python_flow(model.source, model.entrypoint, manifest, report.runtime),
         defaults=dict(
             previous=previous,
             title=model.title or (previous.title if previous else "Untitled Python Flow"),
@@ -44,10 +50,10 @@ def create_python_flow(info: Info, input: inputs.CreatePythonFlowInput) -> types
             creator=request.user,
             source=model.source,
             entrypoint=model.entrypoint,
-            args=[port.model_dump(mode="json") for port in model.args],
-            returns=[port.model_dump(mode="json") for port in model.returns],
+            args=python_flows.arg_ports(report.args),
+            returns=python_flows.return_ports(report.returns),
             manifest=manifest,
-            runtime=model.runtime,
+            runtime=report.runtime,
         ),
     )
     if not created:
@@ -94,18 +100,32 @@ def delete_python_flow(info: Info, input: inputs.PythonFlowRefInput) -> strawber
 
 
 def create_python_run(info: Info, input: inputs.CreatePythonRunInput) -> types.PythonRun:
+    """The run of a task: a task resumed after its agent died gets its run again, running.
+
+    It runs again from the start, so a run the first attempt closed before it died is
+    reopened; it keeps its ``created_at``, which is the clock the flow sees.
+    """
     flow = get_for_org(models.PythonFlow, info, id=input.flow)
     if flow.status != Status.PUBLISHED:
         raise ValueError(f"Only a PUBLISHED PythonFlow can be run; this one is {flow.status}")
-    run, _ = models.PythonRun.objects.get_or_create(flow=flow, task_id=input.task_id)
+    with transaction.atomic():
+        run, created = models.PythonRun.objects.select_for_update().get_or_create(flow=flow, task_id=input.task_id)
+        if not created and run.status != RunStatus.RUNNING:
+            run.status = RunStatus.RUNNING.value
+            run.finished_at = None
+            run.save()
     return run
 
 
 def close_python_run(info: Info, input: inputs.ClosePythonRunInput) -> types.PythonRun:
-    run = get_for_org(models.PythonRun, info, id=input.run)
+    """End a RUNNING run; the row lock makes two closes of one run one close and one refusal."""
     if input.status == enums.PythonRunStatus.RUNNING:
-        raise ValueError("A run is closed as COMPLETED or FAILED, not RUNNING")
-    run.status = input.status.value
-    run.finished_at = timezone.now()
-    run.save()
+        raise ValueError("A run is closed as COMPLETED, FAILED or CANCELLED, not RUNNING")
+    with transaction.atomic():
+        run = for_org(models.PythonRun, info).select_for_update().get(id=input.run)
+        if run.status != RunStatus.RUNNING:
+            raise ValueError(f"Only a RUNNING PythonRun can be closed; this one is {run.status}")
+        run.status = input.status.value
+        run.finished_at = timezone.now()
+        run.save()
     return run
