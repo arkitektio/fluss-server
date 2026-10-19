@@ -17,6 +17,8 @@ agent's to say (``fluss_server.hook_agent``), a different thing with its own con
 
 from reaktion import models
 from arkitekt_service.service import Service, organization_of
+from arkitekt_service.collaborations import items as collaboration_items
+from django.db.models.signals import post_save
 
 from fluss_server import descriptors
 from fluss_server.contract import contract
@@ -24,13 +26,39 @@ from fluss_server.contract import contract
 service = Service("fluss", hosts=contract.description.hosts, description="Workflows and their runs.")
 
 
+# --- Collaborations: what an object needs to be seen, put in a collaboration along with it ------------------
+# What is part of an object (a run's events and snapshots) is in a collaboration with it by itself.
+# These name the rest. A flow's workspace key is nullable, so its flows are not part of it: a
+# workspace brings them, and a flow saved into it later (`_flow_saved`).
+
+
+def _workspace_needs(workspace: models.Workspace) -> list[models.Flow]:
+    """A workspace's flows: the versions of its graph."""
+    return list(workspace.flows.all())
+
+
+def _flow_needs(flow: models.Flow) -> list[models.Workspace | None]:
+    """The workspace a flow is a version in."""
+    return [flow.workspace]
+
+
+def _run_needs(run: models.Run) -> list[models.Flow | None]:
+    """The flow a run executes."""
+    return [run.flow]
+
+
+def _python_run_needs(run: models.PythonRun) -> list[models.PythonFlow]:
+    """The Python flow version a run executes."""
+    return [run.flow]
+
+
 # --- Structures: what fluss hosts -----------------------------------------------------
 
-workspace = service.structure(models.Workspace, "@fluss/workspace")
-flow = service.structure(models.Flow, "@fluss/flow", describe=descriptors.flow_descriptors)
-run = service.structure(models.Run, "@fluss/run", describe=descriptors.run_descriptors)
+workspace = service.structure(models.Workspace, "@fluss/workspace", depends=_workspace_needs)
+flow = service.structure(models.Flow, "@fluss/flow", describe=descriptors.flow_descriptors, depends=_flow_needs)
+run = service.structure(models.Run, "@fluss/run", describe=descriptors.run_descriptors, depends=_run_needs)
 pythonflow = service.structure(models.PythonFlow, "@fluss/pythonflow", describe=descriptors.python_flow_descriptors)
-pythonrun = service.structure(models.PythonRun, "@fluss/pythonrun", describe=descriptors.run_descriptors)
+pythonrun = service.structure(models.PythonRun, "@fluss/pythonrun", describe=descriptors.run_descriptors, depends=_python_run_needs)
 
 
 # --- Signals: what fluss announces -----------------------------------------------------
@@ -46,3 +74,17 @@ service.model_signal(flow, organization=org)
 service.model_signal(run, organization=flow_org)
 service.model_signal(pythonflow, organization=org)
 service.model_signal(pythonrun, organization=flow_org)
+
+
+# A cascading key that points at something shared, not at a whole: a Python run is not part of
+# the version it executes (many runs execute one), so sharing a flow shares none of its runs.
+service.not_part_of(models.PythonRun, "flow")
+
+
+def _flow_saved(sender: type[models.Flow], instance: models.Flow, raw: bool = False, **_: object) -> None:
+    """A flow saved into a workspace in a collaboration (a new version, by updateWorkspace) comes into that collaboration."""
+    if not raw and instance.workspace_id is not None:
+        collaboration_items.refresh(instance.workspace)
+
+
+post_save.connect(_flow_saved, sender=models.Flow, dispatch_uid="fluss-collaborations-flow")

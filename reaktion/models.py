@@ -140,7 +140,8 @@ class Run(Described):
 
 
 class Snapshot(models.Model):
-    run = models.ForeignKey(Run, on_delete=models.CASCADE, null=True, blank=True, related_name="snapshots")
+    # Required: a snapshot is part of its run, and is in a collaboration with it.
+    run = models.ForeignKey(Run, on_delete=models.CASCADE, related_name="snapshots")
     t = models.IntegerField()
     status = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
@@ -148,7 +149,8 @@ class Snapshot(models.Model):
 
 class RunEvent(models.Model):
     reference = models.CharField(max_length=1000, null=True, blank=True)
-    run = models.ForeignKey(Run, on_delete=models.CASCADE, null=True, blank=True, related_name="events")
+    # Required: an event is part of its run, and is in a collaboration with it (tracked later, too).
+    run = models.ForeignKey(Run, on_delete=models.CASCADE, related_name="events")
     snapshot = models.ManyToManyField(Snapshot, related_name="events")
     kind = TextChoicesField(
         max_length=1000,

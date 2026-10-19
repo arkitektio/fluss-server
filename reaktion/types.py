@@ -15,12 +15,15 @@ from strawberry import LazyType
 from strawberry.scalars import JSON
 from kante.types import Info
 from .type_gen import create_stats_type
+from arkitekt_service.collaborations.guests import object_scope
 
 
 def build_prescoped_queryset(info, queryset, field="organization"):
+    """``queryset`` limited to the request's organization, and, at a root field, for a guest of the
+    organization, to what is in their collaborations. Below a root field the collaboration gate holds them to it."""
     if info.variable_values.get("filters", {}).get("scope") is None:
         queryset = queryset.filter(**{field: info.context.request.organization})
-        return queryset
+        return object_scope(queryset, info=info)
 
     else:
         raise Exception("Custom scopes not implemented yet")

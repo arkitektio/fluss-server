@@ -16,6 +16,28 @@ from kante.unions import unionElementOf
 from rekuest_core.scalars import scalar_map as rekuest_scalar_map
 from reaktion.scalars import scalar_map as reaktion_scalar_map
 from reaktion.scoping import get_for_org
+from authentikate.strawberry import AuthExtension
+from arkitekt_service.collaborations import graphql as collaboration_types
+from arkitekt_service.collaborations.guests import object_scope
+from arkitekt_service.graphql import CollaborationGate, annotate_schema
+from django.db.models import Model
+from fluss_server.service import service as fluss_service
+
+
+def _fetch(model: type[Model], id: strawberry.ID, info: Info) -> Model:
+    """An object of the request's organization by id: a run is its flow's (it has no organization path of its own)."""
+    if model is models.Run:
+        run: models.Run = models.Run.objects.get(id=id, flow__organization=info.context.request.organization)
+        return run
+    return get_for_org(model, info, id=id)
+
+
+#: The collaborations of fluss's objects, which a guest of the organization is granted.
+collaboration_api = collaboration_types.resolvers(fetch=_fetch)
+
+
+#: Who makes and changes collaborations: full members who are admins or editors (a guest is refused every mutation).
+COLLABORATING_ROLES = ["admin", "editor"]
 
 
 @strawberry.type
@@ -41,13 +63,16 @@ class Query:
     # Stats
     workspace_stats: types.WorkspaceStats = strawberry.field(resolver=types.WorkspaceStatsResolver, description="Aggregate statistics over the workspaces in your organization.")
 
+    collaborations: list[collaboration_types.Collaboration] = kante.django_field(resolver=collaboration_api.collaborations, description="List the organization's collaborations: what a guest granted one sees of it (a guest: the collaborations granted to them)")
+    collaboration: collaboration_types.Collaboration = kante.django_field(resolver=collaboration_api.collaboration, description="Get a single collaboration by ID")
+
     @kante.django_field(description="Fetch a single run by id.")
     def run(self, info: Info, id: strawberry.ID) -> types.Run:
-        return models.Run.objects.get(id=id, flow__organization=info.context.request.organization)
+        return object_scope(models.Run.objects.filter(flow__organization=info.context.request.organization), info=info).get(id=id)
 
     @kante.django_field(description="Fetch the run created for a given task id.")
     def run_for_task(self, info: Info, id: strawberry.ID) -> types.Run:
-        return models.Run.objects.get(task_id=id, flow__organization=info.context.request.organization)
+        return object_scope(models.Run.objects.filter(flow__organization=info.context.request.organization), info=info).get(task_id=id)
 
     @kante.django_field(description="Fetch a single flow by id.")
     def flow(self, info: Info, id: strawberry.ID) -> types.Flow:
@@ -63,12 +88,20 @@ class Query:
 
     @kante.django_field(description="Fetch a single run snapshot by id.")
     def snapshot(self, info: Info, id: strawberry.ID) -> types.Snapshot:
-        return models.Snapshot.objects.get(id=id, run__flow__organization=info.context.request.organization)
+        return object_scope(models.Snapshot.objects.filter(run__flow__organization=info.context.request.organization), info=info).get(id=id)
 
 
 @strawberry.type
 class Mutation:
-    """The root mutation type. All mutations are scoped to the requesting user's organization."""
+    """The root mutation type. All mutations are scoped to the requesting user's organization.
+
+    None is open to a guest of the organization (none opts in with ``allow_scoped``): running a flow
+    as a guest would act with the organization's agents."""
+
+    create_collaboration = kante.django_mutation(extensions=[AuthExtension(any_role_of=COLLABORATING_ROLES)], resolver=collaboration_api.create_collaboration, description="Create an empty collaboration, to put objects in and grant a guest")
+    add_to_collaboration = kante.django_mutation(extensions=[AuthExtension(any_role_of=COLLABORATING_ROLES)], resolver=collaboration_api.add_to_collaboration, description="Put an object in a collaboration, with what it needs to be seen: a run brings its flow, a flow its workspace, a workspace its flows")
+    remove_from_collaboration = kante.django_mutation(extensions=[AuthExtension(any_role_of=COLLABORATING_ROLES)], resolver=collaboration_api.remove_from_collaboration, description="Take an object out of a collaboration, with what it brought that nothing else there needs")
+    delete_collaboration = kante.django_mutation(extensions=[AuthExtension(any_role_of=COLLABORATING_ROLES)], resolver=collaboration_api.delete_collaboration, description="Delete a collaboration: whoever was granted it sees nothing of it any more")
 
     update_workspace = kante.django_mutation(
         resolver=mutations.update_workspace,
@@ -150,7 +183,9 @@ schema = Schema(
     query=Query,
     mutation=Mutation,
     subscription=Subscription,
-    extensions=[DjangoOptimizerExtension, KoherentExtension, AuthentikateExtension],
+    # A guest of the organization is handed only what is in their collaborations (CollaborationGate, after
+    # authentikate's extension, which reads the token).
+    extensions=[DjangoOptimizerExtension, KoherentExtension, AuthentikateExtension, CollaborationGate],
     config=StrawberryConfig(scalar_map={**rekuest_scalar_map, **reaktion_scalar_map}),
     types=[
         types.RekuestFilterActionNode,
@@ -167,3 +202,6 @@ schema = Schema(
     + input_union_types,
     schema_directives=[unionElementOf],
 )
+
+# Which structure each type is (`@identified`), and, behind the gate, that fluss lets guests in.
+annotate_schema(schema, fluss_service)

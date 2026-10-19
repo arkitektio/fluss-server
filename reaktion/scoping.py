@@ -13,10 +13,15 @@ follow — those are scoped with explicit ``flow__organization`` /
 ``run__flow__organization`` filters at the call sites rather than via
 :func:`for_org`. ``ReactiveTemplate`` is a global, org-less catalog and is
 registered in :data:`UNSCOPED_MODELS`.
+
+For a guest of the organization, a root field's queryset is narrowed further, to what is in
+their collaborations (``object_scope``, ``arkitekt_service.collaborations``); below a root
+field the collaboration gate holds them to it.
 """
 
 from functools import cache
 
+from arkitekt_service.collaborations.guests import object_scope
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models as django_models
 from kante.types import Info
@@ -63,7 +68,7 @@ def organization_path(model: type[django_models.Model]) -> str | None:
 
 
 def for_org(model: type[django_models.Model], info: Info) -> django_models.QuerySet:
-    """Return ``model``'s queryset limited to the request's organization."""
+    """Return ``model``'s queryset limited to the request's organization (a guest: to their collaborations)."""
     path = organization_path(model)
     if path is None:
         if model.__name__ not in UNSCOPED_MODELS:
@@ -71,8 +76,8 @@ def for_org(model: type[django_models.Model], info: Info) -> django_models.Query
                 f"{model.__name__} has no path to an organization and is not "
                 "registered in reaktion.scoping.UNSCOPED_MODELS"
             )
-        return model.objects.all()
-    return model.objects.filter(**{path: info.context.request.organization})
+        return object_scope(model.objects.all(), info=info)
+    return object_scope(model.objects.filter(**{path: info.context.request.organization}), info=info)
 
 
 def get_for_org(model: type[django_models.Model], info: Info, **kwargs) -> django_models.Model:

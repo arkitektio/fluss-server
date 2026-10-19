@@ -1,14 +1,16 @@
 import strawberry
 from kante.types import Info
 from reaktion import models, types
+from arkitekt_service.collaborations.guests import object_scope
 
 
 def events_between(
     info: Info, run: strawberry.ID, min: int | None = None, max: int | None = None
 ) -> list[types.RunEvent]:
     # Scope the run to the request's organization so events of another org's
-    # run cannot be read (raises DoesNotExist for a cross-org / unknown run).
-    models.Run.objects.get(id=run, flow__organization=info.context.request.organization)
+    # run cannot be read (raises DoesNotExist for a cross-org / unknown run), and,
+    # for a guest of the organization, to their collaborations.
+    object_scope(models.Run.objects.filter(flow__organization=info.context.request.organization), info=info).get(id=run)
 
     if min is None:
         min = 0
