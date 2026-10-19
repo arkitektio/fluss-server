@@ -30,7 +30,7 @@ dependencies = [
     "pint>=0.25.3",
     "pgvector>=0.5",
     "model2vec>=0.9",
-    "arkitekt-service>=4.0.0",
+    "arkitekt-service>=6.0.0",
     # Validates a Python flow's source and derives what a version stores (pydantic-monty).
     "fluss-monty>=1",
 ]
