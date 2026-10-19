@@ -262,6 +262,8 @@ async def test_a_guest_writes_nothing_even_as_an_editor(authenticated_context, g
 async def test_root_fields_handing_out_no_objects_are_closed_to_guests(authenticated_context, guest, make_workspace):
     ctx = guest({await _collaboration(authenticated_context, await make_workspace()): []})
     _refused(await _run(ctx, "{ workspaceStats { count } }"), "COLLABORATION_DOES_NOT_REACH")
+    # Validating a source reads the organization's actions: nothing a collaboration holds.
+    _refused(await _run(ctx, '{ validatePythonFlow(input: {source: "def main(): pass"}) { ok } }'), "COLLABORATION_DOES_NOT_REACH")
 
 
 @pytest.mark.django_db(transaction=True)
