@@ -79,7 +79,7 @@ def intake(settings):
     settings.REKUEST_SERVICE = {"REKUEST_URL": server.url, "SERVICE": "fluss"}
     settings.INSTANCE = {
         "PRIVATE_KEY": KEY.as_pem(private=True).decode(),
-        "TRUST_JWKS": {"keys": [{**trust.public_jwk(KEY), "service": "live.arkitekt.fluss"}]},
+        "TRUST_JWKS": {"keys": [{**trust.public_jwk(KEY), "service": "fluss"}]},
     }
     yield server
     server.server.shutdown()
@@ -128,8 +128,8 @@ def test_a_save_is_signalled_signed_by_this_instance(intake):
     (received,) = intake.of("@fluss/workspace")
     assert (received["json"]["kind"], received["json"]["object"], received["json"]["organization"]) == ("CREATED", str(obj.pk), org.slug)
     assert received["path"] == "/agi/signal/fluss"
-    verified = trust.verify("POST", received["path"], received["body"], received["headers"]["Authorization"], audience="live.arkitekt.rekuest")
-    assert verified.issuer == "live.arkitekt.fluss"
+    verified = trust.verify("POST", received["path"], received["body"], received["headers"]["Authorization"], audience="rekuest")
+    assert verified.issuer == "fluss"
 
 
 @pytest.mark.django_db(transaction=True)
