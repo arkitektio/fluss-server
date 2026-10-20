@@ -30,13 +30,13 @@ ROLES = [
 
 #: How many ports a flow is called with and answers with: what a scheduler (no arguments) or a
 #: batch runner (exactly one) selects on. One key for both kinds of flow, so one `requires` asks both.
-_N_ARGS = Descriptor(key="@fluss/n_args", type="INT", description="How many arguments it is called with: 0 for a flow a schedule can start")
-_N_RETURNS = Descriptor(key="@fluss/n_returns", type="INT", description="How many values it returns")
+_N_ARGS = Descriptor(key="@fluss/n_args", type="INT", description="How many arguments (inputs) it is called with: 0 for a flow a schedule can start")
+_N_RETURNS = Descriptor(key="@fluss/n_returns", type="INT", description="How many values (outputs) it returns")
 
 FLOW_DESCRIPTORS = [
     Descriptor(key="@fluss/n_nodes", type="INT", description="How many nodes its graph has"),
     Descriptor(key="@fluss/n_edges", type="INT", description="How many edges its graph has"),
-    Descriptor(key="@fluss/n_globals", type="INT", description="How many globals it is configured with: 0 for a flow that runs without a form"),
+    Descriptor(key="@fluss/n_globals", type="INT", description="How many global parameters it is configured with: 0 for a flow that runs without a form"),
     Descriptor(
         key="@fluss/node_kinds",
         type="LIST",
@@ -46,7 +46,7 @@ FLOW_DESCRIPTORS = [
     _N_RETURNS,
 ]
 PYTHON_FLOW_DESCRIPTORS = [
-    Descriptor(key="@fluss/status", type="STRING", description="Its lifecycle: DRAFT, PUBLISHED or ARCHIVED"),
+    Descriptor(key="@fluss/status", type="STRING", description="Its publication lifecycle: DRAFT, PUBLISHED or ARCHIVED"),
     Descriptor(key="@fluss/physical", type="BOOL", description="Whether its source may call an action with an IRREVERSIBLE effect"),
     Descriptor(key="@fluss/effect", type="STRING", description="The most consequential effect of an action its source may call: NONE, REPEATABLE, UNKNOWN or IRREVERSIBLE (NONE when it calls none)"),
     Descriptor(key="@fluss/runtime", type="STRING", description="The executor runtime its source was validated against"),
@@ -66,32 +66,32 @@ HOSTS = Hosts(
         Structure(
             identifier="@fluss/workspace",
             label="Workspace",
-            description="A workspace: the container users edit the versions of one flow in.",
+            description="A workspace: where users design and edit one workflow, holding the saved versions of its graph.",
         ),
         Structure(
             identifier="@fluss/flow",
             label="Flow",
-            description="A flow: one saved, executable version of a workspace's graph of nodes and edges.",
+            description="A flow (workflow): one saved, executable version of a workspace's graph of nodes and edges, a pipeline over the hub's actions.",
             descriptors=FLOW_DESCRIPTORS,
         ),
         Structure(
             identifier="@fluss/run",
             label="Run",
-            description="A run: one live execution of a flow for a task.",
+            description="A run: one execution of a graph workflow for a rekuest task, with the values, errors and completion it produced.",
             descriptors=[
-                Descriptor(key="@fluss/status", type="STRING", description="Where the run stands: RUNNING or COMPLETED"),
+                Descriptor(key="@fluss/status", type="STRING", description="Where the workflow run stands: RUNNING or COMPLETED"),
             ],
         ),
         Structure(
             identifier="@fluss/pythonflow",
             label="Python Flow",
-            description="A Python flow: one immutable version of a flow written as Python source.",
+            description="A Python flow: one immutable version of a workflow written as a Python script instead of a graph, going through DRAFT, PUBLISHED and ARCHIVED.",
             descriptors=PYTHON_FLOW_DESCRIPTORS,
         ),
         Structure(
             identifier="@fluss/pythonrun",
             label="Python Run",
-            description="A Python run: one execution of a published Python flow for a task.",
+            description="A Python run: one execution of a published Python flow for a rekuest task.",
             descriptors=[
                 Descriptor(key="@fluss/status", type="STRING", description="Where the run stands: RUNNING, COMPLETED or FAILED"),
             ],
@@ -101,31 +101,31 @@ HOSTS = Hosts(
         Signal(
             identifier="@fluss/workspace",
             kinds=["CREATED", "UPDATED", "DELETED"],
-            description="A workspace was created, changed or deleted.",
+            description="A workflow workspace was created, changed or deleted.",
         ),
         Signal(
             identifier="@fluss/flow",
             kinds=["CREATED"],
             descriptors=_keys(FLOW_DESCRIPTORS),
-            description="A flow (a version of a workspace's graph) was created.",
+            description="A flow (a saved version of a workspace's workflow graph) was created.",
         ),
         Signal(
             identifier="@fluss/run",
             kinds=["CREATED", "UPDATED", "DELETED"],
             descriptors=["@fluss/status"],
-            description="A flow run started, changed status (e.g. completed) or was deleted.",
+            description="A flow run (a workflow execution) started, changed status (e.g. completed) or was deleted.",
         ),
         Signal(
             identifier="@fluss/pythonflow",
             kinds=["CREATED", "UPDATED", "DELETED"],
             descriptors=_keys(PYTHON_FLOW_DESCRIPTORS),
-            description="A Python flow version was created, published or archived (UPDATED), or a draft deleted.",
+            description="A Python flow version (a workflow written in Python) was created, published or archived (UPDATED), or a draft deleted.",
         ),
         Signal(
             identifier="@fluss/pythonrun",
             kinds=["CREATED", "UPDATED", "DELETED"],
             descriptors=["@fluss/status"],
-            description="A Python flow run started, finished (COMPLETED/FAILED) or was deleted.",
+            description="A Python flow run (a Python workflow execution) started, finished (COMPLETED/FAILED) or was deleted.",
         ),
     ],
 )
