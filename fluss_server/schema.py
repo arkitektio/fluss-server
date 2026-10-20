@@ -15,7 +15,7 @@ from rekuest_core.constants import interface_types, input_union_types
 from kante.unions import unionElementOf
 from rekuest_core.scalars import scalar_map as rekuest_scalar_map
 from reaktion.scalars import scalar_map as reaktion_scalar_map
-from reaktion.scoping import get_for_org
+from reaktion.scoping import for_org, get_for_org
 from authentikate.strawberry import AuthExtension
 from arkitekt_service.collaborations import graphql as collaboration_types
 from arkitekt_service.collaborations.guests import object_scope
@@ -85,6 +85,11 @@ class Query:
     @kante.django_field(description="Fetch a single Python flow run by id.")
     def python_run(self, info: Info, id: strawberry.ID) -> types.PythonRun:
         return get_for_org(models.PythonRun, info, id=id)
+
+    @kante.django_field(description="Fetch the Python flow run created for a given task id.")
+    def python_run_for_task(self, info: Info, id: strawberry.ID) -> types.PythonRun:
+        # A run is one per (version, task); a task runs one version, so the latest is its run.
+        return for_org(models.PythonRun, info).filter(task_id=id).latest("created_at")
 
     @kante.django_field(description="Fetch a single run snapshot by id.")
     def snapshot(self, info: Info, id: strawberry.ID) -> types.Snapshot:

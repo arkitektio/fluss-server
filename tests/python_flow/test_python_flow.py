@@ -40,6 +40,9 @@ mutation ($input: CreatePythonRunInput!) { createPythonRun(input: $input) { id s
 CLOSE_RUN = """
 mutation ($input: ClosePythonRunInput!) { closePythonRun(input: $input) { id status finishedAt } }
 """
+RUN_FOR_TASK = """
+query ($id: ID!) { pythonRunForTask(id: $id) { id flow { id } } }
+"""
 GET = """
 query ($id: ID!) { pythonFlow(id: $id) { id versions { id } } }
 """
@@ -342,6 +345,18 @@ async def test_a_resumed_task_reopens_its_closed_run(aexecute):
     assert (res.data["createPythonRun"]["id"], res.data["createPythonRun"]["status"]) == (run["id"], "RUNNING")
     reopened = await PythonRun.objects.aget(id=run["id"])
     assert (reopened.finished_at, reopened.created_at) == (None, created_at)
+
+
+async def test_a_run_is_found_by_its_task(aexecute, other_org_context):
+    flow = await _published(aexecute)
+    run = (await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})).data["createPythonRun"]
+
+    res = await aexecute(RUN_FOR_TASK, {"id": "task-1"})
+    assert not res.errors, res.errors
+    assert (res.data["pythonRunForTask"]["id"], res.data["pythonRunForTask"]["flow"]["id"]) == (run["id"], flow["id"])
+
+    assert (await aexecute(RUN_FOR_TASK, {"id": "task-2"})).errors
+    assert (await aexecute(RUN_FOR_TASK, {"id": "task-1"}, context=other_org_context)).errors
 
 
 async def test_a_draft_cannot_be_run(aexecute):
