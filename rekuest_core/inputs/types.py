@@ -457,6 +457,10 @@ class DefinitionInput:
         default_factory=list,
         description="Names of the UI catalogs that extend the base catalog (`base@1`, always applied) for this definition's effect and validator calls. Unknown names yield an unknown_catalog warning; conflicting operation definitions across catalogs are a registration error.",
     )
+    protocols: list[str] = strawberry.field(
+        default_factory=list,
+        description="Where the action means to hook in (`on_scene_annotation`): hints a caller filters on, stored beside the protocols the server infers. Not a contract, and not part of the action's hash.",
+    )
     port_groups: list[PortGroupInput] = strawberry.field(
         default_factory=list,
         description="The port groups of the definition. This is used to group ports together in the UI",
@@ -514,6 +518,7 @@ class ImplementationInput:
     effects: enums.Effects = enums.Effects.UNKNOWN
     execution: enums.Execution = enums.Execution.PLAIN
     code_hash: str | None = None
+    logo: str | None = None
     dependencies: list[AgentDependencyInput] = strawberry.field(default_factory=list)
 
 
@@ -553,6 +558,15 @@ class LockDefinitionInput:
 class LockImplementationInput:
     key: str
     definition: LockDefinitionInput
+
+
+@pydantic.input(models.AssetInputModel, description="A file an agent brings with it: the name its bloks call it by, and what the bytes are.")
+class AssetInput:
+    name: str
+    kind: enums.AssetKind
+    ref: str
+    size: int | None = None
+    source: str | None = None
 
 
 @pydantic.input(models.DynamicValueInputModel, description="A bound state pointer referencing a variable inside a Blok state instance.")
@@ -613,10 +627,16 @@ class ComponentNodeInput:
 class BlokImplementationInput:
     key: str
     dependencies: list[AgentDependencyInput] = strawberry.field(default_factory=list)
-    components: list[ComponentNodeInput] = strawberry.field(default_factory=list)
+    components: list[ComponentNodeInput] | None = None
+    source: str | None = None
     catalog: Optional[str] = None
     demo_state: Optional[scalars.JSONSerializable] = None
     description: Optional[str] = None
+    context: enums.ComponentContext = enums.ComponentContext.HTML
+    default: bool = False
+    for_model: Optional[str] = None
+    for_node: Optional[str] = None
+    args: list[ArgPortInput] = strawberry.field(default_factory=list)
 
 
 @pydantic.input(models.CatalogPropInputModel, description="A prop a catalog component accepts.")
@@ -633,6 +653,11 @@ class CatalogComponentInput:
     description: Optional[str] = None
     props: List[CatalogPropInput] = strawberry.field(default_factory=list)
     accepts_children: bool = True
+    context: enums.ComponentContext = enums.ComponentContext.HTML
+    children_context: Optional[enums.ComponentContext] = None
+    inherits_context: bool = False
+    downstream_of: List[str] = strawberry.field(default_factory=list)
+    not_downstream_of: List[str] = strawberry.field(default_factory=list)
 
 
 @pydantic.input(models.CatalogArgumentInputModel, description="An argument a catalog operation accepts.")
