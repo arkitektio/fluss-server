@@ -167,7 +167,7 @@ async def test_a_status_change_is_stored_and_the_setup_job_repairs_what_is_owed(
 async def test_a_sweep_for_one_organization_claims_only_its_rows(authenticated_context):
     """Every organization has the agent and its own schedule: a run must not do another's work."""
     user, org = authenticated_context.request.user, authenticated_context.request.organization
-    elsewhere = await Organization.objects.acreate(slug="elsewhere")
+    elsewhere = await Organization.objects.acreate(identifier="static_issuer#elsewhere")
     mine = await Workspace.objects.acreate(title="mine", description="Segment nuclei", creator=user, organization=org)
     theirs = await Workspace.objects.acreate(title="theirs", description="Track cells", creator=user, organization=elsewhere)
     await Workspace.objects.filter(pk__in=[mine.pk, theirs.pk]).aupdate(embedding_model="another-model")
@@ -175,12 +175,12 @@ async def test_a_sweep_for_one_organization_claims_only_its_rows(authenticated_c
     def stale(organization: str | None) -> set[int]:
         return set(stale_queryset(Workspace, organization).values_list("pk", flat=True))
 
-    assert await sync_to_async(stale)("elsewhere") == {theirs.pk}
-    assert await sync_to_async(stale)(org.slug) == {mine.pk}
+    assert await sync_to_async(stale)("static_issuer#elsewhere") == {theirs.pk}
+    assert await sync_to_async(stale)(org.identifier) == {mine.pk}
     assert await sync_to_async(stale)(None) == {mine.pk, theirs.pk}
 
     # The action itself, as rekuest runs it for one organization.
-    result = await sync_to_async(agent.actions["reembed_stale"].function)(organization="elsewhere")
+    result = await sync_to_async(agent.actions["reembed_stale"].function)(organization="static_issuer#elsewhere")
     assert result == {"reembedded": 1}
     assert await sync_to_async(stale)(None) == {mine.pk}
     assert (await Workspace.objects.aget(pk=theirs.pk)).embedding_model == engine.model_id()
