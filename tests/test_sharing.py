@@ -55,7 +55,7 @@ def guest(db, authenticated_context, settings):
         granted = {str(collaboration.pk): roles for collaboration, roles in collaborations.items()}
         settings.AUTHENTIKATE = {
             **settings.AUTHENTIKATE,
-            "static_tokens": {**settings.AUTHENTIKATE["static_tokens"], "guest": {"sub": "20", "roles": [], "collabs": {"1": granted}}},
+            "static_tokens": {**settings.AUTHENTIKATE["static_tokens"], "guest": {"sub": "20", "roles": [], "collabs": {"1": granted}, "scope": "openid fluss_all"}},
         }
         authentikate_settings.cached_settings = None
         return _context("guest")
@@ -238,7 +238,7 @@ async def test_a_guest_writes_nothing_even_as_an_editor(authenticated_context, g
     run = await make_run()
     python_flow = await _python_flow(authenticated_context, "Published")
     collaboration = await _collaboration(authenticated_context, run, python_flow)
-    ctx = guest({collaboration: ["admin", "editor"]})
+    ctx = guest({collaboration: ["fluss_editor"]})
 
     _refused(await _run(ctx, CREATE_RUN, input={"flow": str(run.flow_id), "taskId": "guest-task", "snapshotInterval": 5}), "SCOPED_READ_ONLY")
     _refused(

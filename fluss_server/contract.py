@@ -7,26 +7,32 @@ the same commit, and no installer has to learn of it.
 
 from __future__ import annotations
 
-from arkitekt_service.contract import JSON, Contract, Description, Descriptor, Facts, Hosts, Job, Needs, Offers, Scope, Signal, Start, Structure, blocks
+from arkitekt_service.contract import JSON, Contract, Description, Descriptor, Facts, Hosts, Job, Needs, Offers, Role, Scope, Signal, Start, Structure, blocks
 
 from fluss_server.configuration import Settings
 
-#: What a token may be allowed to do here: defined at the coordination server when the hub enrols.
+#: What an app may do here on a user's behalf: defined at the coordination server when the hub
+#: enrols. Every root field of the schema asks for one of them (`AuthExtension(scopes=...)`).
 SCOPES = [
-    Scope(key="fluss_read", description="Read workflow definitions"),
-    Scope(key="fluss_write", description="Create and modify workflows"),
-    Scope(key="fluss_execute", description="Execute workflows"),
-    Scope(key="read", description="Generic read access"),
-    Scope(key="write", description="Generic write access"),
+    Scope(key="fluss_read", description="See workflows, Python flows, workspaces and their runs."),
+    Scope(key="fluss_write", description="Create and change workspaces and Python flow drafts, and archive or delete flows."),
+    Scope(key="fluss_run", description="Start, track, snapshot and close workflow runs."),
+    Scope(key="fluss_publish", description="Publish a Python flow so others in the organization can run it."),
+    Scope(key="fluss_share", description="Share workflows with people outside your organization through collaborations."),
+    Scope(key="fluss_all", description="Do everything in Fluss on your behalf.", is_all_scope=True),
 ]
 
-#: The roles a member of an organization can hold here.
+#: What a member of an organization may do here.
 ROLES = [
-    Scope(key="admin", description="Full administrative access"),
-    Scope(key="user", description="Standard user access"),
-    Scope(key="designer", description="Can design workflows"),
-    Scope(key="viewer", description="Read-only access"),
+    Role(key="fluss_admin", description="Full control of Fluss in this organization.", is_admin_role=True),
+    Role(key="fluss_editor", description="Design and run workflows and share them.", is_default_role=True),
+    Role(key="fluss_publisher", description="Publish Python flows for the organization."),
 ]
+
+#: The role every write asks for, the one publishing a Python flow asks for, and the one holding both.
+EDITOR = "fluss_editor"
+PUBLISHER = "fluss_publisher"
+ADMIN = "fluss_admin"
 
 #: How many ports a flow is called with and answers with: what a scheduler (no arguments) or a
 #: batch runner (exactly one) selects on. One key for both kinds of flow, so one `requires` asks both.

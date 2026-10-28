@@ -16,6 +16,9 @@ DATABASES["default"] = {
 }
 # Django forces DEBUG=False under the test runner, and authentikate 3.0 refuses static
 # tokens when DEBUG is False. These are deliberate test fixtures, so opt in explicitly.
+#: What a test token is unless it says otherwise: fluss's admin, through an app granted all of fluss.
+ADMIN_WITH_EVERY_SCOPE = {"roles": ["fluss_admin"], "scope": "openid fluss_all"}
+
 AUTHENTIKATE = {
     **AUTHENTIKATE,
     "allow_static_tokens_in_production": True,
@@ -23,11 +26,15 @@ AUTHENTIKATE = {
     # listed under (tests/test_sharing.py).
     "audience": "1",
     "static_tokens": {
-        "test": {"sub": "1"},
-        # A non-privileged user in a different organization, for cross-tenant
-        # scoping/permission tests. roles set explicitly so StaticToken's default
-        # ["admin"] doesn't grant this user broad access and defeat the tests.
-        "othertest": {"sub": "9", "org": "other_org", "roles": []},
+        name: {**ADMIN_WITH_EVERY_SCOPE, **token}
+        for name, token in {
+            "test": {"sub": "1"},
+            # A non-admin user in a different organization, for cross-tenant scoping tests: an
+            # editor writes in their own organization, so what refuses them elsewhere is the scoping.
+            "othertest": {"sub": "9", "org": "other_org", "roles": ["fluss_editor"]},
+            # An app granted only what it reads, for the scope tests (tests/test_scopes.py).
+            "readertest": {"sub": "1", "scope": "openid fluss_read"},
+        }.items()
     },
 }
 
