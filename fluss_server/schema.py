@@ -20,7 +20,7 @@ from reaktion.scoping import for_org, get_for_org
 from authentikate.strawberry import AuthExtension, AuthSubscribeExtension
 from arkitekt_service.collaborations import graphql as collaboration_types
 from arkitekt_service.collaborations.guests import object_scope
-from arkitekt_service.graphql import CollaborationGate, annotate_schema
+from arkitekt_service.graphql import CollaborationGate, TelemetryExtension, annotate_schema
 from django.db.models import Model
 from fluss_server.service import service as fluss_service
 from fluss_server.contract import EDITOR, PUBLISHER
@@ -214,7 +214,7 @@ schema = Schema(
     subscription=Subscription,
     # A guest of the organization is handed only what is in their collaborations (CollaborationGate, after
     # authentikate's extension, which reads the token).
-    extensions=[DjangoOptimizerExtension, KoherentExtension, AuthentikateExtension, CollaborationGate],
+    extensions=[TelemetryExtension, DjangoOptimizerExtension, KoherentExtension, AuthentikateExtension, CollaborationGate],
     config=StrawberryConfig(scalar_map={**rekuest_scalar_map, **reaktion_scalar_map}),
     types=[
         types.RekuestFilterActionNode,
