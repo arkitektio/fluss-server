@@ -5,7 +5,7 @@ import re
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Iterator, List, Literal, Optional, Union
 from rekuest_core import enums, units
 from rekuest_core.values import value_mismatch
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, SerializerFunctionWrapHandler, field_validator, model_serializer, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, JsonValue, model_serializer, model_validator, SerializerFunctionWrapHandler
 from typing_extensions import Self
 from strawberry.types.unset import UnsetType
 
@@ -1156,7 +1156,7 @@ class ImplementationInputModel(BaseModel):
     provenance_audience: list[str] | None = Field(default=None, description="The downstream service(s) the provenance token should be scoped to (the token's `aud`). If omitted, Rekuest derives the audience from the structures the assignment acts on.")
     effects: enums.Effects = Field(default=enums.Effects.UNKNOWN, description="What running this implementation again would do to the world. Informational: shown to whoever decides about a lost task.")
     execution: enums.Execution = Field(default=enums.Execution.PLAIN, description="How this implementation runs: a WORKFLOW may call other actions and is resumed from its journal when its agent dies.")
-    code_hash: str | None = Field(default=None, description="A hash of the implementation's code. A workflow is only resumed by an implementation with the same hash.")
+    code_hash: str | None = Field(default=None, description="A hash of the implementation's code. A resumed workflow is told whether it changed since its run started.")
     logo: str | None = Field(default=None, description="The key of the agent's action logo blok (`<Blok kind=\"action\" context=\"logo\">`) that draws this action.")
     asks: list["AskBlokInputModel"] | None = Field(default=None, description="The bloks this implementation asks a person through, declared up front: a task asks one by its key.")
     informs: list["InformBlokInputModel"] | None = Field(default=None, description="The bloks this implementation shows a person while a task goes on, declared up front: a task shows one by its key.")
@@ -1316,12 +1316,21 @@ class AgentProbeInputModel(BaseModel):
     dependency: str = Field(min_length=1, description="`self`, or the dependency key the task goes to (`deps.<key>`).")
     operation: str = Field(min_length=1, description="The action called, by its key in the dependency's action demands.")
     arguments: Optional[List["ActionArgumentInputModel"]] = Field(default=None, description="Its arguments, each named.")
+    given: Optional[str] = Field(default=None, description="`with <key>`: the dependencies the blok declares under that key (`<dependencies key=... />`), whose agents the run gets. Only on a call to `self`.")
 
     @model_validator(mode="after")
     def check_argument_keys(self) -> Self:
         """Call arguments are a map: every entry needs a unique key."""
         _check_keyed(self.arguments, f"arguments of agent call {self.operation}")
         return self
+
+    @model_serializer(mode="wrap")
+    def leave_out_an_unwritten_given(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        """A call without `with` is stored as it always was: `given` is left out, not null."""
+        dumped: dict[str, Any] = handler(self)
+        if dumped.get("given") is None:
+            dumped.pop("given", None)
+        return dumped
 
 
 class UtilCallInputModel(BaseModel):
