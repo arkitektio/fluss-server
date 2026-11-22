@@ -202,6 +202,22 @@ class Subscription:
         resolver=subscriptions.events,
         description="Subscribe to the live stream of events for a given run.",
     )
+    runs = subscription(
+        resolver=subscriptions.runs,
+        description="Every run of the organization as it starts, changes status (RUNNING to COMPLETED) or is deleted: with `runs(filters: { status: [RUNNING] })` a list of the running runs, kept current without polling.",
+    )
+    run = subscription(
+        resolver=subscriptions.run,
+        description="One run as it changes status or is deleted.",
+    )
+    python_runs = subscription(
+        resolver=subscriptions.python_runs,
+        description="Every Python run of the organization as it starts, is reopened, finishes or is deleted.",
+    )
+    python_run = subscription(
+        resolver=subscriptions.python_run,
+        description="One Python run as it changes status or is deleted.",
+    )
 
 
 class Schema(QuietErrorsSchema, kante.Schema):

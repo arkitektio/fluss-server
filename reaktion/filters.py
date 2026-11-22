@@ -10,7 +10,7 @@ import datetime
 
 import kante
 import strawberry
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from embeddings.search import hybrid_search
 from kante.types import Info
 from rekuest_core.inputs.types import RequiresInput
@@ -75,6 +75,13 @@ class CreatedAtFilterMixin:
 
 
 @strawberry.input
+class CreatorFilterMixin:
+    @kante.filter_field(description="Filter to the items this user made, given by their sub (their id in lok), the way a member's profile asks for their work")
+    def creator(self, info: Info, value: strawberry.ID, prefix: str) -> Q:
+        return Q(**{f"{prefix}creator__sub": value})
+
+
+@strawberry.input
 class PinnedFilterMixin:
     @kante.filter_field(description="Filter by whether the current user has pinned the item")
     def pinned(self, info: Info, value: bool, prefix: str) -> Q:
@@ -88,19 +95,19 @@ class PinnedFilterMixin:
 
 
 @kante.filter_type(models.Workspace)
-class WorkspaceFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class WorkspaceFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, CreatorFilterMixin, PinnedFilterMixin):
     pass
 
 
 @kante.filter_type(models.Flow)
-class FlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class FlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, CreatorFilterMixin, PinnedFilterMixin):
     @kante.filter_field(description=REQUIRES_DESCRIPTION)
     def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
         return requires(models.Flow, value, prefix)
 
 
 @kante.filter_type(models.PythonFlow)
-class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, CreatorFilterMixin, PinnedFilterMixin):
     @kante.filter_field(description="Filter by lifecycle status")
     def status(self, info: Info, value: list[enums.PythonFlowStatus], prefix: str) -> Q:
         return Q(**{f"{prefix}status__in": value})
@@ -108,6 +115,19 @@ class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAt
     @kante.filter_field(description="Filter to the versions of one flow")
     def lineage(self, info: Info, value: strawberry.ID, prefix: str) -> Q:
         return Q(**{f"{prefix}lineage": value})
+
+    @kante.filter_field(description="true: only each flow's newest version (the head of its lineage), so a list shows one row per flow; false: only the versions a newer one replaced. The newest version is decided over all of the lineage's versions, so `status` and `search` next to it apply to that head, not to the newest version that happens to match")
+    def latest(self, info: Info, value: bool, prefix: str) -> Q:
+        # A newer sibling: same lineage, created later (the id breaks a tie on the timestamp).
+        newer = models.PythonFlow.objects.filter(
+            organization=OuterRef(f"{prefix}organization"),
+            lineage=OuterRef(f"{prefix}lineage"),
+        ).filter(
+            Q(created_at__gt=OuterRef(f"{prefix}created_at"))
+            | Q(created_at=OuterRef(f"{prefix}created_at"), id__gt=OuterRef(f"{prefix}id"))
+        )
+        is_head = Q(~Exists(newer))
+        return is_head if value else ~is_head
 
     @kante.filter_field(description=REQUIRES_DESCRIPTION)
     def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
@@ -145,6 +165,10 @@ class RunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
     @kante.filter_field(description="Search by task id (case-insensitive substring)")
     def search(self, info: Info, value: str, prefix: str) -> Q:
         return Q(**{f"{prefix}task_id__icontains": value})
+
+    @kante.filter_field(description="Filter by run status, e.g. [RUNNING] for the runs still going however old they are")
+    def status(self, info: Info, value: list[enums.RunStatus], prefix: str) -> Q:
+        return Q(**{f"{prefix}status__in": [status.value for status in value]})
 
     @kante.filter_field(description=REQUIRES_DESCRIPTION)
     def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
