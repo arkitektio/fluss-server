@@ -1,8 +1,12 @@
 """PythonFlow versions and runs, executed against the schema on a real Postgres."""
 
+from typing import Any
+
 import pytest
+from kante.context import HttpContext
 
 from reaktion.models import PythonFlow, PythonRun
+from tests.utils import AExecute, data_of
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]
 
@@ -61,7 +65,7 @@ SOURCE = "async def main(x: int, times: int = 2) -> int:\n    return await segme
 
 
 def _action(
-    alias: str, action_hash: str, effect: str | None = None, **overrides
+    alias: str, action_hash: str, effect: str | None = None, **overrides: object
 ) -> dict:
     """A manifest entry for an INT -> INT FUNCTION action, with its ports."""
     return {
@@ -75,7 +79,7 @@ def _action(
     }
 
 
-def _input(source: str = SOURCE, **overrides) -> dict:
+def _input(source: str = SOURCE, **overrides: Any) -> dict:
     return {
         "source": source,
         "title": "Segment",
@@ -84,13 +88,16 @@ def _input(source: str = SOURCE, **overrides) -> dict:
     }
 
 
-async def _create(aexecute, context=None, **overrides) -> dict:
+async def _create(
+    aexecute: AExecute, context: HttpContext | None = None, **overrides: Any
+) -> dict:
     res = await aexecute(CREATE, {"input": _input(**overrides)}, context=context)
     assert not res.errors, res.errors
+    assert res.data is not None
     return res.data["createPythonFlow"]
 
 
-async def _published(aexecute, **overrides) -> dict:
+async def _published(aexecute: AExecute, **overrides: Any) -> dict:
     flow = await _create(aexecute, **overrides)
     res = await aexecute(PUBLISH, {"input": {"id": flow["id"]}})
     assert not res.errors, res.errors
@@ -101,8 +108,8 @@ async def _published(aexecute, **overrides) -> dict:
 
 
 async def test_create_stores_a_draft_with_the_ports_its_source_declares(
-    aexecute, authenticated_context
-):
+    aexecute: AExecute, authenticated_context: HttpContext
+) -> None:
     flow = await _create(aexecute)
     assert flow["status"] == "DRAFT"
     assert flow["args"] == [
@@ -118,14 +125,18 @@ async def test_create_stores_a_draft_with_the_ports_its_source_declares(
     assert row.organization_id == authenticated_context.request.organization.id
 
 
-async def test_identical_content_in_a_lineage_is_the_same_version(aexecute):
+async def test_identical_content_in_a_lineage_is_the_same_version(
+    aexecute: AExecute,
+) -> None:
     first = await _create(aexecute)
     again = await _create(aexecute, previous=first["id"], title="Renamed only")
     assert again["id"] == first["id"]
     assert await PythonFlow.objects.acount() == 1
 
 
-async def test_changed_source_is_a_new_version_in_the_same_lineage(aexecute):
+async def test_changed_source_is_a_new_version_in_the_same_lineage(
+    aexecute: AExecute,
+) -> None:
     first = await _create(aexecute)
     second = await _create(aexecute, source=SOURCE + "# tweak\n", previous=first["id"])
     assert second["id"] != first["id"]
@@ -135,26 +146,30 @@ async def test_changed_source_is_a_new_version_in_the_same_lineage(aexecute):
 
     res = await aexecute(GET, {"id": first["id"]})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert [v["id"] for v in res.data["pythonFlow"]["versions"]] == [
         first["id"],
         second["id"],
     ]
 
 
-async def test_same_content_without_previous_starts_a_new_lineage(aexecute):
+async def test_same_content_without_previous_starts_a_new_lineage(
+    aexecute: AExecute,
+) -> None:
     first = await _create(aexecute)
     other = await _create(aexecute)
     assert other["id"] != first["id"]
     assert other["lineage"] != first["lineage"]
 
 
-async def test_title_and_description_change_in_place(aexecute):
+async def test_title_and_description_change_in_place(aexecute: AExecute) -> None:
     flow = await _create(aexecute)
     res = await aexecute(
         UPDATE,
         {"input": {"id": flow["id"], "title": "Better", "description": "What it does"}},
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     assert res.data["updatePythonFlow"] == {
         "id": flow["id"],
         "title": "Better",
@@ -163,7 +178,9 @@ async def test_title_and_description_change_in_place(aexecute):
     assert (await PythonFlow.objects.aget(id=flow["id"])).hash == flow["hash"]
 
 
-async def test_an_irreversible_action_marks_the_flow_physical(aexecute):
+async def test_an_irreversible_action_marks_the_flow_physical(
+    aexecute: AExecute,
+) -> None:
     flow = await _create(
         aexecute,
         manifest=[
@@ -174,7 +191,9 @@ async def test_an_irreversible_action_marks_the_flow_physical(aexecute):
     assert flow["physical"] is True
 
 
-async def test_an_undeclared_effect_is_unknown_and_not_physical(aexecute):
+async def test_an_undeclared_effect_is_unknown_and_not_physical(
+    aexecute: AExecute,
+) -> None:
     flow = await _create(
         aexecute, manifest=[_action("segment", "h"), _action("snap", "g", "REPEATABLE")]
     )
@@ -206,7 +225,9 @@ async def test_an_undeclared_effect_is_unknown_and_not_physical(aexecute):
         ),
     ],
 )
-async def test_a_malformed_input_is_rejected(aexecute, overrides, message):
+async def test_a_malformed_input_is_rejected(
+    aexecute: AExecute, overrides: dict[str, object], message: str
+) -> None:
     res = await aexecute(CREATE, {"input": _input(**overrides)})
     assert res.errors and message in res.errors[0].message
     assert not await PythonFlow.objects.aexists()
@@ -237,14 +258,18 @@ async def test_a_malformed_input_is_rejected(aexecute, overrides, message):
         "generator-action",
     ],
 )
-async def test_a_source_that_does_not_validate_is_refused(aexecute, overrides, message):
+async def test_a_source_that_does_not_validate_is_refused(
+    aexecute: AExecute, overrides: dict[str, object], message: str
+) -> None:
     res = await aexecute(CREATE, {"input": _input(**overrides)})
     assert res.errors and "does not validate" in res.errors[0].message, res.errors
     assert message in res.errors[0].message, res.errors[0].message
     assert not await PythonFlow.objects.aexists()
 
 
-async def test_the_ports_are_derived_never_taken_from_the_client(aexecute):
+async def test_the_ports_are_derived_never_taken_from_the_client(
+    aexecute: AExecute,
+) -> None:
     res = await aexecute(
         CREATE,
         {"input": _input(args=[{"key": "y", "kind": "STRING", "nullable": False}])},
@@ -253,7 +278,7 @@ async def test_the_ports_are_derived_never_taken_from_the_client(aexecute):
     assert not await PythonFlow.objects.aexists()
 
 
-async def test_a_new_signature_is_a_new_version(aexecute):
+async def test_a_new_signature_is_a_new_version(aexecute: AExecute) -> None:
     first = await _create(aexecute)
     second = await _create(
         aexecute,
@@ -264,13 +289,14 @@ async def test_a_new_signature_is_a_new_version(aexecute):
 
 
 async def test_validating_a_source_stores_nothing_and_reports_its_ports_and_stubs(
-    aexecute,
-):
+    aexecute: AExecute,
+) -> None:
     res = await aexecute(
         VALIDATE,
         {"input": {"source": SOURCE, "manifest": [_action("segment", "abc123")]}},
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     report = res.data["validatePythonFlow"]
     assert report["ok"] and report["diagnostics"] == []
     assert report["args"] == [
@@ -291,6 +317,7 @@ async def test_validating_a_source_stores_nothing_and_reports_its_ports_and_stub
         },
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     report = res.data["validatePythonFlow"]
     assert not report["ok"] and report["args"] == []
     assert "segment" in report["diagnostics"][0]["message"]
@@ -299,11 +326,12 @@ async def test_validating_a_source_stores_nothing_and_reports_its_ports_and_stub
 # --- lifecycle ---------------------------------------------------------------------------
 
 
-async def test_publish_then_archive(aexecute):
+async def test_publish_then_archive(aexecute: AExecute) -> None:
     flow = await _published(aexecute)
     assert (await PythonFlow.objects.aget(id=flow["id"])).status == "PUBLISHED"
     res = await aexecute(ARCHIVE, {"input": {"id": flow["id"]}})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert res.data["archivePythonFlow"]["status"] == "ARCHIVED"
 
 
@@ -312,33 +340,40 @@ async def test_publish_then_archive(aexecute):
     [(True, PUBLISH), (False, ARCHIVE), (True, DELETE)],
     ids=["publish-twice", "archive-a-draft", "delete-published"],
 )
-async def test_the_lifecycle_only_moves_forward(aexecute, publish_first, mutation):
+async def test_the_lifecycle_only_moves_forward(
+    aexecute: AExecute, publish_first: bool, mutation: str
+) -> None:
     flow = await (_published(aexecute) if publish_first else _create(aexecute))
     res = await aexecute(mutation, {"input": {"id": flow["id"]}})
     assert res.errors and "PythonFlow" in res.errors[0].message
 
 
-async def test_reverting_to_archived_content_republishes_that_version(aexecute):
+async def test_reverting_to_archived_content_republishes_that_version(
+    aexecute: AExecute,
+) -> None:
     v1 = await _published(aexecute)
     res = await aexecute(ARCHIVE, {"input": {"id": v1["id"]}})
     assert not res.errors, res.errors
+    assert res.data is not None
     v2 = await _published(aexecute, source=SOURCE + "# v2\n", previous=v1["id"])
 
     back = await _create(aexecute, previous=v2["id"])
     assert back["id"] == v1["id"]
     res = await aexecute(PUBLISH, {"input": {"id": back["id"]}})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert res.data["publishPythonFlow"]["status"] == "PUBLISHED"
 
 
 async def test_deleting_the_organization_or_creator_is_not_blocked_by_runs(
-    aexecute, authenticated_context
-):
+    aexecute: AExecute, authenticated_context: HttpContext
+) -> None:
     flow = await _published(aexecute)
     res = await aexecute(
         CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}}
     )
     assert not res.errors, res.errors
+    assert res.data is not None
 
     await authenticated_context.request.user.adelete()
     row = await PythonFlow.objects.aget(id=flow["id"])
@@ -348,18 +383,20 @@ async def test_deleting_the_organization_or_creator_is_not_blocked_by_runs(
     assert not await PythonRun.objects.aexists()
 
 
-async def test_a_draft_can_be_deleted(aexecute):
+async def test_a_draft_can_be_deleted(aexecute: AExecute) -> None:
     flow = await _create(aexecute)
     res = await aexecute(DELETE, {"input": {"id": flow["id"]}})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert not await PythonFlow.objects.filter(id=flow["id"]).aexists()
 
 
-async def test_list_filters_by_status(aexecute):
+async def test_list_filters_by_status(aexecute: AExecute) -> None:
     draft = await _create(aexecute)
     published = await _published(aexecute, source=SOURCE + "# v2\n")
     res = await aexecute(LIST, {"filters": {"status": ["PUBLISHED"]}})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert [f["id"] for f in res.data["pythonFlows"]] == [published["id"]]
     assert draft["id"] not in [f["id"] for f in res.data["pythonFlows"]]
 
@@ -367,12 +404,13 @@ async def test_list_filters_by_status(aexecute):
 # --- runs --------------------------------------------------------------------------------
 
 
-async def test_a_run_of_a_published_flow(aexecute):
+async def test_a_run_of_a_published_flow(aexecute: AExecute) -> None:
     flow = await _published(aexecute)
     res = await aexecute(
         CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}}
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     run = res.data["createPythonRun"]
     assert (run["status"], run["taskId"], run["flow"]["id"]) == (
         "RUNNING",
@@ -383,24 +421,26 @@ async def test_a_run_of_a_published_flow(aexecute):
     again = await aexecute(
         CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}}
     )
-    assert again.data["createPythonRun"]["id"] == run["id"]
+    assert data_of(again)["createPythonRun"]["id"] == run["id"]
 
     res = await aexecute(CLOSE_RUN, {"input": {"run": run["id"], "status": "FAILED"}})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert res.data["closePythonRun"]["status"] == "FAILED"
     assert res.data["closePythonRun"]["finishedAt"]
 
 
-async def test_a_run_is_closed_once(aexecute):
+async def test_a_run_is_closed_once(aexecute: AExecute) -> None:
     flow = await _published(aexecute)
-    run = (
+    run = data_of(
         await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})
-    ).data["createPythonRun"]
+    )["createPythonRun"]
 
     res = await aexecute(
         CLOSE_RUN, {"input": {"run": run["id"], "status": "CANCELLED"}}
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     assert res.data["closePythonRun"]["status"] == "CANCELLED"
 
     again = await aexecute(
@@ -410,12 +450,12 @@ async def test_a_run_is_closed_once(aexecute):
     assert (await PythonRun.objects.aget(id=run["id"])).status == "CANCELLED"
 
 
-async def test_a_resumed_task_reopens_its_closed_run(aexecute):
+async def test_a_resumed_task_reopens_its_closed_run(aexecute: AExecute) -> None:
     """An agent that died after closing the run, before its task ended: the task runs again."""
     flow = await _published(aexecute)
-    run = (
+    run = data_of(
         await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})
-    ).data["createPythonRun"]
+    )["createPythonRun"]
     await aexecute(CLOSE_RUN, {"input": {"run": run["id"], "status": "COMPLETED"}})
     created_at = (await PythonRun.objects.aget(id=run["id"])).created_at
 
@@ -423,6 +463,7 @@ async def test_a_resumed_task_reopens_its_closed_run(aexecute):
         CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}}
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     assert (
         res.data["createPythonRun"]["id"],
         res.data["createPythonRun"]["status"],
@@ -431,14 +472,17 @@ async def test_a_resumed_task_reopens_its_closed_run(aexecute):
     assert (reopened.finished_at, reopened.created_at) == (None, created_at)
 
 
-async def test_a_run_is_found_by_its_task(aexecute, other_org_context):
+async def test_a_run_is_found_by_its_task(
+    aexecute: AExecute, other_org_context: HttpContext
+) -> None:
     flow = await _published(aexecute)
-    run = (
+    run = data_of(
         await aexecute(CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}})
-    ).data["createPythonRun"]
+    )["createPythonRun"]
 
     res = await aexecute(RUN_FOR_TASK, {"id": "task-1"})
     assert not res.errors, res.errors
+    assert res.data is not None
     assert (
         res.data["pythonRunForTask"]["id"],
         res.data["pythonRunForTask"]["flow"]["id"],
@@ -450,7 +494,7 @@ async def test_a_run_is_found_by_its_task(aexecute, other_org_context):
     ).errors
 
 
-async def test_a_draft_cannot_be_run(aexecute):
+async def test_a_draft_cannot_be_run(aexecute: AExecute) -> None:
     flow = await _create(aexecute)
     res = await aexecute(
         CREATE_RUN, {"input": {"flow": flow["id"], "taskId": "task-1"}}
@@ -463,14 +507,15 @@ async def test_a_draft_cannot_be_run(aexecute):
 
 
 async def test_another_organization_cannot_see_or_touch_a_flow(
-    aexecute, other_org_context
-):
+    aexecute: AExecute, other_org_context: HttpContext
+) -> None:
     flow = await _published(aexecute)
 
     res = await aexecute(GET, {"id": flow["id"]}, context=other_org_context)
     assert res.errors
     res = await aexecute(LIST, {}, context=other_org_context)
     assert not res.errors, res.errors
+    assert res.data is not None
     assert res.data["pythonFlows"] == []
     for mutation in (ARCHIVE, DELETE):
         res = await aexecute(

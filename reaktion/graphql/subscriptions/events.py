@@ -7,7 +7,7 @@ from reaktion import channels, models, types
 
 
 async def events(
-    self,
+    self: object,
     info: Info,
     run: strawberry.ID,
 ) -> AsyncGenerator[types.RunEvent, None]:

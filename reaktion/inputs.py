@@ -12,7 +12,7 @@ from rekuest_core.inputs import models as rimodels
 from rekuest_core.inputs import types as ritypes
 
 
-def _map_or_empty(value: Any) -> Any:
+def _map_or_empty(value: object) -> object:
     """Treat an omitted (``null``) map as an empty one.
 
     ``ValueMapInput`` fields must default to *null* rather than ``{}`` on the wire:

@@ -6,17 +6,23 @@ puts objects in a collaboration; what each needs to be seen comes along, and wha
 """
 
 import uuid
+from collections.abc import Callable, Iterator
+from typing import TypeAlias
 
 import pytest
 from arkitekt_service.collaborations import items as collaboration_items
 from arkitekt_service.collaborations.models import Collaboration
 from asgiref.sync import sync_to_async
 from authentikate import settings as authentikate_settings
+from django.db.models import Model
 from kante.context import HttpContext, UniversalRequest
+from pytest_django.fixtures import SettingsWrapper
 from strawberry.http.temporal_response import TemporalResponse
+from strawberry.types import ExecutionResult
 
 from fluss_server.schema import schema
 from reaktion import models
+from tests.utils import MakeFlow, MakeRun, MakeSnapshot, MakeWorkspace, data_of
 
 WORKSPACES = "{ workspaces { id flows { id } latestFlow { id } } }"
 WORKSPACE = "query ($id: ID!) { workspace(id: $id) { id flows { id } } }"
@@ -55,8 +61,14 @@ def _context(token: str) -> HttpContext:
     )
 
 
+#: The ``guest`` fixture: a context for a guest granted these collaborations, with these roles.
+Guest: TypeAlias = Callable[[dict[Collaboration, list[str]]], HttpContext]
+
+
 @pytest.fixture
-def guest(db, authenticated_context, settings):
+def guest(
+    db: None, authenticated_context: HttpContext, settings: SettingsWrapper
+) -> Iterator[Guest]:
     """``guest({collaboration: roles})``: a context presenting a guest's token granted those collaborations on instance "1"."""
 
     def mint(collaborations: dict[Collaboration, list[str]]) -> HttpContext:
@@ -83,13 +95,13 @@ def guest(db, authenticated_context, settings):
     authentikate_settings.cached_settings = None
 
 
-async def _run(ctx: HttpContext, query: str, **variables):
+async def _run(ctx: HttpContext, query: str, **variables: object) -> ExecutionResult:
     return await schema.execute(
         query, context_value=ctx, variable_values=variables or None
     )
 
 
-async def _collaboration(ctx: HttpContext, *objects) -> Collaboration:
+async def _collaboration(ctx: HttpContext, *objects: Model) -> Collaboration:
     """A collaboration of the organization holding ``objects``, as a full member puts them in."""
 
     def make() -> Collaboration:
@@ -103,7 +115,7 @@ async def _collaboration(ctx: HttpContext, *objects) -> Collaboration:
     return await sync_to_async(make)()
 
 
-def _refused(result, reason: str) -> None:
+def _refused(result: ExecutionResult, reason: str) -> None:
     assert result.errors, "it was let through"
     assert result.errors[0].extensions.get("reason") == reason, result.errors
 
@@ -140,8 +152,11 @@ def _python_run(flow: models.PythonFlow) -> models.PythonRun:
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_guest_reads_the_workspace_in_their_collaboration_and_its_flows(
-    authenticated_context, guest, make_workspace, make_flow
-):
+    authenticated_context: HttpContext,
+    guest: Guest,
+    make_workspace: MakeWorkspace,
+    make_flow: MakeFlow,
+) -> None:
     shared = await make_workspace(title="Shared")
     versions = [
         await make_flow(workspace=shared, title=f"v{index}") for index in range(2)
@@ -152,64 +167,73 @@ async def test_a_guest_reads_the_workspace_in_their_collaboration_and_its_flows(
 
     listed = await _run(ctx, WORKSPACES)
     assert not listed.errors, listed.errors
+    assert listed.data is not None
     (workspace,) = listed.data["workspaces"]
-    assert workspace["id"] == str(shared.id)
-    assert _ids(workspace["flows"]) == _ids([{"id": str(flow.id)} for flow in versions])
+    assert workspace["id"] == str(shared.pk)
+    assert _ids(workspace["flows"]) == _ids([{"id": str(flow.pk)} for flow in versions])
     assert workspace["latestFlow"] is not None
-    assert _ids((await _run(ctx, FLOWS)).data["flows"]) == _ids(workspace["flows"])
-    assert (await _run(ctx, WORKSPACE, id=str(other.id))).errors
+    assert _ids(data_of(await _run(ctx, FLOWS))["flows"]) == _ids(workspace["flows"])
+    assert (await _run(ctx, WORKSPACE, id=str(other.pk))).errors
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_flow_saved_into_a_shared_workspace_later_comes_in(
-    authenticated_context, guest, make_workspace, make_flow
-):
+    authenticated_context: HttpContext,
+    guest: Guest,
+    make_workspace: MakeWorkspace,
+    make_flow: MakeFlow,
+) -> None:
     workspace = await make_workspace(title="Growing")
     await make_flow(workspace=workspace, title="v1")
     ctx = guest({await _collaboration(authenticated_context, workspace): []})
     later = await make_flow(workspace=workspace, title="v2")
 
-    seen = await _run(ctx, WORKSPACE, id=str(workspace.id))
+    seen = await _run(ctx, WORKSPACE, id=str(workspace.pk))
     assert not seen.errors, seen.errors
-    assert str(later.id) in [flow["id"] for flow in seen.data["workspace"]["flows"]]
+    assert seen.data is not None
+    assert str(later.pk) in [flow["id"] for flow in seen.data["workspace"]["flows"]]
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_shared_run_renders_with_its_flow_events_and_snapshots(
-    authenticated_context, guest, make_run, make_snapshot
-):
+    authenticated_context: HttpContext,
+    guest: Guest,
+    make_run: MakeRun,
+    make_snapshot: MakeSnapshot,
+) -> None:
     run = await make_run()
     event = await _event(run, t=1)
     snapshot = await make_snapshot(run, t=1)
     await sync_to_async(snapshot.events.add)(event)
     ctx = guest({await _collaboration(authenticated_context, run): []})
 
-    result = await _run(ctx, RENDER_RUN, id=str(run.id))
+    result = await _run(ctx, RENDER_RUN, id=str(run.pk))
     assert not result.errors, result.errors
+    assert result.data is not None
     rendered = result.data["run"]
     assert rendered["flow"]["id"] == str(run.flow_id)
     assert rendered["flow"]["workspace"]["id"] is not None
-    assert _ids(rendered["events"]) == [str(event.id)]
+    assert _ids(rendered["events"]) == [str(event.pk)]
     assert rendered["snapshots"] == [
-        {"id": str(snapshot.id), "events": [{"id": str(event.id)}]}
+        {"id": str(snapshot.pk), "events": [{"id": str(event.pk)}]}
     ]
-    assert rendered["latestSnapshot"]["id"] == str(snapshot.id)
+    assert rendered["latestSnapshot"]["id"] == str(snapshot.pk)
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_an_event_tracked_after_sharing_is_seen(
-    authenticated_context, guest, make_run
-):
+    authenticated_context: HttpContext, guest: Guest, make_run: MakeRun
+) -> None:
     run = await make_run()
     ctx = guest({await _collaboration(authenticated_context, run): []})
     tracked = await _run(
         authenticated_context,
         TRACK,
         input={
-            "run": str(run.id),
+            "run": str(run.pk),
             "reference": "ref-1",
             "t": 1,
             "kind": "NEXT",
@@ -219,32 +243,38 @@ async def test_an_event_tracked_after_sharing_is_seen(
         },
     )
     assert not tracked.errors, tracked.errors
+    assert tracked.data is not None
 
-    between = await _run(ctx, EVENTS_BETWEEN, run=str(run.id))
+    between = await _run(ctx, EVENTS_BETWEEN, run=str(run.pk))
     assert not between.errors, between.errors
+    assert between.data is not None
     assert _ids(between.data["eventsBetween"]) == [tracked.data["track"]["id"]]
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_sharing_a_workspace_shares_none_of_its_runs(
-    authenticated_context, guest, make_workspace, make_flow, make_run
-):
+    authenticated_context: HttpContext,
+    guest: Guest,
+    make_workspace: MakeWorkspace,
+    make_flow: MakeFlow,
+    make_run: MakeRun,
+) -> None:
     workspace = await make_workspace()
     run = await make_run(flow=await make_flow(workspace=workspace))
     unshared = await make_run()
     ctx = guest({await _collaboration(authenticated_context, workspace): []})
 
-    assert (await _run(ctx, RUNS)).data["runs"] == []
-    assert (await _run(ctx, RENDER_RUN, id=str(run.id))).errors
-    assert (await _run(ctx, EVENTS_BETWEEN, run=str(unshared.id))).errors
+    assert data_of(await _run(ctx, RUNS))["runs"] == []
+    assert (await _run(ctx, RENDER_RUN, id=str(run.pk))).errors
+    assert (await _run(ctx, EVENTS_BETWEEN, run=str(unshared.pk))).errors
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_python_run_brings_its_flow_and_a_flow_brings_none_of_its_runs(
-    authenticated_context, guest
-):
+    authenticated_context: HttpContext, guest: Guest
+) -> None:
     flow = await _python_flow(authenticated_context, "Shared")
     run = await _python_run(flow)
     other = await _python_run(flow)
@@ -253,21 +283,23 @@ async def test_a_python_run_brings_its_flow_and_a_flow_brings_none_of_its_runs(
     result = await _run(
         by_flow,
         "query ($id: ID!) { pythonFlow(id: $id) { id runs { id } } }",
-        id=str(flow.id),
+        id=str(flow.pk),
     )
     assert not result.errors, result.errors
+    assert result.data is not None
     assert result.data["pythonFlow"]["runs"] == []
-    assert (await _run(by_flow, "{ pythonRuns { id } }")).data["pythonRuns"] == []
+    assert data_of(await _run(by_flow, "{ pythonRuns { id } }"))["pythonRuns"] == []
 
     by_run = guest({await _collaboration(authenticated_context, run): []})
     listed = await _run(by_run, "{ pythonRuns { id flow { id } } }")
     assert not listed.errors, listed.errors
+    assert listed.data is not None
     assert listed.data["pythonRuns"] == [
-        {"id": str(run.id), "flow": {"id": str(flow.id)}}
+        {"id": str(run.pk), "flow": {"id": str(flow.pk)}}
     ]
     assert (
         await _run(
-            by_run, "query ($id: ID!) { pythonRun(id: $id) { id } }", id=str(other.id)
+            by_run, "query ($id: ID!) { pythonRun(id: $id) { id } }", id=str(other.pk)
         )
     ).errors
 
@@ -275,13 +307,14 @@ async def test_a_python_run_brings_its_flow_and_a_flow_brings_none_of_its_runs(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_member_puts_a_run_in_and_it_brings_its_flow_and_workspace(
-    authenticated_context, guest, make_run
-):
+    authenticated_context: HttpContext, guest: Guest, make_run: MakeRun
+) -> None:
     run = await make_run()
     made = await _run(
         authenticated_context, CREATE_COLLABORATION, input={"name": "Results"}
     )
     assert not made.errors, made.errors
+    assert made.data is not None
     collaboration = made.data["createCollaboration"]["id"]
 
     added = await _run(
@@ -290,10 +323,11 @@ async def test_a_member_puts_a_run_in_and_it_brings_its_flow_and_workspace(
         input={
             "collaboration": collaboration,
             "identifier": "@fluss/run",
-            "object": str(run.id),
+            "object": str(run.pk),
         },
     )
     assert not added.errors, added.errors
+    assert added.data is not None
     items = {
         (item["identifier"], item["brought"])
         for item in added.data["addToCollaboration"]["items"]
@@ -305,16 +339,19 @@ async def test_a_member_puts_a_run_in_and_it_brings_its_flow_and_workspace(
     }
 
     ctx = guest({await sync_to_async(Collaboration.objects.get)(pk=collaboration): []})
-    assert _ids((await _run(ctx, RUNS)).data["runs"]) == [str(run.id)]
+    assert _ids(data_of(await _run(ctx, RUNS))["runs"]) == [str(run.pk)]
     listed = await _run(ctx, "{ collaborations { id } }")
-    assert listed.data["collaborations"] == [{"id": collaboration}]
+    assert data_of(listed)["collaborations"] == [{"id": collaboration}]
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_guest_writes_nothing_even_as_an_editor(
-    authenticated_context, guest, make_run, make_workspace
-):
+    authenticated_context: HttpContext,
+    guest: Guest,
+    make_run: MakeRun,
+    make_workspace: MakeWorkspace,
+) -> None:
     run = await make_run()
     python_flow = await _python_flow(authenticated_context, "Published")
     collaboration = await _collaboration(authenticated_context, run, python_flow)
@@ -337,7 +374,7 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
             ctx,
             TRACK,
             input={
-                "run": str(run.id),
+                "run": str(run.pk),
                 "reference": "ref-1",
                 "t": 1,
                 "kind": "NEXT",
@@ -352,7 +389,7 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
         await _run(
             ctx,
             CREATE_PYTHON_RUN,
-            input={"flow": str(python_flow.id), "taskId": "guest-task"},
+            input={"flow": str(python_flow.pk), "taskId": "guest-task"},
         ),
         "SCOPED_READ_ONLY",
     )
@@ -376,7 +413,7 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
             input={
                 "collaboration": str(collaboration.pk),
                 "identifier": "@fluss/workspace",
-                "object": str(elsewhere.id),
+                "object": str(elsewhere.pk),
             },
         ),
         "SCOPED_READ_ONLY",
@@ -393,8 +430,8 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_root_fields_handing_out_no_objects_are_closed_to_guests(
-    authenticated_context, guest, make_workspace
-):
+    authenticated_context: HttpContext, guest: Guest, make_workspace: MakeWorkspace
+) -> None:
     ctx = guest(
         {await _collaboration(authenticated_context, await make_workspace()): []}
     )
@@ -413,20 +450,20 @@ async def test_root_fields_handing_out_no_objects_are_closed_to_guests(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_collaboration_of_another_organization_shows_nothing(
-    other_org_context, guest, make_workspace
-):
+    other_org_context: HttpContext, guest: Guest, make_workspace: MakeWorkspace
+) -> None:
     theirs = await make_workspace(context=other_org_context, title="Theirs")
     ctx = guest({await _collaboration(other_org_context, theirs): []})
 
-    assert (await _run(ctx, WORKSPACES)).data["workspaces"] == []
-    assert (await _run(ctx, WORKSPACE, id=str(theirs.id))).errors
+    assert data_of(await _run(ctx, WORKSPACES))["workspaces"] == []
+    assert (await _run(ctx, WORKSPACE, id=str(theirs.pk))).errors
 
 
 def _type_line(sdl: str, name: str) -> str:
     return next(line for line in sdl.splitlines() if line.startswith(f"type {name} "))
 
 
-def test_the_schema_says_what_each_type_is():
+def test_the_schema_says_what_each_type_is() -> None:
     sdl = str(schema)
     assert '@identified(by: "@fluss/workspace")' in _type_line(sdl, "Workspace")
     assert '@identified(by: "@fluss/run")' in _type_line(sdl, "Run")

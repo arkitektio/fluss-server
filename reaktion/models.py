@@ -46,7 +46,7 @@ class Workspace(EmbeddedDescriptionMixin, models.Model):
         help_text="The users that have pinned the workspace",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.title}"
 
     class Meta:
@@ -353,4 +353,5 @@ class TraceEvent(models.Model):
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
 
 
-from .signals import *
+# Imported last, for its side effect: connects the receivers of these models.
+from . import signals as signals

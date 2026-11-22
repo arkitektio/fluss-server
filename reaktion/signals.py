@@ -10,7 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=models.RunEvent)
-def event_singal(sender, instance=None, **kwargs):
+def event_singal(
+    sender: type[models.RunEvent],
+    instance: models.RunEvent | None = None,
+    **kwargs: object,
+) -> None:
     if instance:
         logger.debug(
             "RunEvent %s saved; broadcasting to run_%s", instance.id, instance.run_id

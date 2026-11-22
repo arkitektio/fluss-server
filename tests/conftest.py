@@ -9,20 +9,36 @@ elektro are intentionally omitted.
 import os
 import time
 import uuid
+from collections.abc import Iterator, Mapping
 
 import psycopg
 import pytest
 from asgiref.sync import sync_to_async
 from authentikate.models import Client, Membership, Organization, User
+from django.apps import AppConfig
 from django.contrib.contenttypes.management import create_contenttypes
 from django.db.models.signals import post_migrate
 from dokker import PortNotFoundError, testing
+from dokker.deployment import Deployment
 from kante.context import HttpContext, UniversalRequest
+from pytest_django import DjangoDbBlocker
 from strawberry.http.temporal_response import TemporalResponse
+from strawberry.types import ExecutionResult
+
+from reaktion.models import Flow, ReactiveTemplate, Run, Snapshot, Trace, Workspace
+from tests.utils import (
+    AExecute,
+    MakeFlow,
+    MakeReactiveTemplate,
+    MakeRun,
+    MakeSnapshot,
+    MakeTrace,
+    MakeWorkspace,
+)
 
 
 def _wait_for_port(
-    e, service: str, container_port: int, deadline_seconds: float = 30.0
+    e: Deployment, service: str, container_port: int, deadline_seconds: float = 30.0
 ) -> int:
     """The host port docker published for ``service:container_port``, once the container is up."""
     deadline = time.monotonic() + deadline_seconds
@@ -36,7 +52,7 @@ def _wait_for_port(
 
 
 @pytest.fixture(scope="session")
-def backend_stack():
+def backend_stack() -> Iterator[dict[str, int]]:
     """Bring up the Postgres (+ Redis) backend from tests/integration/docker-compose.yaml."""
     docker_compose_path = os.path.join(
         os.path.dirname(__file__), "integration", "docker-compose.yaml"
@@ -58,7 +74,7 @@ def backend_stack():
         # with its siblings and with any stack a crashed run left behind. `get_port` is
         # resolved inside the retry loop because `up()` can return before the container
         # is running.
-        db_port = None
+        db_port: int | None = None
         deadline = time.monotonic() + 30
         while True:
             try:
@@ -100,7 +116,7 @@ def backend_stack():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def embedding_model_warm():
+def embedding_model_warm() -> Iterator[None]:
     """Load the embedding model once per session, outside any test's DB transaction.
 
     Every save of a Workspace / Flow embeds its text, so the first one would otherwise pay
@@ -114,7 +130,7 @@ def embedding_model_warm():
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings(backend_stack):
+def django_db_modify_db_settings(backend_stack: dict[str, int]) -> Iterator[None]:
     """Start the backend services, and point Django at the ports they came up on.
 
     pytest-django calls this before creating the test database, which is the only window
@@ -129,7 +145,9 @@ def django_db_modify_db_settings(backend_stack):
 
 
 @pytest.fixture(scope="session")
-def django_db_setup(django_db_setup, django_db_blocker):
+def django_db_setup(
+    django_db_setup: None, django_db_blocker: DjangoDbBlocker
+) -> Iterator[None]:
     # Every transaction=True test teardown flushes the DB and re-fires
     # post_migrate, which rebuilds all contenttypes and permissions from the
     # model registry (~1s per test). The rows never change between tests, so
@@ -147,9 +165,11 @@ def django_db_setup(django_db_setup, django_db_blocker):
     )
     post_migrate.disconnect(create_contenttypes)
 
-    def restore_contenttypes_and_permissions(sender, **kwargs):
+    def restore_contenttypes_and_permissions(
+        sender: AppConfig, **kwargs: object
+    ) -> None:
         # post_migrate fires once per app config on flush; restore once.
-        if getattr(sender, "label", None) != "contenttypes":
+        if sender.label != "contenttypes":
             return
         ContentType.objects.bulk_create(contenttypes, ignore_conflicts=True)
         Permission.objects.bulk_create(permissions, ignore_conflicts=True)
@@ -176,7 +196,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 
 @pytest.fixture(scope="function")
-def authenticated_context(db, backend_stack) -> HttpContext:
+def authenticated_context(db: None, backend_stack: dict[str, int]) -> HttpContext:
     # Match the identity the static "test" token resolves to (settings_test
     # STATIC_TOKENS), so the org/user on this context is the same one the
     # schema's AuthentikateExtension authenticates as at resolve time.
@@ -204,7 +224,7 @@ def authenticated_context(db, backend_stack) -> HttpContext:
 
 
 @pytest.fixture(scope="function")
-def other_org_context(db, backend_stack) -> HttpContext:
+def other_org_context(db: None, backend_stack: dict[str, int]) -> HttpContext:
     """A context for a user in a different organization (static token "othertest")."""
     user, _ = User.objects.get_or_create(
         sub="9", iss="static_issuer", defaults={"username": "static_issuer_9"}
@@ -235,14 +255,18 @@ def other_org_context(db, backend_stack) -> HttpContext:
 
 
 @pytest.fixture
-def aexecute(authenticated_context):
+def aexecute(authenticated_context: HttpContext) -> AExecute:
     """Run a GraphQL document against the schema, defaulting to the authed context."""
     from fluss_server.schema import schema
 
-    async def _run(query, variables=None, context=None):
+    async def _run(
+        query: str,
+        variables: Mapping[str, object] | None = None,
+        context: HttpContext | None = None,
+    ) -> ExecutionResult:
         return await schema.execute(
             query,
-            variable_values=variables or {},
+            variable_values=dict(variables or {}),
             context_value=context or authenticated_context,
         )
 
@@ -250,12 +274,13 @@ def aexecute(authenticated_context):
 
 
 @pytest.fixture
-def make_workspace(authenticated_context):
+def make_workspace(authenticated_context: HttpContext) -> MakeWorkspace:
     """Factory: create a Workspace row."""
-    from reaktion.models import Workspace
 
     @sync_to_async
-    def _make(context=None, title="Workspace"):
+    def _make(
+        context: HttpContext | None = None, title: str = "Workspace"
+    ) -> Workspace:
         ctx = context or authenticated_context
         return Workspace.objects.create(
             title=title,
@@ -267,12 +292,16 @@ def make_workspace(authenticated_context):
 
 
 @pytest.fixture
-def make_flow(authenticated_context):
+def make_flow(authenticated_context: HttpContext) -> MakeFlow:
     """Factory: create a Flow row (organization is NOT NULL; hash is unique per workspace)."""
-    from reaktion.models import Flow, Workspace
 
     @sync_to_async
-    def _make(context=None, workspace=None, title="Flow", graph=None):
+    def _make(
+        context: HttpContext | None = None,
+        workspace: Workspace | None = None,
+        title: str = "Flow",
+        graph: Mapping[str, object] | None = None,
+    ) -> Flow:
         ctx = context or authenticated_context
         if workspace is None:
             workspace = Workspace.objects.create(
@@ -293,18 +322,21 @@ def make_flow(authenticated_context):
 
 
 @pytest.fixture
-def make_run(authenticated_context, make_flow):
+def make_run(authenticated_context: HttpContext, make_flow: MakeFlow) -> MakeRun:
     """Factory: create a Run row (defaults to a freshly minted flow)."""
-    from reaktion.models import Run
 
     @sync_to_async
-    def _make(flow, task_id=None):
+    def _make(flow: Flow, task_id: str | None = None) -> Run:
         return Run.objects.create(
             flow=flow,
             task_id=task_id or uuid.uuid4().hex,
         )
 
-    async def _wrap(context=None, flow=None, task_id=None):
+    async def _wrap(
+        context: HttpContext | None = None,
+        flow: Flow | None = None,
+        task_id: str | None = None,
+    ) -> Run:
         if flow is None:
             flow = await make_flow(context=context)
         return await _make(flow, task_id)
@@ -313,24 +345,26 @@ def make_run(authenticated_context, make_flow):
 
 
 @pytest.fixture
-def make_snapshot(authenticated_context):
+def make_snapshot(authenticated_context: HttpContext) -> MakeSnapshot:
     """Factory: create a Snapshot row (t is required)."""
-    from reaktion.models import Snapshot
 
     @sync_to_async
-    def _make(run, t=0):
+    def _make(run: Run, t: int = 0) -> Snapshot:
         return Snapshot.objects.create(run=run, t=t)
 
     return _make
 
 
 @pytest.fixture
-def make_reactive_template(authenticated_context):
+def make_reactive_template(authenticated_context: HttpContext) -> MakeReactiveTemplate:
     """Factory: create a ReactiveTemplate row (title+description are unique together)."""
-    from reaktion.models import ReactiveTemplate
 
     @sync_to_async
-    def _make(title=None, description=None, implementation="ZIP"):
+    def _make(
+        title: str | None = None,
+        description: str | None = None,
+        implementation: str = "ZIP",
+    ) -> ReactiveTemplate:
         return ReactiveTemplate.objects.create(
             title=title or f"tpl-{uuid.uuid4().hex}",
             description=description or "A reactive template",
@@ -341,15 +375,18 @@ def make_reactive_template(authenticated_context):
 
 
 @pytest.fixture
-def make_trace(authenticated_context, make_flow):
+def make_trace(authenticated_context: HttpContext, make_flow: MakeFlow) -> MakeTrace:
     """Factory: create a Trace row (no GraphQL surface; model-level only)."""
-    from reaktion.models import Trace
 
     @sync_to_async
-    def _make(flow, provision=None):
+    def _make(flow: Flow, provision: Mapping[str, object] | None = None) -> Trace:
         return Trace.objects.create(flow=flow, provision=provision)
 
-    async def _wrap(context=None, flow=None, provision=None):
+    async def _wrap(
+        context: HttpContext | None = None,
+        flow: Flow | None = None,
+        provision: Mapping[str, object] | None = None,
+    ) -> Trace:
         if flow is None:
             flow = await make_flow(context=context)
         return await _make(flow, provision)

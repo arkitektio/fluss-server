@@ -1,3 +1,5 @@
+from typing import Any
+
 import kante
 import strawberry
 import strawberry_django
@@ -42,13 +44,13 @@ def _fetch(model: type[Model], id: strawberry.ID, info: Info) -> Model:
 collaboration_api = collaboration_types.resolvers(fetch=_fetch)
 
 
-def field(scope: str = "fluss_read", **kwargs):
+def field(scope: str = "fluss_read", **kwargs: Any) -> Any:  # noqa: ANN401 -- as strawberry_django.field: the value of `x: T = field()`
     "A field an app needs ``scope`` for (``fluss_read``, unless it says otherwise)."
     return strawberry_django.field(extensions=[AuthExtension(scopes=[scope])], **kwargs)
 
 
 def mutation(
-    scope: str = "fluss_write", roles: list[str] | None = None, **kwargs
+    scope: str = "fluss_write", roles: list[str] | None = None, **kwargs: Any
 ) -> strawberry.mutation:
     """A write: an app needs ``scope`` for it, a full member one of ``roles`` (``fluss_editor`` unless it
     says otherwise; ``fluss_admin`` holds every role). A guest is refused every one."""
@@ -58,7 +60,7 @@ def mutation(
     )
 
 
-def subscription(**kwargs) -> strawberry.subscription:
+def subscription(**kwargs: Any) -> strawberry.subscription:
     """A subscription: what it streams is read, so an app needs ``fluss_read`` for it."""
     return strawberry.subscription(
         extensions=[AuthSubscribeExtension(scopes=["fluss_read"])], **kwargs

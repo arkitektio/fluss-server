@@ -7,17 +7,33 @@ the real embedding of the query, ``_vec(d)`` a unit vector at cosine distance ``
 
 import math
 import uuid
+from collections.abc import Awaitable
+from typing import Protocol, TypeAlias
 
 import numpy as np
 import pytest
 from asgiref.sync import sync_to_async
 from django.test import override_settings
+from kante.context import HttpContext
 
 from embeddings import engine
 from embeddings.healer import reembed_all, reembed_stale
 from reaktion.models import Flow, PythonFlow, Workspace
+from tests.utils import AExecute
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]
+
+#: A model that embeds its title + description, as the search tests seed it.
+Embedded: TypeAlias = Workspace | Flow | PythonFlow
+
+
+class Seed(Protocol):
+    """``_workspace`` / ``_flow`` / ``_python_flow``: a row of one embedded model."""
+
+    def __call__(
+        self, ctx: HttpContext, title: str, description: str | None = None
+    ) -> Awaitable[Embedded]: ...
+
 
 QUERY = "detect cells"
 
@@ -34,7 +50,9 @@ query ($filters: FlowFilter, $ordering: [FlowOrder!]) {
 
 
 @sync_to_async
-def _workspace(ctx, title: str, description: str | None = None) -> Workspace:
+def _workspace(
+    ctx: HttpContext, title: str, description: str | None = None
+) -> Workspace:
     return Workspace.objects.create(
         title=title,
         description=description,
@@ -44,7 +62,7 @@ def _workspace(ctx, title: str, description: str | None = None) -> Workspace:
 
 
 @sync_to_async
-def _flow(ctx, title: str, description: str | None = None) -> Flow:
+def _flow(ctx: HttpContext, title: str, description: str | None = None) -> Flow:
     return Flow.objects.create(
         title=title,
         description=description,
@@ -62,7 +80,9 @@ query ($filters: PythonFlowFilter, $ordering: [PythonFlowOrder!]) {
 
 
 @sync_to_async
-def _python_flow(ctx, title: str, description: str | None = None) -> PythonFlow:
+def _python_flow(
+    ctx: HttpContext, title: str, description: str | None = None
+) -> PythonFlow:
     return PythonFlow.objects.create(
         title=title,
         description=description,
@@ -99,23 +119,41 @@ def _vec(e0: np.ndarray, distance: float) -> list[float]:
     )
 
 
-async def _pin(model, row, e0, distance, embedding_model=None):
+async def _pin(
+    model: type[Embedded],
+    row: Embedded,
+    e0: np.ndarray,
+    distance: float | None,
+    embedding_model: str | None = None,
+) -> None:
     await model.objects.filter(pk=row.pk).aupdate(
         embedding=_vec(e0, distance) if distance is not None else None,
         embedding_model=embedding_model or engine.model_id(),
     )
 
 
-async def _titles(aexecute, query, search, ordering=None):
+async def _titles(
+    aexecute: AExecute,
+    query: str,
+    search: str,
+    ordering: list[dict[str, str]] | None = None,
+) -> list[str]:
     res = await aexecute(
         query, {"filters": {"search": search}, "ordering": ordering or []}
     )
     assert not res.errors, res.errors
+    assert res.data is not None
     return [row["title"] for row in next(iter(res.data.values()))]
 
 
 @pytest.mark.parametrize(("model", "seed", "query", "field"), MODELS)
-async def test_create_embeds(authenticated_context, model, seed, query, field):
+async def test_create_embeds(
+    authenticated_context: HttpContext,
+    model: type[Embedded],
+    seed: Seed,
+    query: str,
+    field: str,
+) -> None:
     row = await seed(
         authenticated_context,
         "Segment nuclei",
@@ -127,7 +165,9 @@ async def test_create_embeds(authenticated_context, model, seed, query, field):
     assert row.embedding_model == engine.model_id()
 
 
-async def test_editing_the_description_reembeds(authenticated_context):
+async def test_editing_the_description_reembeds(
+    authenticated_context: HttpContext,
+) -> None:
     ws = await _workspace(
         authenticated_context, "Export", "Write a table to a spreadsheet"
     )
@@ -138,14 +178,18 @@ async def test_editing_the_description_reembeds(authenticated_context):
     assert list((await Workspace.objects.aget(pk=ws.pk)).embedding) != before
 
 
-async def test_blank_text_stores_null_and_is_complete(authenticated_context):
+async def test_blank_text_stores_null_and_is_complete(
+    authenticated_context: HttpContext,
+) -> None:
     ws = await _workspace(authenticated_context, "  ", None)
     await ws.arefresh_from_db()
     assert ws.embedding is None and ws.embedding_model == engine.model_id()
     assert await sync_to_async(reembed_stale)(Workspace) == 0
 
 
-async def test_healer_reembeds_rows_of_another_model(authenticated_context):
+async def test_healer_reembeds_rows_of_another_model(
+    authenticated_context: HttpContext,
+) -> None:
     ws = await _workspace(authenticated_context, "Blur", "Gaussian blur of an image")
     fl = await _flow(authenticated_context, "Blur v2", "Gaussian blur, faster")
     for model, row in ((Workspace, ws), (Flow, fl)):
@@ -163,8 +207,13 @@ async def test_healer_reembeds_rows_of_another_model(authenticated_context):
 
 @pytest.mark.parametrize(("model", "seed", "query", "field"), MODELS)
 async def test_semantic_match_without_substring(
-    aexecute, authenticated_context, model, seed, query, field
-):
+    aexecute: AExecute,
+    authenticated_context: HttpContext,
+    model: type[Embedded],
+    seed: Seed,
+    query: str,
+    field: str,
+) -> None:
     await seed(
         authenticated_context,
         "Segment nuclei",
@@ -181,8 +230,13 @@ async def test_semantic_match_without_substring(
 
 @pytest.mark.parametrize(("model", "seed", "query", "field"), MODELS)
 async def test_lexical_only_when_disabled(
-    aexecute, authenticated_context, model, seed, query, field
-):
+    aexecute: AExecute,
+    authenticated_context: HttpContext,
+    model: type[Embedded],
+    seed: Seed,
+    query: str,
+    field: str,
+) -> None:
     await seed(authenticated_context, "Detect cells", None)
     await seed(authenticated_context, "Segment nuclei", "detect cells in an image")
     with override_settings(EMBEDDINGS={**engine._settings(), "ENABLED": False}):
@@ -191,8 +245,13 @@ async def test_lexical_only_when_disabled(
 
 @pytest.mark.parametrize(("model", "seed", "query", "field"), MODELS)
 async def test_ranking_lexical_first_then_by_distance(
-    aexecute, authenticated_context, model, seed, query, field
-):
+    aexecute: AExecute,
+    authenticated_context: HttpContext,
+    model: type[Embedded],
+    seed: Seed,
+    query: str,
+    field: str,
+) -> None:
     e0 = np.asarray(engine.embed_query(QUERY))
     await _pin(model, await seed(authenticated_context, "Far"), e0, 0.5)
     await _pin(model, await seed(authenticated_context, "Near"), e0, 0.1)
@@ -209,8 +268,13 @@ async def test_ranking_lexical_first_then_by_distance(
 
 @pytest.mark.parametrize(("model", "seed", "query", "field"), MODELS)
 async def test_stale_embedding_model_is_not_a_vector_hit(
-    aexecute, authenticated_context, model, seed, query, field
-):
+    aexecute: AExecute,
+    authenticated_context: HttpContext,
+    model: type[Embedded],
+    seed: Seed,
+    query: str,
+    field: str,
+) -> None:
     e0 = np.asarray(engine.embed_query(QUERY))
     await _pin(
         model,
@@ -231,8 +295,13 @@ async def test_stale_embedding_model_is_not_a_vector_hit(
 
 @pytest.mark.parametrize(("model", "seed", "query", "field"), MODELS)
 async def test_explicit_ordering_replaces_the_ranking(
-    aexecute, authenticated_context, model, seed, query, field
-):
+    aexecute: AExecute,
+    authenticated_context: HttpContext,
+    model: type[Embedded],
+    seed: Seed,
+    query: str,
+    field: str,
+) -> None:
     e0 = np.asarray(engine.embed_query(QUERY))
     await _pin(model, await seed(authenticated_context, "Zeta"), e0, 0.1)
     await _pin(model, await seed(authenticated_context, "Alpha"), e0, 0.4)
@@ -243,7 +312,9 @@ async def test_explicit_ordering_replaces_the_ranking(
     ]
 
 
-async def test_unloadable_model_degrades_to_substring(aexecute, authenticated_context):
+async def test_unloadable_model_degrades_to_substring(
+    aexecute: AExecute, authenticated_context: HttpContext
+) -> None:
     e0 = np.asarray(engine.embed_query(QUERY))
     await _pin(Workspace, await _workspace(authenticated_context, "Near"), e0, 0.05)
     await _workspace(authenticated_context, "Detect cells")

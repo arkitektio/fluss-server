@@ -1,10 +1,11 @@
 import datetime
-from dataclasses import Field
-from typing import Any, Literal, Optional, Union
+from collections.abc import Callable
+from typing import Any, Literal, Optional, TypeVar
 
 import kante
 import strawberry
 from arkitekt_service.collaborations.guests import object_scope
+from django.db.models import Model, QuerySet
 from kante.types import Info
 from pydantic import BaseModel, Field
 from strawberry.experimental import pydantic
@@ -17,8 +18,12 @@ from rekuest_core.objects import types as rtypes
 
 from .type_gen import create_stats_type
 
+_ModelT = TypeVar("_ModelT", bound=Model)
 
-def build_prescoped_queryset(info, queryset, field="organization"):
+
+def build_prescoped_queryset(
+    info: Info, queryset: QuerySet[_ModelT], field: str = "organization"
+) -> QuerySet[_ModelT]:
     """``queryset`` limited to the request's organization, and, at a root field, for a guest of the
     organization, to what is in their collaborations. Below a root field the collaboration gate holds them to it."""
     if info.variable_values.get("filters", {}).get("scope") is None:
@@ -29,8 +34,10 @@ def build_prescoped_queryset(info, queryset, field="organization"):
         raise Exception("Custom scopes not implemented yet")
 
 
-def build_prescoper(field="organization"):
-    def prescoper(queryset, info):
+def build_prescoper(
+    field: str = "organization",
+) -> Callable[[QuerySet[_ModelT], Info], QuerySet[_ModelT]]:
+    def prescoper(queryset: QuerySet[_ModelT], info: Info) -> QuerySet[_ModelT]:
         return build_prescoped_queryset(info, queryset, field=field)
 
     return prescoper
@@ -315,14 +322,14 @@ class AgentSubFlowNode(GraphNode):
     auto_resolvable: bool = False
 
 
-GraphNodeModelUnion = Union[
-    RekuestMapActionNodeModel,
-    ReactiveNodeModel,
-    ArgNodeModel,
-    ReturnNodeModel,
-    RekuestFilterActionNodeModel,
-    AgentSubFlowNodeModel,
-]
+GraphNodeModelUnion = (
+    RekuestMapActionNodeModel
+    | ReactiveNodeModel
+    | ArgNodeModel
+    | ReturnNodeModel
+    | RekuestFilterActionNodeModel
+    | AgentSubFlowNodeModel
+)
 
 
 class StreamItemModel(BaseModel):
@@ -410,7 +417,7 @@ class LoggingEdge(GraphEdge):
     level: str
 
 
-StreamEdgeModelUnion = Union[VanillaEdgeModel, LoggingEdgeModel]
+StreamEdgeModelUnion = VanillaEdgeModel | LoggingEdgeModel
 
 
 class GlobalArgModel(BaseModel):
@@ -494,7 +501,9 @@ class Flow:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.Flow], info: Info, **kwargs: Any
+    ) -> QuerySet[models.Flow]:
         return build_prescoped_queryset(info, queryset)
 
     @kante.django_field(
@@ -536,7 +545,9 @@ class Workspace:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.Workspace], info: Info, **kwargs: Any
+    ) -> QuerySet[models.Workspace]:
         return build_prescoped_queryset(info, queryset)
 
     @kante.django_field(
@@ -675,7 +686,9 @@ class PythonFlow:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.PythonFlow], info: Info, **kwargs: Any
+    ) -> QuerySet[models.PythonFlow]:
         return build_prescoped_queryset(info, queryset)
 
     @kante.django_field(
@@ -742,7 +755,9 @@ class PythonRun:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.PythonRun], info: Info, **kwargs: Any
+    ) -> QuerySet[models.PythonRun]:
         return build_prescoped_queryset(info, queryset, field="flow__organization")
 
 
@@ -846,7 +861,9 @@ class Run:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.Run], info: Info, **kwargs: Any
+    ) -> QuerySet[models.Run]:
         return build_prescoped_queryset(info, queryset, field="flow__organization")
 
     @kante.django_field(
@@ -886,7 +903,9 @@ class Snapshot:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.Snapshot], info: Info, **kwargs: Any
+    ) -> QuerySet[models.Snapshot]:
         return build_prescoped_queryset(info, queryset, field="run__flow__organization")
 
 
@@ -931,7 +950,9 @@ class RunEvent:
     )
 
     @classmethod
-    def get_queryset(cls, queryset, info, **kwargs):
+    def get_queryset(
+        cls, queryset: QuerySet[models.RunEvent], info: Info, **kwargs: Any
+    ) -> QuerySet[models.RunEvent]:
         return build_prescoped_queryset(info, queryset, field="run__flow__organization")
 
 

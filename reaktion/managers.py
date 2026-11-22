@@ -2,13 +2,22 @@ import re
 import typing as t
 
 from django.db import connection
+from django.db.models import Model, QuerySet
 
 from .inputs import PortMatchInput
+
+_ModelT = t.TypeVar("_ModelT", bound=Model)
 
 qt = re.compile(r"@(?P<package>[^\/]*)\/(?P<interface>[^\/]*)")
 
 
-def build_child_recursively(item: PortMatchInput, prefix, value_path, parts, params):
+def build_child_recursively(
+    item: PortMatchInput,
+    prefix: str,
+    value_path: str,
+    parts: list[str],
+    params: dict[str, str | int],
+) -> None:
     if item.key:
         parts.append(f"{prefix}->>'key' = %({value_path}_key)s")
         params[f"{value_path}_key"] = item.key
@@ -27,9 +36,11 @@ def build_child_recursively(item: PortMatchInput, prefix, value_path, parts, par
         )
 
 
-def build_sql_for_item_recursive(item: PortMatchInput, at_value=None):
-    sql_parts = []
-    params = {}
+def build_sql_for_item_recursive(
+    item: PortMatchInput, at_value: int | None = None
+) -> tuple[str, dict[str, str | int]]:
+    sql_parts: list[str] = []
+    params: dict[str, str | int] = {}
 
     if at_value is not None:
         sql_parts.append(f"idx = %(at_{at_value})s")
@@ -49,8 +60,8 @@ def build_sql_for_item_recursive(item: PortMatchInput, at_value=None):
 
     if item.child:
         # Adjusting the prefix for recursion
-        child_parts = []
-        child_params = {}
+        child_parts: list[str] = []
+        child_params: dict[str, str | int] = {}
         build_child_recursively(
             item.child,
             "item->'child'",
@@ -69,9 +80,9 @@ def build_params(
     type: t.Literal["args", "returns"] = "args",
     force_length: int | None = None,
     force_non_nullable_length: int | None = None,
-):
-    individual_queries = []
-    all_params = {}
+) -> tuple[str, dict[str, str | int]]:
+    individual_queries: list[str] = []
+    all_params: dict[str, str | int] = {}
     if search_params:
         for item in search_params:
             sql_part, params = build_sql_for_item_recursive(item, at_value=item.at)
@@ -100,13 +111,12 @@ def build_params(
 
 
 def filter_nodes_by_demands(
-    qs: t.Any,
-    demands: list[PortMatchInput] = None,
+    qs: QuerySet[_ModelT],
+    demands: list[PortMatchInput] | None = None,
     type: t.Literal["args", "returns"] = "args",
     force_length: int | None = None,
     force_non_nullable_length: int | None = None,
-):
-
+) -> QuerySet[_ModelT]:
     if type not in ["args", "returns"]:
         raise ValueError("Type must be either 'args' or 'returns'")
 

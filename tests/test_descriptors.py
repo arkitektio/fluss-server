@@ -13,13 +13,15 @@ import pytest
 from asgiref.sync import sync_to_async
 from authentikate.models import Organization
 from django.core.management import call_command
+from kante.context import HttpContext
 
 from embeddings import engine
 from embeddings.healer import stale_queryset
 from fluss_server.hook_agent import agent
 from fluss_server.service import service
 from reaktion.models import Flow, PythonFlow, PythonRun, Run, Workspace
-from tests.test_signals import intake  # noqa: F401  the fixture
+from tests.test_signals import _Intake, intake  # noqa: F401  the fixture
+from tests.utils import AExecute
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]
 
@@ -75,7 +77,7 @@ GRAPH = {
 }
 
 
-async def _seed(aexecute, ctx) -> dict:
+async def _seed(aexecute: AExecute, ctx: HttpContext) -> dict:
     """One object of every structure fluss hosts, in the context's organization: the flow as the mutation saves it."""
     user, org = ctx.request.user, ctx.request.organization
     workspace = await Workspace.objects.acreate(
@@ -133,14 +135,15 @@ async def _seed(aexecute, ctx) -> dict:
 
 
 async def test_an_object_answers_the_descriptors_its_structure_declares(
-    aexecute, authenticated_context
-):
+    aexecute: AExecute, authenticated_context: HttpContext
+) -> None:
     seeded = await _seed(aexecute, authenticated_context)
 
     result = await aexecute(
         DESCRIBED, {name: str(obj.pk) for name, obj in seeded.items()}
     )
     assert not result.errors, result.errors
+    assert result.data is not None
 
     flow = {
         "@fluss/n_nodes": 2,
@@ -180,10 +183,10 @@ async def test_an_object_answers_the_descriptors_its_structure_declares(
 
 
 async def test_the_field_answers_what_the_signal_carried(
-    intake,  # noqa: F811
-    aexecute,
-    authenticated_context,
-):
+    intake: _Intake,  # noqa: F811 -- the fixture imported above
+    aexecute: AExecute,
+    authenticated_context: HttpContext,
+) -> None:
     seeded = await _seed(aexecute, authenticated_context)
 
     (received,) = await sync_to_async(intake.of)("@fluss/pythonflow")
@@ -192,6 +195,7 @@ async def test_the_field_answers_what_the_signal_carried(
         {"id": str(seeded["pythonFlow"].pk)},
     )
     assert not result.errors, result.errors
+    assert result.data is not None
     assert (
         result.data["pythonFlow"]["descriptors"]
         == received["json"]["descriptors"]
@@ -204,6 +208,7 @@ async def test_the_field_answers_what_the_signal_carried(
         {"id": str(seeded["flow"].pk)},
     )
     assert not result.errors, result.errors
+    assert result.data is not None
     assert result.data["flow"]["descriptors"] == received["json"]["descriptors"] != {}
 
 
@@ -217,24 +222,26 @@ REQUIRED = """
 
 
 async def _required(
-    aexecute, flows: list, python_flows: list, runs: list
+    aexecute: AExecute, flows: list, python_flows: list, runs: list
 ) -> dict[str, set[str]]:
     result = await aexecute(
         REQUIRED, {"flows": flows, "pythonFlows": python_flows, "runs": runs}
     )
     assert not result.errors, result.errors
+    assert result.data is not None
     return {field: {row["id"] for row in rows} for field, rows in result.data.items()}
 
 
 async def test_a_port_requires_is_answered_from_the_stored_descriptors(
-    aexecute, authenticated_context
-):
+    aexecute: AExecute, authenticated_context: HttpContext
+) -> None:
     seeded = await _seed(aexecute, authenticated_context)
     # createWorkspace's flow takes no argument: what a schedule can start.
     created = await aexecute(
         'mutation { createWorkspace(input: {title: "Scheduled"}) { id } }'
     )
     assert not created.errors, created.errors
+    assert created.data is not None
     scheduled = await Flow.objects.aget(
         workspace_id=created.data["createWorkspace"]["id"]
     )
@@ -281,8 +288,8 @@ async def test_a_port_requires_is_answered_from_the_stored_descriptors(
 
 
 async def test_a_status_change_is_stored_and_the_setup_job_repairs_what_is_owed(
-    aexecute, authenticated_context
-):
+    aexecute: AExecute, authenticated_context: HttpContext
+) -> None:
     seeded = await _seed(aexecute, authenticated_context)
     python_run = seeded["pythonRun"]
     python_run.status = "COMPLETED"
@@ -300,7 +307,9 @@ async def test_a_status_change_is_stored_and_the_setup_job_repairs_what_is_owed(
     ] == 1
 
 
-async def test_a_sweep_for_one_organization_claims_only_its_rows(authenticated_context):
+async def test_a_sweep_for_one_organization_claims_only_its_rows(
+    authenticated_context: HttpContext,
+) -> None:
     """Every organization has the agent and its own schedule: a run must not do another's work."""
     user, org = (
         authenticated_context.request.user,

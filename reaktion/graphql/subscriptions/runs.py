@@ -10,6 +10,7 @@ from collections.abc import AsyncGenerator
 
 import strawberry
 from arkitekt_service.collaborations.guests import object_scope
+from django.db.models import QuerySet
 from kante.channel import CRUDSignal
 from kante.types import Info
 
@@ -47,7 +48,7 @@ class PythonRunChange:
     )
 
 
-def _scoped_runs(info: Info):
+def _scoped_runs(info: Info) -> QuerySet[models.Run]:
     organization = info.context.request.organization
     return object_scope(
         models.Run.objects.filter(flow__organization=organization), info=info
