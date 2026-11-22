@@ -1,5 +1,6 @@
 import strawberry
 from kante.types import Info
+
 from reaktion import models, types
 from reaktion.scoping import get_for_org
 

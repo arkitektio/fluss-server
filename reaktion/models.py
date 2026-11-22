@@ -1,15 +1,16 @@
 import uuid
 
 from arkitekt_service.service.described import Described
+from authentikate.models import Organization
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.indexes import GinIndex
-from authentikate.models import Organization, User
 
 # Create your models here.
 from django.db import models
 
 # Create your models here.
 from django_choices_field import TextChoicesField
+
 from embeddings.models import EmbeddedDescriptionMixin, embedding_indexes
 
 from . import enums
@@ -30,7 +31,9 @@ class Workspace(EmbeddedDescriptionMixin, models.Model):
     )
     title = models.CharField(max_length=10000, null=True)
     description = models.CharField(max_length=10000, null=True)
-    creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    creator = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, null=True, blank=True
+    )
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -56,9 +59,15 @@ class Flow(EmbeddedDescriptionMixin, Described):
 
     embedding_source_fields = ("title", "description")
 
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, null=True, blank=True, related_name="flows")
-    creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
-    restrict = models.JSONField(default=list, help_text="Restrict access to specific nodes for this diagram")
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, null=True, blank=True, related_name="flows"
+    )
+    creator = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, null=True, blank=True
+    )
+    restrict = models.JSONField(
+        default=list, help_text="Restrict access to specific nodes for this diagram"
+    )
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -70,7 +79,9 @@ class Flow(EmbeddedDescriptionMixin, Described):
     edges = models.JSONField(null=True, blank=True, default=list)
     graph = models.JSONField(null=True, blank=True)
     hash = models.CharField(max_length=4000, default=uuid.uuid4)
-    description = models.CharField(max_length=50000, default="Add a Desssscription", blank=True, null=True)
+    description = models.CharField(
+        max_length=50000, default="Add a Desssscription", blank=True, null=True
+    )
     brittle = models.BooleanField(
         default=False,
         help_text="Is this a brittle flow? aka. should the flow fail on any exception?",
@@ -91,7 +102,14 @@ class Flow(EmbeddedDescriptionMixin, Described):
             )
         ]
         # The embedding healer's "any row not by the current model?" probe.
-        indexes = [*embedding_indexes("flow"), GinIndex(fields=["stored_descriptors"], name="flow_desc_gin", opclasses=["jsonb_path_ops"])]
+        indexes = [
+            *embedding_indexes("flow"),
+            GinIndex(
+                fields=["stored_descriptors"],
+                name="flow_desc_gin",
+                opclasses=["jsonb_path_ops"],
+            ),
+        ]
 
 
 class ReactiveTemplate(models.Model):
@@ -119,7 +137,9 @@ class ReactiveTemplate(models.Model):
 
 # Montoring Classes
 class Run(Described):
-    flow = models.ForeignKey(Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="runs")
+    flow = models.ForeignKey(
+        Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="runs"
+    )
 
     task_id = models.CharField(null=True, blank=True, max_length=1000)
     status = models.CharField(max_length=100, default="RUNNING")
@@ -133,7 +153,13 @@ class Run(Described):
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
 
     class Meta:
-        indexes = [GinIndex(fields=["stored_descriptors"], name="run_desc_gin", opclasses=["jsonb_path_ops"])]
+        indexes = [
+            GinIndex(
+                fields=["stored_descriptors"],
+                name="run_desc_gin",
+                opclasses=["jsonb_path_ops"],
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.flow.workspace} - {self.task_id}"
@@ -170,7 +196,6 @@ class RunEvent(models.Model):
         return f"Events for {self.run}"
 
 
-
 class PythonFlow(EmbeddedDescriptionMixin, Described):
     """One immutable version of a flow written as Python source (not a graph).
 
@@ -184,25 +209,69 @@ class PythonFlow(EmbeddedDescriptionMixin, Described):
     embedding_source_fields = ("title", "description")
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    creator = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name="python_flows")
+    creator = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="python_flows",
+    )
     title = models.CharField(max_length=10000, null=True)
     description = models.CharField(max_length=50000, null=True, blank=True)
-    lineage = models.UUIDField(default=uuid.uuid4, help_text="Shared by every version of the same flow")
-    previous = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="next_versions")
+    lineage = models.UUIDField(
+        default=uuid.uuid4, help_text="Shared by every version of the same flow"
+    )
+    previous = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="next_versions",
+    )
     source = models.TextField()
     entrypoint = models.CharField(max_length=1000, default="main")
-    args = models.JSONField(default=list, help_text="The ArgPorts derived from the entrypoint's signature")
-    returns = models.JSONField(default=list, help_text="The ReturnPorts derived from the entrypoint's signature")
-    manifest = models.JSONField(default=list, help_text="Every action the source may call, under the name it is injected as")
-    runtime = models.CharField(max_length=1000, help_text="The executor runtime (interpreter + helpers) the source was validated against")
-    status = TextChoicesField(max_length=100, choices_enum=enums.PythonFlowStatusChoices, default=enums.PythonFlowStatusChoices.DRAFT.value)
-    hash = models.CharField(max_length=64, help_text="sha256 over source, entrypoint, manifest and runtime")
-    pinned_by = models.ManyToManyField(get_user_model(), related_name="pinned_python_flows", blank=True)
+    args = models.JSONField(
+        default=list, help_text="The ArgPorts derived from the entrypoint's signature"
+    )
+    returns = models.JSONField(
+        default=list,
+        help_text="The ReturnPorts derived from the entrypoint's signature",
+    )
+    manifest = models.JSONField(
+        default=list,
+        help_text="Every action the source may call, under the name it is injected as",
+    )
+    runtime = models.CharField(
+        max_length=1000,
+        help_text="The executor runtime (interpreter + helpers) the source was validated against",
+    )
+    status = TextChoicesField(
+        max_length=100,
+        choices_enum=enums.PythonFlowStatusChoices,
+        default=enums.PythonFlowStatusChoices.DRAFT.value,
+    )
+    hash = models.CharField(
+        max_length=64, help_text="sha256 over source, entrypoint, manifest and runtime"
+    )
+    pinned_by = models.ManyToManyField(
+        get_user_model(), related_name="pinned_python_flows", blank=True
+    )
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["organization", "lineage", "hash"], name="pyflow_unique_version")]
-        indexes = [*embedding_indexes("pyflow"), GinIndex(fields=["stored_descriptors"], name="pyflow_desc_gin", opclasses=["jsonb_path_ops"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "lineage", "hash"], name="pyflow_unique_version"
+            )
+        ]
+        indexes = [
+            *embedding_indexes("pyflow"),
+            GinIndex(
+                fields=["stored_descriptors"],
+                name="pyflow_desc_gin",
+                opclasses=["jsonb_path_ops"],
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.title} ({self.hash[:8]})"
@@ -210,7 +279,9 @@ class PythonFlow(EmbeddedDescriptionMixin, Described):
     @property
     def is_physical(self) -> bool:
         """Whether the source may call an action that touches the real world."""
-        return any(entry.get("effect") == "IRREVERSIBLE" for entry in self.manifest or [])
+        return any(
+            entry.get("effect") == "IRREVERSIBLE" for entry in self.manifest or []
+        )
 
 
 class PythonRun(Described):
@@ -220,18 +291,36 @@ class PythonRun(Described):
     # with runs goes only with its organization -- and then its runs go with it.
     flow = models.ForeignKey(PythonFlow, on_delete=models.CASCADE, related_name="runs")
     task_id = models.CharField(max_length=1000)
-    status = TextChoicesField(max_length=100, choices_enum=enums.PythonRunStatusChoices, default=enums.PythonRunStatusChoices.RUNNING.value)
-    pinned_by = models.ManyToManyField(get_user_model(), related_name="pinned_python_runs", blank=True)
+    status = TextChoicesField(
+        max_length=100,
+        choices_enum=enums.PythonRunStatusChoices,
+        default=enums.PythonRunStatusChoices.RUNNING.value,
+    )
+    pinned_by = models.ManyToManyField(
+        get_user_model(), related_name="pinned_python_runs", blank=True
+    )
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
     finished_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["flow", "task_id"], name="pyrun_unique_task")]
-        indexes = [GinIndex(fields=["stored_descriptors"], name="pyrun_desc_gin", opclasses=["jsonb_path_ops"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["flow", "task_id"], name="pyrun_unique_task"
+            )
+        ]
+        indexes = [
+            GinIndex(
+                fields=["stored_descriptors"],
+                name="pyrun_desc_gin",
+                opclasses=["jsonb_path_ops"],
+            )
+        ]
 
 
 class Trace(models.Model):
-    flow = models.ForeignKey(Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="traces")
+    flow = models.ForeignKey(
+        Flow, on_delete=models.CASCADE, null=True, blank=True, related_name="traces"
+    )
     provision = models.JSONField(null=True, blank=True, max_length=1000)
     snapshot_interval = models.IntegerField(null=True, blank=True)
     pinned_by = models.ManyToManyField(
@@ -246,13 +335,17 @@ class Trace(models.Model):
 
 
 class TraceSnapshot(models.Model):
-    trace = models.ForeignKey(Trace, on_delete=models.CASCADE, null=True, blank=True, related_name="snapshots")
+    trace = models.ForeignKey(
+        Trace, on_delete=models.CASCADE, null=True, blank=True, related_name="snapshots"
+    )
     status = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_created=True, auto_now_add=True)
 
 
 class TraceEvent(models.Model):
-    trace = models.ForeignKey(Trace, on_delete=models.CASCADE, null=True, blank=True, related_name="events")
+    trace = models.ForeignKey(
+        Trace, on_delete=models.CASCADE, null=True, blank=True, related_name="events"
+    )
     snapshot = models.ManyToManyField(TraceSnapshot, related_name="events")
     source = models.CharField(max_length=1000)
     value = models.CharField(max_length=1000, blank=True)

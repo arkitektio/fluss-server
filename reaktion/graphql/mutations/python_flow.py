@@ -25,7 +25,9 @@ Status = enums.PythonFlowStatusChoices
 RunStatus = enums.PythonRunStatusChoices
 
 
-def create_python_flow(info: Info, input: inputs.CreatePythonFlowInput) -> types.PythonFlow:
+def create_python_flow(
+    info: Info, input: inputs.CreatePythonFlowInput
+) -> types.PythonFlow:
     """Validate the source and store what the validation derived; a source that does not validate is refused."""
     request = info.context.request
     model = input.to_pydantic()
@@ -34,7 +36,11 @@ def create_python_flow(info: Info, input: inputs.CreatePythonFlowInput) -> types
         raise ValueError(python_flows.refusal(report))
     manifest = python_flows.manifest(report)
 
-    previous = get_for_org(models.PythonFlow, info, id=model.previous) if model.previous else None
+    previous = (
+        get_for_org(models.PythonFlow, info, id=model.previous)
+        if model.previous
+        else None
+    )
     lineage = previous.lineage if previous else uuid.uuid4()
 
     # Ports are derived from source, entrypoint and the manifest's actions, so the hash need not
@@ -45,8 +51,11 @@ def create_python_flow(info: Info, input: inputs.CreatePythonFlowInput) -> types
         hash=hash_python_flow(model.source, model.entrypoint, manifest, report.runtime),
         defaults=dict(
             previous=previous,
-            title=model.title or (previous.title if previous else "Untitled Python Flow"),
-            description=model.description if model.description is not None else (previous.description if previous else None),
+            title=model.title
+            or (previous.title if previous else "Untitled Python Flow"),
+            description=model.description
+            if model.description is not None
+            else (previous.description if previous else None),
             creator=request.user,
             source=model.source,
             entrypoint=model.entrypoint,
@@ -61,7 +70,9 @@ def create_python_flow(info: Info, input: inputs.CreatePythonFlowInput) -> types
     return flow
 
 
-def update_python_flow(info: Info, input: inputs.UpdatePythonFlowInput) -> types.PythonFlow:
+def update_python_flow(
+    info: Info, input: inputs.UpdatePythonFlowInput
+) -> types.PythonFlow:
     flow = get_for_org(models.PythonFlow, info, id=input.id)
     if input.title is not None:
         flow.title = input.title
@@ -71,22 +82,32 @@ def update_python_flow(info: Info, input: inputs.UpdatePythonFlowInput) -> types
     return flow
 
 
-def _transition(info: Info, id: strawberry.ID, sources: tuple[Status, ...], target: Status) -> models.PythonFlow:
+def _transition(
+    info: Info, id: strawberry.ID, sources: tuple[Status, ...], target: Status
+) -> models.PythonFlow:
     """Move one version from one of ``sources`` to ``target``; the row lock serialises concurrent calls."""
     with transaction.atomic():
         flow = for_org(models.PythonFlow, info).select_for_update().get(id=id)
         if flow.status not in sources:
-            raise ValueError(f"Only a {' or '.join(s.value for s in sources)} PythonFlow can become {target.value}; this one is {flow.status}")
+            raise ValueError(
+                f"Only a {' or '.join(s.value for s in sources)} PythonFlow can become {target.value}; this one is {flow.status}"
+            )
         flow.status = target.value
         flow.save()
     return flow
 
 
-def publish_python_flow(info: Info, input: inputs.PythonFlowRefInput) -> types.PythonFlow:
-    return _transition(info, input.id, (Status.DRAFT, Status.ARCHIVED), Status.PUBLISHED)
+def publish_python_flow(
+    info: Info, input: inputs.PythonFlowRefInput
+) -> types.PythonFlow:
+    return _transition(
+        info, input.id, (Status.DRAFT, Status.ARCHIVED), Status.PUBLISHED
+    )
 
 
-def archive_python_flow(info: Info, input: inputs.PythonFlowRefInput) -> types.PythonFlow:
+def archive_python_flow(
+    info: Info, input: inputs.PythonFlowRefInput
+) -> types.PythonFlow:
     return _transition(info, input.id, (Status.PUBLISHED,), Status.ARCHIVED)
 
 
@@ -94,12 +115,16 @@ def delete_python_flow(info: Info, input: inputs.PythonFlowRefInput) -> strawber
     with transaction.atomic():
         flow = for_org(models.PythonFlow, info).select_for_update().get(id=input.id)
         if flow.status != Status.DRAFT:
-            raise ValueError(f"Only a DRAFT PythonFlow can be deleted; archive this {flow.status} one instead")
+            raise ValueError(
+                f"Only a DRAFT PythonFlow can be deleted; archive this {flow.status} one instead"
+            )
         flow.delete()
     return input.id
 
 
-def create_python_run(info: Info, input: inputs.CreatePythonRunInput) -> types.PythonRun:
+def create_python_run(
+    info: Info, input: inputs.CreatePythonRunInput
+) -> types.PythonRun:
     """The run of a task: a task resumed after its agent died gets its run again, running.
 
     It runs again from the start, so a run the first attempt closed before it died is
@@ -107,9 +132,13 @@ def create_python_run(info: Info, input: inputs.CreatePythonRunInput) -> types.P
     """
     flow = get_for_org(models.PythonFlow, info, id=input.flow)
     if flow.status != Status.PUBLISHED:
-        raise ValueError(f"Only a PUBLISHED PythonFlow can be run; this one is {flow.status}")
+        raise ValueError(
+            f"Only a PUBLISHED PythonFlow can be run; this one is {flow.status}"
+        )
     with transaction.atomic():
-        run, created = models.PythonRun.objects.select_for_update().get_or_create(flow=flow, task_id=input.task_id)
+        run, created = models.PythonRun.objects.select_for_update().get_or_create(
+            flow=flow, task_id=input.task_id
+        )
         if not created and run.status != RunStatus.RUNNING:
             run.status = RunStatus.RUNNING.value
             run.finished_at = None
@@ -120,11 +149,15 @@ def create_python_run(info: Info, input: inputs.CreatePythonRunInput) -> types.P
 def close_python_run(info: Info, input: inputs.ClosePythonRunInput) -> types.PythonRun:
     """End a RUNNING run; the row lock makes two closes of one run one close and one refusal."""
     if input.status == enums.PythonRunStatus.RUNNING:
-        raise ValueError("A run is closed as COMPLETED, FAILED or CANCELLED, not RUNNING")
+        raise ValueError(
+            "A run is closed as COMPLETED, FAILED or CANCELLED, not RUNNING"
+        )
     with transaction.atomic():
         run = for_org(models.PythonRun, info).select_for_update().get(id=input.run)
         if run.status != RunStatus.RUNNING:
-            raise ValueError(f"Only a RUNNING PythonRun can be closed; this one is {run.status}")
+            raise ValueError(
+                f"Only a RUNNING PythonRun can be closed; this one is {run.status}"
+            )
         run.status = input.status.value
         run.finished_at = timezone.now()
         run.save()

@@ -11,12 +11,11 @@ import datetime
 import kante
 import strawberry
 from django.db.models import Exists, OuterRef, Q, QuerySet
-from embeddings.search import hybrid_search
 from kante.types import Info
-from rekuest_core.inputs.types import RequiresInput
 
+from embeddings.search import hybrid_search
 from reaktion import enums, models
-
+from rekuest_core.inputs.types import RequiresInput
 
 # --- descriptors: a port's requires ------------------------------------------
 
@@ -26,7 +25,9 @@ REQUIRES_DESCRIPTION = "Filter to the objects satisfying every one of these desc
 
 def requires(model: type, value: list[RequiresInput], prefix: str) -> Q:
     """A port's ``requires`` on the stored descriptors of ``model``'s rows."""
-    from fluss_server.service import service  # it imports the models this module filters
+    from fluss_server.service import (
+        service,  # it imports the models this module filters
+    )
 
     return service.requires(model, value, prefix)
 
@@ -57,10 +58,16 @@ class SemanticTitleSearchFilterMixin:
     stays lexical.
     """
 
-    @kante.filter_field(description="Search by title (case-insensitive substring) or by the meaning of the query against title and description. Substring matches rank first, then by similarity; an explicit `ordering` replaces that ranking")
-    def search(self, info: Info, queryset: QuerySet, value: str, prefix: str) -> tuple[QuerySet, Q]:
+    @kante.filter_field(
+        description="Search by title (case-insensitive substring) or by the meaning of the query against title and description. Substring matches rank first, then by similarity; an explicit `ordering` replaces that ranking"
+    )
+    def search(
+        self, info: Info, queryset: QuerySet, value: str, prefix: str
+    ) -> tuple[QuerySet, Q]:
         """Annotate the distance and OR the semantic predicate onto the substring one."""
-        return hybrid_search(queryset, prefix, value, Q(**{f"{prefix}title__icontains": value}))
+        return hybrid_search(
+            queryset, prefix, value, Q(**{f"{prefix}title__icontains": value})
+        )
 
 
 @strawberry.input
@@ -76,14 +83,18 @@ class CreatedAtFilterMixin:
 
 @strawberry.input
 class CreatorFilterMixin:
-    @kante.filter_field(description="Filter to the items this user made, given by their sub (their id in lok), the way a member's profile asks for their work")
+    @kante.filter_field(
+        description="Filter to the items this user made, given by their sub (their id in lok), the way a member's profile asks for their work"
+    )
     def creator(self, info: Info, value: strawberry.ID, prefix: str) -> Q:
         return Q(**{f"{prefix}creator__sub": value})
 
 
 @strawberry.input
 class PinnedFilterMixin:
-    @kante.filter_field(description="Filter by whether the current user has pinned the item")
+    @kante.filter_field(
+        description="Filter by whether the current user has pinned the item"
+    )
     def pinned(self, info: Info, value: bool, prefix: str) -> Q:
         user = info.context.request.user
         if value:
@@ -95,19 +106,37 @@ class PinnedFilterMixin:
 
 
 @kante.filter_type(models.Workspace)
-class WorkspaceFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, CreatorFilterMixin, PinnedFilterMixin):
+class WorkspaceFilter(
+    IdsFilterMixin,
+    SemanticTitleSearchFilterMixin,
+    CreatedAtFilterMixin,
+    CreatorFilterMixin,
+    PinnedFilterMixin,
+):
     pass
 
 
 @kante.filter_type(models.Flow)
-class FlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, CreatorFilterMixin, PinnedFilterMixin):
+class FlowFilter(
+    IdsFilterMixin,
+    SemanticTitleSearchFilterMixin,
+    CreatedAtFilterMixin,
+    CreatorFilterMixin,
+    PinnedFilterMixin,
+):
     @kante.filter_field(description=REQUIRES_DESCRIPTION)
     def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
         return requires(models.Flow, value, prefix)
 
 
 @kante.filter_type(models.PythonFlow)
-class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAtFilterMixin, CreatorFilterMixin, PinnedFilterMixin):
+class PythonFlowFilter(
+    IdsFilterMixin,
+    SemanticTitleSearchFilterMixin,
+    CreatedAtFilterMixin,
+    CreatorFilterMixin,
+    PinnedFilterMixin,
+):
     @kante.filter_field(description="Filter by lifecycle status")
     def status(self, info: Info, value: list[enums.PythonFlowStatus], prefix: str) -> Q:
         return Q(**{f"{prefix}status__in": value})
@@ -116,7 +145,9 @@ class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAt
     def lineage(self, info: Info, value: strawberry.ID, prefix: str) -> Q:
         return Q(**{f"{prefix}lineage": value})
 
-    @kante.filter_field(description="true: only each flow's newest version (the head of its lineage), so a list shows one row per flow; false: only the versions a newer one replaced. The newest version is decided over all of the lineage's versions, so `status` and `search` next to it apply to that head, not to the newest version that happens to match")
+    @kante.filter_field(
+        description="true: only each flow's newest version (the head of its lineage), so a list shows one row per flow; false: only the versions a newer one replaced. The newest version is decided over all of the lineage's versions, so `status` and `search` next to it apply to that head, not to the newest version that happens to match"
+    )
     def latest(self, info: Info, value: bool, prefix: str) -> Q:
         # A newer sibling: same lineage, created later (the id breaks a tie on the timestamp).
         newer = models.PythonFlow.objects.filter(
@@ -124,7 +155,10 @@ class PythonFlowFilter(IdsFilterMixin, SemanticTitleSearchFilterMixin, CreatedAt
             lineage=OuterRef(f"{prefix}lineage"),
         ).filter(
             Q(created_at__gt=OuterRef(f"{prefix}created_at"))
-            | Q(created_at=OuterRef(f"{prefix}created_at"), id__gt=OuterRef(f"{prefix}id"))
+            | Q(
+                created_at=OuterRef(f"{prefix}created_at"),
+                id__gt=OuterRef(f"{prefix}id"),
+            )
         )
         is_head = Q(~Exists(newer))
         return is_head if value else ~is_head
@@ -156,7 +190,9 @@ class PythonRunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
 @kante.filter_type(models.ReactiveTemplate)
 class ReactiveTemplateFilter(IdsFilterMixin, TitleSearchFilterMixin):
     @kante.filter_field(description="Filter by reactive implementation")
-    def implementations(self, info: Info, value: list[enums.ReactiveImplementation], prefix: str) -> Q:
+    def implementations(
+        self, info: Info, value: list[enums.ReactiveImplementation], prefix: str
+    ) -> Q:
         return Q(**{f"{prefix}implementation__in": value})
 
 
@@ -166,7 +202,9 @@ class RunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
     def search(self, info: Info, value: str, prefix: str) -> Q:
         return Q(**{f"{prefix}task_id__icontains": value})
 
-    @kante.filter_field(description="Filter by run status, e.g. [RUNNING] for the runs still going however old they are")
+    @kante.filter_field(
+        description="Filter by run status, e.g. [RUNNING] for the runs still going however old they are"
+    )
     def status(self, info: Info, value: list[enums.RunStatus], prefix: str) -> Q:
         return Q(**{f"{prefix}status__in": [status.value for status in value]})
 

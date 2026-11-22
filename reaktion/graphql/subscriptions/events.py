@@ -1,7 +1,9 @@
-from kante.types import Info
+from collections.abc import AsyncGenerator
+
 import strawberry
-from reaktion import types, models, scalars, channel_signals, channels
-from typing import AsyncGenerator
+from kante.types import Info
+
+from reaktion import channels, models, types
 
 
 async def events(
@@ -13,7 +15,11 @@ async def events(
 
     # Held to the organization like every run read (a run reaches it through its flow): another
     # organization's member is not told the run exists, nor joined to its group.
-    run = await models.Run.objects.aget(id=run, flow__organization=info.context.request.organization)
+    run = await models.Run.objects.aget(
+        id=run, flow__organization=info.context.request.organization
+    )
 
-    async for message in channels.run_event_channel.listen(info.context, [f"run_{run.id}"]):
+    async for message in channels.run_event_channel.listen(
+        info.context, [f"run_{run.id}"]
+    ):
         yield await models.RunEvent.objects.aget(id=message.event)

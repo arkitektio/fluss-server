@@ -1,8 +1,10 @@
-from kante.types import Info
-import strawberry
-from reaktion import types, models, inputs, enums
-from reaktion.scoping import get_for_org
 import logging
+
+import strawberry
+from kante.types import Info
+
+from reaktion import enums, inputs, models, types
+from reaktion.scoping import get_for_org
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +26,9 @@ def create_run(info: Info, input: inputs.CreateRunInput) -> types.Run:
 
 
 def close_run(info: Info, input: inputs.CloseRunInput) -> types.Run:
-    run = models.Run.objects.get(id=input.run, flow__organization=info.context.request.organization)
+    run = models.Run.objects.get(
+        id=input.run, flow__organization=info.context.request.organization
+    )
     run.status = enums.RunStatus.COMPLETED.value
     run.save()
 
@@ -32,14 +36,18 @@ def close_run(info: Info, input: inputs.CloseRunInput) -> types.Run:
 
 
 def delete_run(info: Info, input: inputs.DeleteRunInput) -> strawberry.ID:
-    run = models.Run.objects.get(id=input.run, flow__organization=info.context.request.organization)
+    run = models.Run.objects.get(
+        id=input.run, flow__organization=info.context.request.organization
+    )
     run.delete()
     return input.run
 
 
 def snapshot(info: Info, input: inputs.SnapshotRunInput) -> types.Snapshot:
     # Validate the run belongs to the request's organization before snapshotting.
-    run = models.Run.objects.get(id=input.run, flow__organization=info.context.request.organization)
+    run = models.Run.objects.get(
+        id=input.run, flow__organization=info.context.request.organization
+    )
     snapshot = models.Snapshot.objects.create(run=run, t=input.t)
     return snapshot
 
@@ -54,7 +62,9 @@ def delete_snapshot(info: Info, input: inputs.DeleteSnapshotInput) -> strawberry
 
 def track(info: Info, input: inputs.TrackInput) -> types.RunEvent:
     # Validate the run belongs to the request's organization before tracking.
-    run = models.Run.objects.get(id=input.run, flow__organization=info.context.request.organization)
+    run = models.Run.objects.get(
+        id=input.run, flow__organization=info.context.request.organization
+    )
     event = models.RunEvent.objects.create(
         reference=input.reference,
         run=run,

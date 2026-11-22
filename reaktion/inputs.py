@@ -1,13 +1,15 @@
 import keyword
-from strawberry.experimental import pydantic
+from typing import Annotated, Any, cast
+
+import strawberry
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
+from strawberry import LazyType
+from strawberry.experimental import pydantic
+
+from reaktion import enums, scalars
+from rekuest_core import enums as renums
 from rekuest_core.inputs import models as rimodels
 from rekuest_core.inputs import types as ritypes
-from rekuest_core import enums as renums
-from reaktion import scalars, enums
-from typing import Annotated, Any, Dict, Optional, cast
-from strawberry import LazyType
-import strawberry
 
 
 def _map_or_empty(value: Any) -> Any:
@@ -24,7 +26,7 @@ def _map_or_empty(value: Any) -> Any:
 
 
 #: A map-valued input field that is optional on the wire but always a dict in Python.
-ValueMapInput = Annotated[Dict[str, Any], BeforeValidator(_map_or_empty)]
+ValueMapInput = Annotated[dict[str, Any], BeforeValidator(_map_or_empty)]
 
 #: Default for a ``ValueMapInput``. It is ``None`` at runtime -- which is what makes
 #: strawberry emit ``= null`` rather than ``= {}`` in the SDL -- and ``validate_default``
@@ -205,8 +207,8 @@ class PortMatchInput:
     kind: renums.PortKind | None = None
     identifier: str | None = None
     nullable: bool | None = None
-    variants: Optional[list[LazyType["PortDemandInput", __name__]]] = None
-    child: Optional[LazyType["PortDemandInput", __name__]] = None
+    variants: list[LazyType["PortDemandInput", __name__]] | None = None
+    child: LazyType["PortDemandInput", __name__] | None = None
 
 
 @strawberry.input
@@ -301,11 +303,21 @@ class TrackInput:
 
 
 class ManifestEntryInputModel(BaseModel):
-    alias: str = Field(description="The name the action is injected under in the source")
+    alias: str = Field(
+        description="The name the action is injected under in the source"
+    )
     action_hash: str
-    kind: renums.ActionKind = Field(description="The action's kind: a Python flow can only call FUNCTION actions")
-    args: list[rimodels.ArgPortInputModel] = Field(default_factory=list, description="The action's arg ports, which the source's calls are checked against")
-    returns: list[rimodels.ReturnPortInputModel] = Field(default_factory=list, description="The action's return ports, which the source's use of its results is checked against")
+    kind: renums.ActionKind = Field(
+        description="The action's kind: a Python flow can only call FUNCTION actions"
+    )
+    args: list[rimodels.ArgPortInputModel] = Field(
+        default_factory=list,
+        description="The action's arg ports, which the source's calls are checked against",
+    )
+    returns: list[rimodels.ReturnPortInputModel] = Field(
+        default_factory=list,
+        description="The action's return ports, which the source's use of its results is checked against",
+    )
     app: str | None = None
     key: str | None = None
     version: str | None = None
@@ -315,7 +327,9 @@ class ManifestEntryInputModel(BaseModel):
     @classmethod
     def _alias_is_an_identifier(cls, value: str) -> str:
         if not value.isidentifier() or keyword.iskeyword(value):
-            raise ValueError(f"A manifest alias must be a Python identifier, not {value!r}")
+            raise ValueError(
+                f"A manifest alias must be a Python identifier, not {value!r}"
+            )
         return value
 
     @property
@@ -324,7 +338,10 @@ class ManifestEntryInputModel(BaseModel):
         return self.action_hash
 
 
-@pydantic.input(ManifestEntryInputModel, description="One action a Python flow may call, with the ports of that action: the source is checked against them, and only the hash is stored.")
+@pydantic.input(
+    ManifestEntryInputModel,
+    description="One action a Python flow may call, with the ports of that action: the source is checked against them, and only the hash is stored.",
+)
 class ManifestEntryInput:
     alias: str
     action_hash: str
@@ -341,26 +358,38 @@ class PythonFlowSourceInputModel(BaseModel):
     source: str
     entrypoint: str = "main"
     manifest: list[ManifestEntryInputModel] = Field(default_factory=list)
-    structures: list[str] = Field(default_factory=list, description="Structure identifiers the entrypoint's signature uses that no action mentions")
+    structures: list[str] = Field(
+        default_factory=list,
+        description="Structure identifiers the entrypoint's signature uses that no action mentions",
+    )
 
     @field_validator("entrypoint")
     @classmethod
     def _entrypoint_is_an_identifier(cls, value: str) -> str:
         if not value.isidentifier():
-            raise ValueError(f"The entrypoint must be a Python identifier, not {value!r}")
+            raise ValueError(
+                f"The entrypoint must be a Python identifier, not {value!r}"
+            )
         return value
 
     @field_validator("manifest")
     @classmethod
-    def _aliases_are_unique(cls, value: list[ManifestEntryInputModel]) -> list[ManifestEntryInputModel]:
+    def _aliases_are_unique(
+        cls, value: list[ManifestEntryInputModel]
+    ) -> list[ManifestEntryInputModel]:
         aliases = [entry.alias for entry in value]
         duplicates = sorted({alias for alias in aliases if aliases.count(alias) > 1})
         if duplicates:
-            raise ValueError(f"Manifest aliases must be unique; duplicated: {', '.join(duplicates)}")
+            raise ValueError(
+                f"Manifest aliases must be unique; duplicated: {', '.join(duplicates)}"
+            )
         return value
 
 
-@pydantic.input(PythonFlowSourceInputModel, description="A Python flow's source and the actions it may call: what validatePythonFlow checks.")
+@pydantic.input(
+    PythonFlowSourceInputModel,
+    description="A Python flow's source and the actions it may call: what validatePythonFlow checks.",
+)
 class PythonFlowSourceInput:
     source: str
     entrypoint: str = "main"
@@ -388,7 +417,9 @@ class CreatePythonFlowInput:
     structures: list[str]
 
 
-@strawberry.input(description="Change a PythonFlow's title or description; its source, manifest and runtime are immutable.")
+@strawberry.input(
+    description="Change a PythonFlow's title or description; its source, manifest and runtime are immutable."
+)
 class UpdatePythonFlowInput:
     id: strawberry.ID
     title: str | None = None
@@ -400,7 +431,9 @@ class PythonFlowRefInput:
     id: strawberry.ID
 
 
-@strawberry.input(description="Start (or reuse) the run of a published PythonFlow for a task.")
+@strawberry.input(
+    description="Start (or reuse) the run of a published PythonFlow for a task."
+)
 class CreatePythonRunInput:
     flow: strawberry.ID
     task_id: strawberry.ID

@@ -1,7 +1,9 @@
-from .inputs import PortDemandInput, PortMatchInput
-from django.db import connection
 import re
 import typing as t
+
+from django.db import connection
+
+from .inputs import PortMatchInput
 
 qt = re.compile(r"@(?P<package>[^\/]*)\/(?P<interface>[^\/]*)")
 
@@ -65,8 +67,8 @@ def build_sql_for_item_recursive(item: PortMatchInput, at_value=None):
 def build_params(
     search_params: list[PortMatchInput] | None,
     type: t.Literal["args", "returns"] = "args",
-    force_length: t.Optional[int] = None,
-    force_non_nullable_length: t.Optional[int] = None,
+    force_length: int | None = None,
+    force_non_nullable_length: int | None = None,
 ):
     individual_queries = []
     all_params = {}
@@ -85,7 +87,7 @@ def build_params(
         individual_queries.append(f"jsonb_array_length({type}) = {force_length}")
 
     if force_non_nullable_length is not None:
-        sql_part = f"item->>'nullable'::text = 'false'"
+        sql_part = "item->>'nullable'::text = 'false'"
         count_condition = f"""
             (SELECT COUNT(*)
             FROM jsonb_array_elements({type}) AS j(item)
@@ -101,8 +103,8 @@ def filter_nodes_by_demands(
     qs: t.Any,
     demands: list[PortMatchInput] = None,
     type: t.Literal["args", "returns"] = "args",
-    force_length: t.Optional[int] = None,
-    force_non_nullable_length: t.Optional[int] = None,
+    force_length: int | None = None,
+    force_non_nullable_length: int | None = None,
 ):
 
     if type not in ["args", "returns"]:

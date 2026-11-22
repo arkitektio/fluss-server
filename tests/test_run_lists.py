@@ -53,7 +53,9 @@ async def test_running_runs_are_found_past_the_newest_page(aexecute, make_run):
     assert not newest.errors, newest.errors
     assert all(run["status"] == "COMPLETED" for run in newest.data["runs"])
 
-    running = await aexecute(RUNS, {"filters": {"status": ["RUNNING"]}, "pagination": {"limit": 3}})
+    running = await aexecute(
+        RUNS, {"filters": {"status": ["RUNNING"]}, "pagination": {"limit": 3}}
+    )
     assert not running.errors, running.errors
     assert running.data["runs"] == [{"id": str(old_running.id), "status": "RUNNING"}]
 
@@ -67,8 +69,12 @@ def _other_member(context):
     """A second member of the same organization, with their own sub."""
     from authentikate.models import Membership, User
 
-    user, _ = User.objects.get_or_create(sub="42", iss="static_issuer", defaults={"username": "static_issuer_42"})
-    Membership.objects.get_or_create(user=user, organization=context.request.organization)
+    user, _ = User.objects.get_or_create(
+        sub="42", iss="static_issuer", defaults={"username": "static_issuer_42"}
+    )
+    Membership.objects.get_or_create(
+        user=user, organization=context.request.organization
+    )
     return user
 
 
@@ -78,7 +84,9 @@ def _reassign(row, user) -> None:
     row.save()
 
 
-async def test_creator_filters_by_the_members_sub(aexecute, authenticated_context, make_workspace, make_flow):
+async def test_creator_filters_by_the_members_sub(
+    aexecute, authenticated_context, make_workspace, make_flow
+):
     mine = await make_workspace(title="Mine")
     theirs = await make_workspace(title="Theirs")
     other = await _other_member(authenticated_context)
@@ -88,7 +96,9 @@ async def test_creator_filters_by_the_members_sub(aexecute, authenticated_contex
     assert not res.errors, res.errors
     assert res.data["workspaces"] == [{"id": str(theirs.id), "title": "Theirs"}]
 
-    res = await aexecute(WORKSPACES, {"filters": {"creator": "1", "ids": [str(mine.id), str(theirs.id)]}})
+    res = await aexecute(
+        WORKSPACES, {"filters": {"creator": "1", "ids": [str(mine.id), str(theirs.id)]}}
+    )
     assert not res.errors, res.errors
     assert res.data["workspaces"] == [{"id": str(mine.id), "title": "Mine"}]
 
@@ -101,7 +111,14 @@ async def test_creator_filters_by_the_members_sub(aexecute, authenticated_contex
 
 
 @sync_to_async
-def _python_flow(context, title: str, lineage: uuid.UUID | None = None, previous=None, status: str = "DRAFT", creator=None):
+def _python_flow(
+    context,
+    title: str,
+    lineage: uuid.UUID | None = None,
+    previous=None,
+    status: str = "DRAFT",
+    creator=None,
+):
     from reaktion.models import PythonFlow
 
     source = f"async def main() -> int:\n    return {uuid.uuid4().int % 1000}\n"
@@ -118,14 +135,25 @@ def _python_flow(context, title: str, lineage: uuid.UUID | None = None, previous
     )
 
 
-async def test_latest_lists_each_flow_once_by_its_newest_version(aexecute, authenticated_context):
+async def test_latest_lists_each_flow_once_by_its_newest_version(
+    aexecute, authenticated_context
+):
     first = await _python_flow(authenticated_context, "Segment v1", status="PUBLISHED")
-    second = await _python_flow(authenticated_context, "Segment v2", lineage=first.lineage, previous=first, status="DRAFT")
+    second = await _python_flow(
+        authenticated_context,
+        "Segment v2",
+        lineage=first.lineage,
+        previous=first,
+        status="DRAFT",
+    )
     other = await _python_flow(authenticated_context, "Track", status="PUBLISHED")
 
     res = await aexecute(PYTHON_FLOWS, {"filters": {"latest": True}})
     assert not res.errors, res.errors
-    assert [flow["id"] for flow in res.data["pythonFlows"]] == [str(second.id), str(other.id)]
+    assert [flow["id"] for flow in res.data["pythonFlows"]] == [
+        str(second.id),
+        str(other.id),
+    ]
 
     res = await aexecute(PYTHON_FLOWS, {"filters": {"latest": False}})
     assert not res.errors, res.errors
@@ -133,7 +161,9 @@ async def test_latest_lists_each_flow_once_by_its_newest_version(aexecute, authe
 
     # The status applies to each flow's head: Segment's head is a draft, so a list of
     # published flows shows Track alone, not Segment's older published version.
-    res = await aexecute(PYTHON_FLOWS, {"filters": {"latest": True, "status": ["PUBLISHED"]}})
+    res = await aexecute(
+        PYTHON_FLOWS, {"filters": {"latest": True, "status": ["PUBLISHED"]}}
+    )
     assert not res.errors, res.errors
     assert [flow["id"] for flow in res.data["pythonFlows"]] == [str(other.id)]
 
@@ -151,20 +181,28 @@ async def _heard(stream) -> list[dict]:
     return [message async for message in stream]
 
 
-async def test_runs_are_heard_starting_and_completing_by_their_organization_alone(make_flow):
+async def test_runs_are_heard_starting_and_completing_by_their_organization_alone(
+    make_flow,
+):
     from kante.testing import GraphQLWebSocketTestClient
-    from reaktion.models import Run
 
     from fluss_server.asgi import application
+    from reaktion.models import Run
 
     flow = await make_flow()
     watch = "subscription { runs { create { id status } update { id status } delete } }"
 
     async with (
-        GraphQLWebSocketTestClient(application, connection_params={"token": "test"}) as member,
-        GraphQLWebSocketTestClient(application, connection_params={"token": "othertest"}) as stranger,
+        GraphQLWebSocketTestClient(
+            application, connection_params={"token": "test"}
+        ) as member,
+        GraphQLWebSocketTestClient(
+            application, connection_params={"token": "othertest"}
+        ) as stranger,
     ):
-        heard = asyncio.ensure_future(_heard(member.subscribe(watch, timeout=3, max_messages=2)))
+        heard = asyncio.ensure_future(
+            _heard(member.subscribe(watch, timeout=3, max_messages=2))
+        )
         overheard = asyncio.ensure_future(_heard(stranger.subscribe(watch, timeout=2)))
         await asyncio.sleep(0.3)
 
@@ -173,10 +211,21 @@ async def test_runs_are_heard_starting_and_completing_by_their_organization_alon
 
         messages = [message["payload"]["data"]["runs"] for message in await heard]
         assert messages == [
-            {"create": {"id": str(run.id), "status": "RUNNING"}, "update": None, "delete": None},
-            {"create": None, "update": {"id": str(run.id), "status": "COMPLETED"}, "delete": None},
+            {
+                "create": {"id": str(run.id), "status": "RUNNING"},
+                "update": None,
+                "delete": None,
+            },
+            {
+                "create": None,
+                "update": {"id": str(run.id), "status": "COMPLETED"},
+                "delete": None,
+            },
         ]
-        assert not any((message["payload"].get("data") or {}).get("runs") for message in await overheard)
+        assert not any(
+            (message["payload"].get("data") or {}).get("runs")
+            for message in await overheard
+        )
 
 
 async def test_one_run_is_heard_and_another_is_not(make_run):
@@ -189,7 +238,9 @@ async def test_one_run_is_heard_and_another_is_not(make_run):
     other = await make_run()
     watch = f'subscription {{ run(id: "{watched.id}") {{ update {{ id status }} delete }} }}'
 
-    async with GraphQLWebSocketTestClient(application, connection_params={"token": "test"}) as member:
+    async with GraphQLWebSocketTestClient(
+        application, connection_params={"token": "test"}
+    ) as member:
         heard = asyncio.ensure_future(_heard(member.subscribe(watch, timeout=2)))
         await asyncio.sleep(0.3)
 
@@ -211,18 +262,22 @@ async def test_a_run_of_another_organization_cannot_be_watched(make_run):
 
     run = await make_run()
     watch = f'subscription {{ run(id: "{run.id}") {{ update {{ id }} }} }}'
-    async with GraphQLWebSocketTestClient(application, connection_params={"token": "othertest"}) as stranger:
+    async with GraphQLWebSocketTestClient(
+        application, connection_params={"token": "othertest"}
+    ) as stranger:
         messages = await _heard(stranger.subscribe(watch, timeout=2))
     assert messages, "the refusal is answered"
-    assert all(not (message["payload"].get("data") or {}).get("run") for message in messages)
+    assert all(
+        not (message["payload"].get("data") or {}).get("run") for message in messages
+    )
 
 
 async def test_python_runs_are_heard_finishing(authenticated_context):
     from django.utils import timezone
     from kante.testing import GraphQLWebSocketTestClient
-    from reaktion.models import PythonRun
 
     from fluss_server.asgi import application
+    from reaktion.models import PythonRun
 
     flow = await _python_flow(authenticated_context, "Segment", status="PUBLISHED")
     run = await sync_to_async(PythonRun.objects.create)(flow=flow, task_id="t-1")
@@ -231,20 +286,41 @@ async def test_python_runs_are_heard_finishing(authenticated_context):
     one_watch = f'subscription {{ pythonRun(id: "{run.id}") {{ update {{ id status finishedAt }} }} }}'
 
     async with (
-        GraphQLWebSocketTestClient(application, connection_params={"token": "test"}) as member,
-        GraphQLWebSocketTestClient(application, connection_params={"token": "test"}) as page,
-        GraphQLWebSocketTestClient(application, connection_params={"token": "othertest"}) as stranger,
+        GraphQLWebSocketTestClient(
+            application, connection_params={"token": "test"}
+        ) as member,
+        GraphQLWebSocketTestClient(
+            application, connection_params={"token": "test"}
+        ) as page,
+        GraphQLWebSocketTestClient(
+            application, connection_params={"token": "othertest"}
+        ) as stranger,
     ):
-        listed = asyncio.ensure_future(anext(member.subscribe(list_watch, timeout=3, max_messages=1)))
-        one = asyncio.ensure_future(anext(page.subscribe(one_watch, timeout=3, max_messages=1)))
-        overheard = asyncio.ensure_future(_heard(stranger.subscribe(list_watch, timeout=2)))
+        listed = asyncio.ensure_future(
+            anext(member.subscribe(list_watch, timeout=3, max_messages=1))
+        )
+        one = asyncio.ensure_future(
+            anext(page.subscribe(one_watch, timeout=3, max_messages=1))
+        )
+        overheard = asyncio.ensure_future(
+            _heard(stranger.subscribe(list_watch, timeout=2))
+        )
         await asyncio.sleep(0.3)
 
         run.status = "FAILED"
         run.finished_at = timezone.now()
         await sync_to_async(run.save)()
 
-        assert (await listed)["payload"]["data"]["pythonRuns"] == {"update": {"id": str(run.id), "status": "FAILED"}}
+        assert (await listed)["payload"]["data"]["pythonRuns"] == {
+            "update": {"id": str(run.id), "status": "FAILED"}
+        }
         heard = (await one)["payload"]["data"]["pythonRun"]["update"]
-        assert heard["id"] == str(run.id) and heard["status"] == "FAILED" and heard["finishedAt"]
-        assert not any((message["payload"].get("data") or {}).get("pythonRuns") for message in await overheard)
+        assert (
+            heard["id"] == str(run.id)
+            and heard["status"] == "FAILED"
+            and heard["finishedAt"]
+        )
+        assert not any(
+            (message["payload"].get("data") or {}).get("pythonRuns")
+            for message in await overheard
+        )

@@ -7,26 +7,70 @@ the same commit, and no installer has to learn of it.
 
 from __future__ import annotations
 
-from arkitekt_service.contract import JSON, Contract, Description, Descriptor, Facts, Hosts, Job, Needs, Offers, Role, Scope, Signal, Start, Structure, blocks
+from arkitekt_service.contract import (
+    JSON,
+    Contract,
+    Description,
+    Descriptor,
+    Facts,
+    Hosts,
+    Job,
+    Needs,
+    Offers,
+    Role,
+    Scope,
+    Signal,
+    Start,
+    Structure,
+    blocks,
+)
 
 from fluss_server.configuration import Settings
 
 #: What an app may do here on a user's behalf: defined at the coordination server when the hub
 #: enrols. Every root field of the schema asks for one of them (`AuthExtension(scopes=...)`).
 SCOPES = [
-    Scope(key="fluss_read", description="See workflows, Python flows, workspaces and their runs."),
-    Scope(key="fluss_write", description="Create and change workspaces and Python flow drafts, and archive or delete flows."),
-    Scope(key="fluss_run", description="Start, track, snapshot and close workflow runs."),
-    Scope(key="fluss_publish", description="Publish a Python flow so others in the organization can run it."),
-    Scope(key="fluss_share", description="Share workflows with people outside your organization through collaborations."),
-    Scope(key="fluss_all", description="Do everything in Fluss on your behalf.", is_all_scope=True),
+    Scope(
+        key="fluss_read",
+        description="See workflows, Python flows, workspaces and their runs.",
+    ),
+    Scope(
+        key="fluss_write",
+        description="Create and change workspaces and Python flow drafts, and archive or delete flows.",
+    ),
+    Scope(
+        key="fluss_run", description="Start, track, snapshot and close workflow runs."
+    ),
+    Scope(
+        key="fluss_publish",
+        description="Publish a Python flow so others in the organization can run it.",
+    ),
+    Scope(
+        key="fluss_share",
+        description="Share workflows with people outside your organization through collaborations.",
+    ),
+    Scope(
+        key="fluss_all",
+        description="Do everything in Fluss on your behalf.",
+        is_all_scope=True,
+    ),
 ]
 
 #: What a member of an organization may do here.
 ROLES = [
-    Role(key="fluss_admin", description="Full control of Fluss in this organization.", is_admin_role=True),
-    Role(key="fluss_editor", description="Design and run workflows and share them.", is_default_role=True),
-    Role(key="fluss_publisher", description="Publish Python flows for the organization."),
+    Role(
+        key="fluss_admin",
+        description="Full control of Fluss in this organization.",
+        is_admin_role=True,
+    ),
+    Role(
+        key="fluss_editor",
+        description="Design and run workflows and share them.",
+        is_default_role=True,
+    ),
+    Role(
+        key="fluss_publisher", description="Publish Python flows for the organization."
+    ),
 ]
 
 #: The role every write asks for, the one publishing a Python flow asks for, and the one holding both.
@@ -36,13 +80,29 @@ ADMIN = "fluss_admin"
 
 #: How many ports a flow is called with and answers with: what a scheduler (no arguments) or a
 #: batch runner (exactly one) selects on. One key for both kinds of flow, so one `requires` asks both.
-_N_ARGS = Descriptor(key="@fluss/n_args", type="INT", description="How many arguments (inputs) it is called with: 0 for a flow a schedule can start")
-_N_RETURNS = Descriptor(key="@fluss/n_returns", type="INT", description="How many values (outputs) it returns")
+_N_ARGS = Descriptor(
+    key="@fluss/n_args",
+    type="INT",
+    description="How many arguments (inputs) it is called with: 0 for a flow a schedule can start",
+)
+_N_RETURNS = Descriptor(
+    key="@fluss/n_returns",
+    type="INT",
+    description="How many values (outputs) it returns",
+)
 
 FLOW_DESCRIPTORS = [
-    Descriptor(key="@fluss/n_nodes", type="INT", description="How many nodes its graph has"),
-    Descriptor(key="@fluss/n_edges", type="INT", description="How many edges its graph has"),
-    Descriptor(key="@fluss/n_globals", type="INT", description="How many global parameters it is configured with: 0 for a flow that runs without a form"),
+    Descriptor(
+        key="@fluss/n_nodes", type="INT", description="How many nodes its graph has"
+    ),
+    Descriptor(
+        key="@fluss/n_edges", type="INT", description="How many edges its graph has"
+    ),
+    Descriptor(
+        key="@fluss/n_globals",
+        type="INT",
+        description="How many global parameters it is configured with: 0 for a flow that runs without a form",
+    ),
     Descriptor(
         key="@fluss/node_kinds",
         type="LIST",
@@ -52,10 +112,26 @@ FLOW_DESCRIPTORS = [
     _N_RETURNS,
 ]
 PYTHON_FLOW_DESCRIPTORS = [
-    Descriptor(key="@fluss/status", type="STRING", description="Its publication lifecycle: DRAFT, PUBLISHED or ARCHIVED"),
-    Descriptor(key="@fluss/physical", type="BOOL", description="Whether its source may call an action with an IRREVERSIBLE effect"),
-    Descriptor(key="@fluss/effect", type="STRING", description="The most consequential effect of an action its source may call: NONE, REPEATABLE, UNKNOWN or IRREVERSIBLE (NONE when it calls none)"),
-    Descriptor(key="@fluss/runtime", type="STRING", description="The executor runtime its source was validated against"),
+    Descriptor(
+        key="@fluss/status",
+        type="STRING",
+        description="Its publication lifecycle: DRAFT, PUBLISHED or ARCHIVED",
+    ),
+    Descriptor(
+        key="@fluss/physical",
+        type="BOOL",
+        description="Whether its source may call an action with an IRREVERSIBLE effect",
+    ),
+    Descriptor(
+        key="@fluss/effect",
+        type="STRING",
+        description="The most consequential effect of an action its source may call: NONE, REPEATABLE, UNKNOWN or IRREVERSIBLE (NONE when it calls none)",
+    ),
+    Descriptor(
+        key="@fluss/runtime",
+        type="STRING",
+        description="The executor runtime its source was validated against",
+    ),
     _N_ARGS,
     _N_RETURNS,
 ]
@@ -85,7 +161,11 @@ HOSTS = Hosts(
             label="Run",
             description="A run: one execution of a graph workflow for a rekuest task, with the values, errors and completion it produced.",
             descriptors=[
-                Descriptor(key="@fluss/status", type="STRING", description="Where the workflow run stands: RUNNING or COMPLETED"),
+                Descriptor(
+                    key="@fluss/status",
+                    type="STRING",
+                    description="Where the workflow run stands: RUNNING or COMPLETED",
+                ),
             ],
         ),
         Structure(
@@ -99,7 +179,11 @@ HOSTS = Hosts(
             label="Python Run",
             description="A Python run: one execution of a published Python flow for a rekuest task.",
             descriptors=[
-                Descriptor(key="@fluss/status", type="STRING", description="Where the run stands: RUNNING, COMPLETED or FAILED"),
+                Descriptor(
+                    key="@fluss/status",
+                    type="STRING",
+                    description="Where the run stands: RUNNING, COMPLETED or FAILED",
+                ),
             ],
         ),
     ],
@@ -152,8 +236,19 @@ contract = Contract(
         name="fluss",
         identifier="live.arkitekt.fluss",
         summary="Workflows over the hub's actions.",
-        needs=Needs(scopes=SCOPES, roles=ROLES, storage=["media"], instance_key=True, peers=["rekuest"]),
-        offers=Offers(endpoints={"rekuest_service": "_rekuest/service", "rekuest_hook": "_rekuest/hook"}),
+        needs=Needs(
+            scopes=SCOPES,
+            roles=ROLES,
+            storage=["media"],
+            instance_key=True,
+            peers=["rekuest"],
+        ),
+        offers=Offers(
+            endpoints={
+                "rekuest_service": "_rekuest/service",
+                "rekuest_hook": "_rekuest/hook",
+            }
+        ),
         requires={"rekuest": ">=6"},
         hosts=HOSTS,
     ),
@@ -161,11 +256,27 @@ contract = Contract(
     render=render,
     # How this service is started: there is no script beside it. `arkitekt-service serve`
     # (and `debug`) become these, so they get the container's signals themselves.
-    serve=Start(("daphne", "-b", "0.0.0.0", "-p", "80", "--websocket_timeout", "-1", "fluss_server.asgi:application")),
+    serve=Start(
+        (
+            "daphne",
+            "-b",
+            "0.0.0.0",
+            "-p",
+            "80",
+            "--websocket_timeout",
+            "-1",
+            "fluss_server.asgi:application",
+        )
+    ),
     debug=Start(("python", "manage.py", "runserver", "0.0.0.0:80")),
     jobs={
-        "ensureadmin": Job(("ensureadmin",), "Create the operator account the config names"),
-        "restore_descriptors": Job(("restore_descriptors",), "Store the descriptors of every flow and run that misses one (--all: of every row)"),
+        "ensureadmin": Job(
+            ("ensureadmin",), "Create the operator account the config names"
+        ),
+        "restore_descriptors": Job(
+            ("restore_descriptors",),
+            "Store the descriptors of every flow and run that misses one (--all: of every row)",
+        ),
     },
     setup=("ensureadmin", "restore_descriptors"),
 )

@@ -14,16 +14,17 @@ That is all a service is. What can be *done* in this process is not declared her
 agent's to say (``fluss_server.hook_agent``), a different thing with its own configuration.
 """
 
-
-from reaktion import models
-from arkitekt_service.service import Service, organization_of
 from arkitekt_service.collaborations import items as collaboration_items
+from arkitekt_service.service import Service, organization_of
 from django.db.models.signals import post_save
 
 from fluss_server import descriptors
 from fluss_server.contract import contract
+from reaktion import models
 
-service = Service("fluss", hosts=contract.description.hosts, description="Workflows and their runs.")
+service = Service(
+    "fluss", hosts=contract.description.hosts, description="Workflows and their runs."
+)
 
 
 # --- Collaborations: what an object needs to be seen, put in a collaboration along with it ------------------
@@ -54,11 +55,27 @@ def _python_run_needs(run: models.PythonRun) -> list[models.PythonFlow]:
 
 # --- Structures: what fluss hosts -----------------------------------------------------
 
-workspace = service.structure(models.Workspace, "@fluss/workspace", depends=_workspace_needs)
-flow = service.structure(models.Flow, "@fluss/flow", describe=descriptors.flow_descriptors, depends=_flow_needs)
-run = service.structure(models.Run, "@fluss/run", describe=descriptors.run_descriptors, depends=_run_needs)
-pythonflow = service.structure(models.PythonFlow, "@fluss/pythonflow", describe=descriptors.python_flow_descriptors)
-pythonrun = service.structure(models.PythonRun, "@fluss/pythonrun", describe=descriptors.run_descriptors, depends=_python_run_needs)
+workspace = service.structure(
+    models.Workspace, "@fluss/workspace", depends=_workspace_needs
+)
+flow = service.structure(
+    models.Flow,
+    "@fluss/flow",
+    describe=descriptors.flow_descriptors,
+    depends=_flow_needs,
+)
+run = service.structure(
+    models.Run, "@fluss/run", describe=descriptors.run_descriptors, depends=_run_needs
+)
+pythonflow = service.structure(
+    models.PythonFlow, "@fluss/pythonflow", describe=descriptors.python_flow_descriptors
+)
+pythonrun = service.structure(
+    models.PythonRun,
+    "@fluss/pythonrun",
+    describe=descriptors.run_descriptors,
+    depends=_python_run_needs,
+)
 
 
 # --- Signals: what fluss announces -----------------------------------------------------
@@ -81,10 +98,14 @@ service.model_signal(pythonrun, organization=flow_org)
 service.not_part_of(models.PythonRun, "flow")
 
 
-def _flow_saved(sender: type[models.Flow], instance: models.Flow, raw: bool = False, **_: object) -> None:
+def _flow_saved(
+    sender: type[models.Flow], instance: models.Flow, raw: bool = False, **_: object
+) -> None:
     """A flow saved into a workspace in a collaboration (a new version, by updateWorkspace) comes into that collaboration."""
     if not raw and instance.workspace_id is not None:
         collaboration_items.refresh(instance.workspace)
 
 
-post_save.connect(_flow_saved, sender=models.Flow, dispatch_uid="fluss-collaborations-flow")
+post_save.connect(
+    _flow_saved, sender=models.Flow, dispatch_uid="fluss-collaborations-flow"
+)

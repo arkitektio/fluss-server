@@ -11,7 +11,16 @@ from rekuest_core.inputs.models import DefinitionInputModel
 
 
 def definition(**fields: object) -> DefinitionInputModel:
-    return DefinitionInputModel.model_validate({"key": "attach", "name": "Attach", "kind": "FUNCTION", "args": [], "returns": [], **fields})
+    return DefinitionInputModel.model_validate(
+        {
+            "key": "attach",
+            "name": "Attach",
+            "kind": "FUNCTION",
+            "args": [],
+            "returns": [],
+            **fields,
+        }
+    )
 
 
 def test_an_action_with_protocol_hints_is_read() -> None:

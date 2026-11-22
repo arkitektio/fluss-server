@@ -1,7 +1,8 @@
-import os
-from .settings import *  # noqa
-from .settings import DATABASES, AUTHENTIKATE
 import logging
+import os
+
+from .settings import *  # noqa
+from .settings import AUTHENTIKATE, DATABASES
 
 DATABASES["default"] = {
     "ENGINE": "django.db.backends.postgresql",
@@ -62,4 +63,3 @@ DATABASE_ROUTERS = []
 
 # Use in-memory channel layer for tests instead of Redis
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
-

@@ -63,7 +63,9 @@ async def test_flow_ids_filter(aexecute, make_flow):
     assert [x["id"] for x in res.data["flows"]] == [str(f.id)]
 
 
-async def test_reactive_template_implementations_filter(aexecute, make_reactive_template):
+async def test_reactive_template_implementations_filter(
+    aexecute, make_reactive_template
+):
     zip_tpl = await make_reactive_template(implementation="ZIP")
     await make_reactive_template(implementation="WITHLATEST")
     res = await aexecute(TEMPLATES, {"filters": {"implementations": ["ZIP"]}})

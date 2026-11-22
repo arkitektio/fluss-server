@@ -1,35 +1,39 @@
-import strawberry
-from fluss_server.logs import QuietErrorsSchema
 import kante
+import strawberry
 import strawberry_django
-from strawberry_django.optimizer import DjangoOptimizerExtension
-from reaktion import types, models
-from reaktion.graphql import mutations
-from reaktion.graphql import subscriptions
-from reaktion.graphql import queries
-from koherent.strawberry.extension import KoherentExtension
-from authentikate.strawberry.extension import AuthentikateExtension
-from strawberry.schema.config import StrawberryConfig
-from kante.types import Info
-from typing import List
-from rekuest_core.constants import interface_types, input_union_types
-from kante.unions import unionElementOf
-from rekuest_core.scalars import scalar_map as rekuest_scalar_map
-from reaktion.scalars import scalar_map as reaktion_scalar_map
-from reaktion.scoping import for_org, get_for_org
-from authentikate.strawberry import AuthExtension, AuthSubscribeExtension
 from arkitekt_service.collaborations import graphql as collaboration_types
 from arkitekt_service.collaborations.guests import object_scope
-from arkitekt_service.graphql import CollaborationGate, TelemetryExtension, annotate_schema
+from arkitekt_service.graphql import (
+    CollaborationGate,
+    TelemetryExtension,
+    annotate_schema,
+)
+from authentikate.strawberry import AuthExtension, AuthSubscribeExtension
+from authentikate.strawberry.extension import AuthentikateExtension
 from django.db.models import Model
-from fluss_server.service import service as fluss_service
+from kante.types import Info
+from kante.unions import unionElementOf
+from koherent.strawberry.extension import KoherentExtension
+from strawberry.schema.config import StrawberryConfig
+from strawberry_django.optimizer import DjangoOptimizerExtension
+
 from fluss_server.contract import EDITOR, PUBLISHER
+from fluss_server.logs import QuietErrorsSchema
+from fluss_server.service import service as fluss_service
+from reaktion import models, types
+from reaktion.graphql import mutations, queries, subscriptions
+from reaktion.scalars import scalar_map as reaktion_scalar_map
+from reaktion.scoping import for_org, get_for_org
+from rekuest_core.constants import input_union_types, interface_types
+from rekuest_core.scalars import scalar_map as rekuest_scalar_map
 
 
 def _fetch(model: type[Model], id: strawberry.ID, info: Info) -> Model:
     """An object of the request's organization by id: a run is its flow's (it has no organization path of its own)."""
     if model is models.Run:
-        run: models.Run = models.Run.objects.get(id=id, flow__organization=info.context.request.organization)
+        run: models.Run = models.Run.objects.get(
+            id=id, flow__organization=info.context.request.organization
+        )
         return run
     return get_for_org(model, info, id=id)
 
@@ -43,15 +47,22 @@ def field(scope: str = "fluss_read", **kwargs):
     return strawberry_django.field(extensions=[AuthExtension(scopes=[scope])], **kwargs)
 
 
-def mutation(scope: str = "fluss_write", roles: list[str] | None = None, **kwargs) -> strawberry.mutation:
+def mutation(
+    scope: str = "fluss_write", roles: list[str] | None = None, **kwargs
+) -> strawberry.mutation:
     """A write: an app needs ``scope`` for it, a full member one of ``roles`` (``fluss_editor`` unless it
     says otherwise; ``fluss_admin`` holds every role). A guest is refused every one."""
-    return strawberry_django.mutation(extensions=[AuthExtension(scopes=[scope], any_role_of=roles or [EDITOR])], **kwargs)
+    return strawberry_django.mutation(
+        extensions=[AuthExtension(scopes=[scope], any_role_of=roles or [EDITOR])],
+        **kwargs,
+    )
 
 
 def subscription(**kwargs) -> strawberry.subscription:
     """A subscription: what it streams is read, so an app needs ``fluss_read`` for it."""
-    return strawberry.subscription(extensions=[AuthSubscribeExtension(scopes=["fluss_read"])], **kwargs)
+    return strawberry.subscription(
+        extensions=[AuthSubscribeExtension(scopes=["fluss_read"])], **kwargs
+    )
 
 
 @strawberry.type
@@ -60,33 +71,71 @@ class Query:
 
     flows: list[types.Flow] = field(description="List all flows in your organization.")
     runs: list[types.Run] = field(description="List all runs in your organization.")
-    snapshots: list[types.Snapshot] = field(description="List all run snapshots in your organization.")
-    workspaces: list[types.Workspace] = field(description="List all workspaces in your organization.")
-    workspace = field(resolver=queries.workspace, description="Fetch a single workspace by id.")
-    reactive_templates: list[types.ReactiveTemplate] = field(description="List all reactive operator templates (a shared, global catalog).")
-    reactive_template = field(resolver=queries.reactive_template, description="Fetch a single reactive template by id.")
-    events_between = field(resolver=queries.events_between, description="Fetch the events of a run between two logical times, seeded from the latest snapshot at or before the lower bound.")
+    snapshots: list[types.Snapshot] = field(
+        description="List all run snapshots in your organization."
+    )
+    workspaces: list[types.Workspace] = field(
+        description="List all workspaces in your organization."
+    )
+    workspace = field(
+        resolver=queries.workspace, description="Fetch a single workspace by id."
+    )
+    reactive_templates: list[types.ReactiveTemplate] = field(
+        description="List all reactive operator templates (a shared, global catalog)."
+    )
+    reactive_template = field(
+        resolver=queries.reactive_template,
+        description="Fetch a single reactive template by id.",
+    )
+    events_between = field(
+        resolver=queries.events_between,
+        description="Fetch the events of a run between two logical times, seeded from the latest snapshot at or before the lower bound.",
+    )
 
-    python_flows: list[types.PythonFlow] = field(description="List all Python flow versions in your organization.")
-    python_runs: list[types.PythonRun] = field(description="List all Python flow runs in your organization.")
+    python_flows: list[types.PythonFlow] = field(
+        description="List all Python flow versions in your organization."
+    )
+    python_runs: list[types.PythonRun] = field(
+        description="List all Python flow runs in your organization."
+    )
     validate_python_flow = field(
         resolver=queries.validate_python_flow,
         description="Check a Python flow's source against the actions it may call, as createPythonFlow would, without storing it: its ports, stubs and runtime, or why it would be refused.",
     )
 
     # Stats
-    workspace_stats: types.WorkspaceStats = strawberry.field(extensions=[AuthExtension(scopes=["fluss_read"])], resolver=types.WorkspaceStatsResolver, description="Aggregate statistics over the workspaces in your organization.")
+    workspace_stats: types.WorkspaceStats = strawberry.field(
+        extensions=[AuthExtension(scopes=["fluss_read"])],
+        resolver=types.WorkspaceStatsResolver,
+        description="Aggregate statistics over the workspaces in your organization.",
+    )
 
-    collaborations: list[collaboration_types.Collaboration] = field(resolver=collaboration_api.collaborations, description="List the organization's collaborations: what a guest granted one sees of it (a guest: the collaborations granted to them)")
-    collaboration: collaboration_types.Collaboration = field(resolver=collaboration_api.collaboration, description="Get a single collaboration by ID")
+    collaborations: list[collaboration_types.Collaboration] = field(
+        resolver=collaboration_api.collaborations,
+        description="List the organization's collaborations: what a guest granted one sees of it (a guest: the collaborations granted to them)",
+    )
+    collaboration: collaboration_types.Collaboration = field(
+        resolver=collaboration_api.collaboration,
+        description="Get a single collaboration by ID",
+    )
 
     @field(description="Fetch a single run by id.")
     def run(self, info: Info, id: strawberry.ID) -> types.Run:
-        return object_scope(models.Run.objects.filter(flow__organization=info.context.request.organization), info=info).get(id=id)
+        return object_scope(
+            models.Run.objects.filter(
+                flow__organization=info.context.request.organization
+            ),
+            info=info,
+        ).get(id=id)
 
     @field(description="Fetch the run created for a given task id.")
     def run_for_task(self, info: Info, id: strawberry.ID) -> types.Run:
-        return object_scope(models.Run.objects.filter(flow__organization=info.context.request.organization), info=info).get(task_id=id)
+        return object_scope(
+            models.Run.objects.filter(
+                flow__organization=info.context.request.organization
+            ),
+            info=info,
+        ).get(task_id=id)
 
     @field(description="Fetch a single flow by id.")
     def flow(self, info: Info, id: strawberry.ID) -> types.Flow:
@@ -107,7 +156,12 @@ class Query:
 
     @field(description="Fetch a single run snapshot by id.")
     def snapshot(self, info: Info, id: strawberry.ID) -> types.Snapshot:
-        return object_scope(models.Snapshot.objects.filter(run__flow__organization=info.context.request.organization), info=info).get(id=id)
+        return object_scope(
+            models.Snapshot.objects.filter(
+                run__flow__organization=info.context.request.organization
+            ),
+            info=info,
+        ).get(id=id)
 
 
 @strawberry.type
@@ -117,10 +171,26 @@ class Mutation:
     None is open to a guest of the organization (none opts in with ``allow_scoped``): running a flow
     as a guest would act with the organization's agents."""
 
-    create_collaboration = mutation(scope="fluss_share", resolver=collaboration_api.create_collaboration, description="Create an empty collaboration, to put objects in and grant a guest")
-    add_to_collaboration = mutation(scope="fluss_share", resolver=collaboration_api.add_to_collaboration, description="Put an object in a collaboration, with what it needs to be seen: a run brings its flow, a flow its workspace, a workspace its flows")
-    remove_from_collaboration = mutation(scope="fluss_share", resolver=collaboration_api.remove_from_collaboration, description="Take an object out of a collaboration, with what it brought that nothing else there needs")
-    delete_collaboration = mutation(scope="fluss_share", resolver=collaboration_api.delete_collaboration, description="Delete a collaboration: whoever was granted it sees nothing of it any more")
+    create_collaboration = mutation(
+        scope="fluss_share",
+        resolver=collaboration_api.create_collaboration,
+        description="Create an empty collaboration, to put objects in and grant a guest",
+    )
+    add_to_collaboration = mutation(
+        scope="fluss_share",
+        resolver=collaboration_api.add_to_collaboration,
+        description="Put an object in a collaboration, with what it needs to be seen: a run brings its flow, a flow its workspace, a workspace its flows",
+    )
+    remove_from_collaboration = mutation(
+        scope="fluss_share",
+        resolver=collaboration_api.remove_from_collaboration,
+        description="Take an object out of a collaboration, with what it brought that nothing else there needs",
+    )
+    delete_collaboration = mutation(
+        scope="fluss_share",
+        resolver=collaboration_api.delete_collaboration,
+        description="Delete a collaboration: whoever was granted it sees nothing of it any more",
+    )
 
     update_workspace = mutation(
         resolver=mutations.update_workspace,
@@ -230,7 +300,13 @@ schema = Schema(
     subscription=Subscription,
     # A guest of the organization is handed only what is in their collaborations (CollaborationGate, after
     # authentikate's extension, which reads the token).
-    extensions=[TelemetryExtension, DjangoOptimizerExtension, KoherentExtension, AuthentikateExtension, CollaborationGate],
+    extensions=[
+        TelemetryExtension,
+        DjangoOptimizerExtension,
+        KoherentExtension,
+        AuthentikateExtension,
+        CollaborationGate,
+    ],
     config=StrawberryConfig(scalar_map={**rekuest_scalar_map, **reaktion_scalar_map}),
     types=[
         types.RekuestFilterActionNode,

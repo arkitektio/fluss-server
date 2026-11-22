@@ -11,15 +11,26 @@ from reaktion import enums, models
 from rekuest_core.enums import Effects
 
 #: From least to most consequential: a Python flow is as consequential as its worst call.
-EFFECT_ORDER = [Effects.NONE.value, Effects.REPEATABLE.value, Effects.UNKNOWN.value, Effects.IRREVERSIBLE.value]
+EFFECT_ORDER = [
+    Effects.NONE.value,
+    Effects.REPEATABLE.value,
+    Effects.UNKNOWN.value,
+    Effects.IRREVERSIBLE.value,
+]
 
 Descriptors = dict[str, int | str | bool | list[str]]
 GraphNode = Mapping[str, object]
 
 
-def _nodes_of(graph: Mapping[str, object] | None, kind: enums.GraphNodeKind) -> list[GraphNode]:
+def _nodes_of(
+    graph: Mapping[str, object] | None, kind: enums.GraphNodeKind
+) -> list[GraphNode]:
     nodes = (graph or {}).get("nodes") or []
-    return [node for node in nodes if isinstance(node, Mapping) and node.get("kind") == kind.value]
+    return [
+        node
+        for node in nodes
+        if isinstance(node, Mapping) and node.get("kind") == kind.value
+    ]
 
 
 def _first_stream(streams: object) -> Sequence[object]:
@@ -39,7 +50,13 @@ def flow_descriptors(flow: models.Flow) -> Descriptors:
         "@fluss/n_nodes": len(nodes),
         "@fluss/n_edges": len(graph.get("edges") or []),
         "@fluss/n_globals": len(graph.get("globals") or []),
-        "@fluss/node_kinds": sorted({str(node["kind"]) for node in nodes if isinstance(node, Mapping) and node.get("kind")}),
+        "@fluss/node_kinds": sorted(
+            {
+                str(node["kind"])
+                for node in nodes
+                if isinstance(node, Mapping) and node.get("kind")
+            }
+        ),
         "@fluss/n_args": len(_first_stream(args[0].get("outs"))) if args else 0,
         "@fluss/n_returns": len(_first_stream(returns[0].get("ins"))) if returns else 0,
     }
@@ -47,7 +64,10 @@ def flow_descriptors(flow: models.Flow) -> Descriptors:
 
 def python_flow_descriptors(flow: models.PythonFlow) -> Descriptors:
     """A Python flow's descriptors: its lifecycle, the worst effect its manifest allows, and the ports its entrypoint takes and gives."""
-    effects = [str(entry.get("effect") or Effects.UNKNOWN.value) for entry in flow.manifest or []]
+    effects = [
+        str(entry.get("effect") or Effects.UNKNOWN.value)
+        for entry in flow.manifest or []
+    ]
     worst = max(effects, key=EFFECT_ORDER.index) if effects else Effects.NONE.value
     return {
         "@fluss/status": str(flow.status),

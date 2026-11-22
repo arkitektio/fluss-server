@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class RunEventSignal(BaseModel):
     event: int = Field(
         ...,

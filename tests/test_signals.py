@@ -10,35 +10,17 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
+from arkitekt_service import trust
 from joserfc.jwk import OKPKey
 
-from arkitekt_service import trust
 from fluss_server.service import service
 
 EXPECTED = {
-    "@fluss/flow": [
-        "CREATED"
-    ],
-    "@fluss/pythonflow": [
-        "CREATED",
-        "UPDATED",
-        "DELETED"
-    ],
-    "@fluss/pythonrun": [
-        "CREATED",
-        "UPDATED",
-        "DELETED"
-    ],
-    "@fluss/run": [
-        "CREATED",
-        "UPDATED",
-        "DELETED"
-    ],
-    "@fluss/workspace": [
-        "CREATED",
-        "UPDATED",
-        "DELETED"
-    ]
+    "@fluss/flow": ["CREATED"],
+    "@fluss/pythonflow": ["CREATED", "UPDATED", "DELETED"],
+    "@fluss/pythonrun": ["CREATED", "UPDATED", "DELETED"],
+    "@fluss/run": ["CREATED", "UPDATED", "DELETED"],
+    "@fluss/workspace": ["CREATED", "UPDATED", "DELETED"],
 }
 
 KEY = OKPKey.generate_key("Ed25519")
@@ -52,7 +34,14 @@ class _Intake:
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self):  # noqa: N802
                 body = self.rfile.read(int(self.headers["Content-Length"]))
-                intake.received.append({"path": self.path, "headers": dict(self.headers), "body": body, "json": json.loads(body)})
+                intake.received.append(
+                    {
+                        "path": self.path,
+                        "headers": dict(self.headers),
+                        "body": body,
+                        "json": json.loads(body),
+                    }
+                )
                 self.send_response(202)
                 self.end_headers()
 
@@ -91,11 +80,15 @@ def intake(settings):
 def _organization():
     from authentikate.models import Organization
 
-    return Organization.objects.get_or_create(identifier="static_issuer#signals-test-org")[0]
+    return Organization.objects.get_or_create(
+        identifier="static_issuer#signals-test-org"
+    )[0]
 
 
 def test_the_manifest_declares_every_model_signal():
-    assert {s["identifier"]: s["kinds"] for s in service.manifest()["signals"]} == EXPECTED
+    assert {
+        s["identifier"]: s["kinds"] for s in service.manifest()["signals"]
+    } == EXPECTED
 
 
 def test_the_manifest_lists_what_fluss_hosts_with_its_descriptors():
@@ -112,10 +105,19 @@ def test_the_manifest_lists_what_fluss_hosts_with_its_descriptors():
         ("@fluss/n_args", "INT"),
         ("@fluss/n_returns", "INT"),
     ]
-    assert {"key": "@fluss/physical", "type": "BOOL", "description": "Whether its source may call an action with an IRREVERSIBLE effect"} in hosted["@fluss/pythonflow"]["descriptors"]
+    assert {
+        "key": "@fluss/physical",
+        "type": "BOOL",
+        "description": "Whether its source may call an action with an IRREVERSIBLE effect",
+    } in hosted["@fluss/pythonflow"]["descriptors"]
     # A signal carries exactly the keys its structure declares.
-    signalled = {s["identifier"]: s["descriptors"] for s in service.manifest()["signals"]}
-    assert signalled == {identifier: [d["key"] for d in s["descriptors"]] for identifier, s in hosted.items()}
+    signalled = {
+        s["identifier"]: s["descriptors"] for s in service.manifest()["signals"]
+    }
+    assert signalled == {
+        identifier: [d["key"] for d in s["descriptors"]]
+        for identifier, s in hosted.items()
+    }
 
 
 @pytest.mark.django_db(transaction=True)
@@ -123,12 +125,22 @@ def test_a_save_is_signalled_signed_by_this_instance(intake):
     from reaktion.models import Workspace
 
     org = _organization()
-    obj = Workspace.objects.create(title='signalled', organization=org)
+    obj = Workspace.objects.create(title="signalled", organization=org)
 
     (received,) = intake.of("@fluss/workspace")
-    assert (received["json"]["kind"], received["json"]["object"], received["json"]["organization"]) == ("CREATED", str(obj.pk), org.identifier)
+    assert (
+        received["json"]["kind"],
+        received["json"]["object"],
+        received["json"]["organization"],
+    ) == ("CREATED", str(obj.pk), org.identifier)
     assert received["path"] == "/agi/signal/fluss"
-    verified = trust.verify("POST", received["path"], received["body"], received["headers"]["Authorization"], audience="rekuest")
+    verified = trust.verify(
+        "POST",
+        received["path"],
+        received["body"],
+        received["headers"]["Authorization"],
+        audience="rekuest",
+    )
     assert verified.issuer == "fluss"
 
 
@@ -138,13 +150,29 @@ def test_publishing_a_python_flow_is_signalled_with_its_status_and_effect(intake
 
     org = _organization()
     flow = PythonFlow.objects.create(
-        organization=org, title="moves", source="def main(): pass", runtime="monty-0.1", hash="h",
-        manifest=[{"alias": "move_stage", "action_hash": "a", "effect": "IRREVERSIBLE"}],
+        organization=org,
+        title="moves",
+        source="def main(): pass",
+        runtime="monty-0.1",
+        hash="h",
+        manifest=[
+            {"alias": "move_stage", "action_hash": "a", "effect": "IRREVERSIBLE"}
+        ],
     )
     flow.status = "PUBLISHED"
     flow.save()
 
     created, updated = intake.of("@fluss/pythonflow", count=2)
-    assert (created["json"]["kind"], created["json"]["object"]) == ("CREATED", str(flow.pk))
+    assert (created["json"]["kind"], created["json"]["object"]) == (
+        "CREATED",
+        str(flow.pk),
+    )
     assert updated["json"]["kind"] == "UPDATED"
-    assert updated["json"]["descriptors"] == {"@fluss/status": "PUBLISHED", "@fluss/physical": True, "@fluss/effect": "IRREVERSIBLE", "@fluss/runtime": "monty-0.1", "@fluss/n_args": 0, "@fluss/n_returns": 0}
+    assert updated["json"]["descriptors"] == {
+        "@fluss/status": "PUBLISHED",
+        "@fluss/physical": True,
+        "@fluss/effect": "IRREVERSIBLE",
+        "@fluss/runtime": "monty-0.1",
+        "@fluss/n_args": 0,
+        "@fluss/n_returns": 0,
+    }

@@ -1,4 +1,5 @@
 from enum import Enum
+
 import strawberry
 from django.db.models import TextChoices
 
@@ -44,7 +45,10 @@ class ReactiveImplementationChoices(TextChoices):
         "BUFFER_UNTIL",
         "BUFFER_UNTIL (Buffer values until signal is send)",
     )
-    BUFFER_COUNT = ("BUFFER_COUNT", "BUFFER_COUNT (Butffer values until the count is reacht)")
+    BUFFER_COUNT = (
+        "BUFFER_COUNT",
+        "BUFFER_COUNT (Butffer values until the count is reacht)",
+    )
 
     # Delay
     DELAY = "DELAY", "DELAY (Delay the data)"
@@ -207,7 +211,9 @@ class DemandKind(str, Enum):
     RETURNS = "returns"
 
 
-@strawberry.enum(description="The lifecycle of a PythonFlow version: only PUBLISHED versions run, and only they can be deployed as actions (a higher-order implementation of run_python_flow).")
+@strawberry.enum(
+    description="The lifecycle of a PythonFlow version: only PUBLISHED versions run, and only they can be deployed as actions (a higher-order implementation of run_python_flow)."
+)
 class PythonFlowStatus(str, Enum):
     DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"

@@ -1,7 +1,9 @@
-from kante.types import Info
-import strawberry
-from reaktion import types, models
 import logging
+
+import strawberry
+from kante.types import Info
+
+from reaktion import models, types
 
 logger = logging.getLogger(__name__)
 

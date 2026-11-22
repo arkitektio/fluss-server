@@ -13,16 +13,17 @@ import uuid
 import psycopg
 import pytest
 from asgiref.sync import sync_to_async
-
 from authentikate.models import Client, Membership, Organization, User
 from django.contrib.contenttypes.management import create_contenttypes
 from django.db.models.signals import post_migrate
+from dokker import PortNotFoundError, testing
 from kante.context import HttpContext, UniversalRequest
 from strawberry.http.temporal_response import TemporalResponse
-from dokker import PortNotFoundError, testing
 
 
-def _wait_for_port(e, service: str, container_port: int, deadline_seconds: float = 30.0) -> int:
+def _wait_for_port(
+    e, service: str, container_port: int, deadline_seconds: float = 30.0
+) -> int:
     """The host port docker published for ``service:container_port``, once the container is up."""
     deadline = time.monotonic() + deadline_seconds
     while True:
@@ -37,7 +38,9 @@ def _wait_for_port(e, service: str, container_port: int, deadline_seconds: float
 @pytest.fixture(scope="session")
 def backend_stack():
     """Bring up the Postgres (+ Redis) backend from tests/integration/docker-compose.yaml."""
-    docker_compose_path = os.path.join(os.path.dirname(__file__), "integration", "docker-compose.yaml")
+    docker_compose_path = os.path.join(
+        os.path.dirname(__file__), "integration", "docker-compose.yaml"
+    )
 
     # No `down()` before `up()`: `testing()` mints a fresh `dokker-test-<uuid>` project
     # every call, so downing it would only tear down the empty project this run just
@@ -83,7 +86,14 @@ def backend_stack():
         # it into template1 so the test database pytest-django creates from it
         # inherits it, and into testdb itself for anything connecting directly.
         for dbname in ("template1", "testdb"):
-            with psycopg.connect(dbname=dbname, user="test", password="test", host="localhost", port=db_port, autocommit=True) as connection:
+            with psycopg.connect(
+                dbname=dbname,
+                user="test",
+                password="test",
+                host="localhost",
+                port=db_port,
+                autocommit=True,
+            ) as connection:
                 connection.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
         yield {"db": db_port}
@@ -132,7 +142,9 @@ def django_db_setup(django_db_setup, django_db_blocker):
         contenttypes = list(ContentType.objects.all())
         permissions = list(Permission.objects.all())
 
-    post_migrate.disconnect(dispatch_uid="django.contrib.auth.management.create_permissions")
+    post_migrate.disconnect(
+        dispatch_uid="django.contrib.auth.management.create_permissions"
+    )
     post_migrate.disconnect(create_contenttypes)
 
     def restore_contenttypes_and_permissions(sender, **kwargs):
