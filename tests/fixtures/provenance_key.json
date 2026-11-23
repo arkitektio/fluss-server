@@ -1,0 +1,7 @@
+{
+  "crv": "Ed25519",
+  "x": "aKISAhQ4q-8NtV3ibZbp7z_idNzRzler7OyF2Fa4LnU",
+  "d": "8EXNCJb4AQJEbhOuoD6zUWojCnCZNgERGHfBGgsCk-Q",
+  "kid": "fluss-test-provenance",
+  "kty": "OKP"
+}

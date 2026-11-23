@@ -17,6 +17,7 @@ from kante.types import Info
 
 from reaktion import enums, inputs, models, python_flows, types
 from reaktion.hashers import hash_python_flow
+from reaktion.provenance import creating_task
 from reaktion.scoping import for_org, get_for_org
 
 logger = logging.getLogger(__name__)
@@ -135,9 +136,10 @@ def create_python_run(
         raise ValueError(
             f"Only a PUBLISHED PythonFlow can be run; this one is {flow.status}"
         )
+    task = creating_task(input.task_id)
     with transaction.atomic():
         run, created = models.PythonRun.objects.select_for_update().get_or_create(
-            flow=flow, task_id=input.task_id
+            flow=flow, task_id=input.task_id, defaults={"created_through": task}
         )
         if not created and run.status != RunStatus.RUNNING:
             run.status = RunStatus.RUNNING.value

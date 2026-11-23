@@ -54,6 +54,11 @@ def _python_run_needs(run: models.PythonRun) -> list[models.PythonFlow]:
 
 
 # --- Structures: what fluss hosts -----------------------------------------------------
+# What a workflow (a root task) created, for `shareWorkflow` and the `createdUnder` filters, koherent
+# reads off a run's or a Python run's `created_through`: the task of the provenance token the run was
+# created under (createRun, createPythonRun). A run's events and snapshots are part of it and come
+# along. Workspaces, flows and Python flows keep neither a creating task nor a history, so nothing
+# says which workflow made one: a workflow share reports them as `unknown`.
 
 workspace = service.structure(
     models.Workspace, "@fluss/workspace", depends=_workspace_needs

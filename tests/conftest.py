@@ -14,6 +14,7 @@ from collections.abc import Iterator, Mapping
 import psycopg
 import pytest
 from asgiref.sync import sync_to_async
+from authentikate import settings as authentikate_settings
 from authentikate.models import Client, Membership, Organization, User
 from django.apps import AppConfig
 from django.contrib.contenttypes.management import create_contenttypes
@@ -22,12 +23,14 @@ from dokker import PortNotFoundError, testing
 from dokker.deployment import Deployment
 from kante.context import HttpContext, UniversalRequest
 from pytest_django import DjangoDbBlocker
+from pytest_django.fixtures import SettingsWrapper
 from strawberry.http.temporal_response import TemporalResponse
 from strawberry.types import ExecutionResult
 
 from reaktion.models import Flow, ReactiveTemplate, Run, Snapshot, Trace, Workspace
 from tests.utils import (
     AExecute,
+    GuestFactory,
     MakeFlow,
     MakeReactiveTemplate,
     MakeRun,
@@ -247,6 +250,50 @@ def other_org_context(db: None, backend_stack: dict[str, int]) -> HttpContext:
         headers={"Authorization": "Bearer othertest"},
         type="http",
     )
+
+
+def token_context(token: str, task: str | None = None) -> HttpContext:
+    """A request presenting the static token ``token``, as a client sends it: nothing resolved yet.
+
+    ``task`` is a provenance token, sent in the ``Rekuest-Task`` header as an agent does for the task
+    it runs.
+    """
+    headers = {"Authorization": f"Bearer {token}"}
+    if task is not None:
+        headers["Rekuest-Task"] = task
+    return HttpContext(
+        request=UniversalRequest(_extensions={}),
+        response=TemporalResponse(),
+        headers=headers,
+        type="http",
+    )
+
+
+@pytest.fixture
+def guest(
+    db: None, authenticated_context: HttpContext, settings: SettingsWrapper
+) -> Iterator[GuestFactory]:
+    """``guest({key: roles})``: a context presenting a guest of the test organization (sub 20),
+    granted those collaborations by their key, as lok lists them in the token's ``collabs``."""
+
+    def mint(collaborations: Mapping[str, list[str]]) -> HttpContext:
+        settings.AUTHENTIKATE = {
+            **settings.AUTHENTIKATE,
+            "static_tokens": {
+                **settings.AUTHENTIKATE["static_tokens"],
+                "guest": {
+                    "sub": "20",
+                    "roles": [],
+                    "collabs": dict(collaborations),
+                    "scope": "openid fluss_all",
+                },
+            },
+        }
+        authentikate_settings.cached_settings = None
+        return token_context("guest")
+
+    yield mint
+    authentikate_settings.cached_settings = None
 
 
 # ---------------------------------------------------------------------------

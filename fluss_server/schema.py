@@ -118,7 +118,7 @@ class Query:
     )
     collaboration: collaboration_types.Collaboration = field(
         resolver=collaboration_api.collaboration,
-        description="Get a single collaboration by ID",
+        description="Get a single collaboration by its key (lok's): what was put in it here",
     )
 
     @field(description="Fetch a single run by id.")
@@ -173,15 +173,20 @@ class Mutation:
     None is open to a guest of the organization (none opts in with ``allow_scoped``): running a flow
     as a guest would act with the organization's agents."""
 
-    create_collaboration = mutation(
-        scope="fluss_share",
-        resolver=collaboration_api.create_collaboration,
-        description="Create an empty collaboration, to put objects in and grant a guest",
-    )
     add_to_collaboration = mutation(
         scope="fluss_share",
         resolver=collaboration_api.add_to_collaboration,
-        description="Put an object in a collaboration, with what it needs to be seen: a run brings its flow, a flow its workspace, a workspace its flows",
+        description="Put an object in a collaboration (lok's, by its key), with what it needs to be seen: a run brings its flow, a flow its workspace, a workspace its flows. The collaboration's row here is made the first time something is put in",
+    )
+    add_many_to_collaboration = mutation(
+        scope="fluss_share",
+        resolver=collaboration_api.add_many_to_collaboration,
+        description="Put several objects in a collaboration (by its key) at once, a whole before its parts, each with what it needs to be seen: all of them, or none",
+    )
+    share_workflow = mutation(
+        scope="fluss_share",
+        resolver=collaboration_api.share_workflow,
+        description="Put what a workflow (its root task) created in fluss in a collaboration, as it is now: its runs, with their events and snapshots and the flows they execute. What it makes later is not; `dryRun` only says what would be put in",
     )
     remove_from_collaboration = mutation(
         scope="fluss_share",
@@ -191,7 +196,7 @@ class Mutation:
     delete_collaboration = mutation(
         scope="fluss_share",
         resolver=collaboration_api.delete_collaboration,
-        description="Delete a collaboration: whoever was granted it sees nothing of it any more",
+        description="Take everything fluss put in a collaboration (by its key) out of it: whoever was granted it sees nothing of it here any more. lok's collaboration, and its grants, stay",
     )
 
     update_workspace = mutation(
@@ -301,13 +306,14 @@ schema = Schema(
     mutation=Mutation,
     subscription=Subscription,
     # A guest of the organization is handed only what is in their collaborations (CollaborationGate, after
-    # authentikate's extension, which reads the token).
+    # authentikate's extension, which reads the token). koherent reads the provenance token authentikate
+    # verified, so it comes after it too: before, it found none and no run recorded its task.
     extensions=[
         TelemetryExtension,
         DjangoOptimizerExtension,
-        KoherentExtension,
         AuthentikateExtension,
         CollaborationGate,
+        KoherentExtension,
     ],
     config=StrawberryConfig(scalar_map={**rekuest_scalar_map, **reaktion_scalar_map}),
     types=[

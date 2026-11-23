@@ -10,6 +10,7 @@ import datetime
 
 import kante
 import strawberry
+from arkitekt_service.collaborations.filters import SharingFilterMixin
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from kante.types import Info
 
@@ -112,6 +113,7 @@ class WorkspaceFilter(
     CreatedAtFilterMixin,
     CreatorFilterMixin,
     PinnedFilterMixin,
+    SharingFilterMixin,
 ):
     pass
 
@@ -123,6 +125,7 @@ class FlowFilter(
     CreatedAtFilterMixin,
     CreatorFilterMixin,
     PinnedFilterMixin,
+    SharingFilterMixin,
 ):
     @kante.filter_field(description=REQUIRES_DESCRIPTION)
     def requires(self, info: Info, value: list[RequiresInput], prefix: str) -> Q:
@@ -136,6 +139,7 @@ class PythonFlowFilter(
     CreatedAtFilterMixin,
     CreatorFilterMixin,
     PinnedFilterMixin,
+    SharingFilterMixin,
 ):
     @kante.filter_field(description="Filter by lifecycle status")
     def status(self, info: Info, value: list[enums.PythonFlowStatus], prefix: str) -> Q:
@@ -169,7 +173,9 @@ class PythonFlowFilter(
 
 
 @kante.filter_type(models.PythonRun)
-class PythonRunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class PythonRunFilter(
+    IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin, SharingFilterMixin
+):
     @kante.filter_field(description="Search by task id (case-insensitive substring)")
     def search(self, info: Info, value: str, prefix: str) -> Q:
         return Q(**{f"{prefix}task_id__icontains": value})
@@ -197,7 +203,9 @@ class ReactiveTemplateFilter(IdsFilterMixin, TitleSearchFilterMixin):
 
 
 @kante.filter_type(models.Run)
-class RunFilter(IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin):
+class RunFilter(
+    IdsFilterMixin, CreatedAtFilterMixin, PinnedFilterMixin, SharingFilterMixin
+):
     @kante.filter_field(description="Search by task id (case-insensitive substring)")
     def search(self, info: Info, value: str, prefix: str) -> Q:
         return Q(**{f"{prefix}task_id__icontains": value})

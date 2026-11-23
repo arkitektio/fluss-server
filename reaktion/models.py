@@ -142,6 +142,14 @@ class Run(Described):
     )
 
     task_id = models.CharField(null=True, blank=True, max_length=1000)
+    created_through = models.ForeignKey(
+        "koherent.Task",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_%(class)ss",
+        help_text="The task this run was created through (the request's verified provenance token), if any: what finds a workflow's runs",
+    )
     status = models.CharField(max_length=100, default="RUNNING")
     snapshot_interval = models.IntegerField(null=True, blank=True)
     pinned_by = models.ManyToManyField(
@@ -291,6 +299,14 @@ class PythonRun(Described):
     # with runs goes only with its organization -- and then its runs go with it.
     flow = models.ForeignKey(PythonFlow, on_delete=models.CASCADE, related_name="runs")
     task_id = models.CharField(max_length=1000)
+    created_through = models.ForeignKey(
+        "koherent.Task",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_%(class)ss",
+        help_text="The task this run was created through (the request's verified provenance token), if any: what finds a workflow's runs",
+    )
     status = TextChoicesField(
         max_length=100,
         choices_enum=enums.PythonRunStatusChoices,

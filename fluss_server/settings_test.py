@@ -23,9 +23,6 @@ ADMIN_WITH_EVERY_SCOPE = {"roles": ["fluss_admin"], "scope": "openid fluss_all"}
 AUTHENTIKATE = {
     **AUTHENTIKATE,
     "allow_static_tokens_in_production": True,
-    # This service instance, as konstruktor renders it: what a guest's collaborations are
-    # listed under (tests/test_sharing.py).
-    "audience": "1",
     "static_tokens": {
         name: {**ADMIN_WITH_EVERY_SCOPE, **token}
         for name, token in {
@@ -36,6 +33,27 @@ AUTHENTIKATE = {
             # An app granted only what it reads, for the scope tests (tests/test_scopes.py).
             "readertest": {"sub": "1", "scope": "openid fluss_read"},
         }.items()
+    },
+    # A rekuest that signs task tokens with tests/fixtures/provenance_key.json: what a run records
+    # as the task it was created through (tests/test_share_workflow.py).
+    "provenance": {
+        "issuers": [
+            {
+                "iss": "rekuest",
+                "kind": "jwks_dict",
+                "jwks": {
+                    "keys": [
+                        {
+                            "crv": "Ed25519",
+                            "x": "aKISAhQ4q-8NtV3ibZbp7z_idNzRzler7OyF2Fa4LnU",
+                            "kty": "OKP",
+                            "kid": "fluss-test-provenance",
+                        }
+                    ]
+                },
+            }
+        ],
+        "audience": "*",
     },
 }
 

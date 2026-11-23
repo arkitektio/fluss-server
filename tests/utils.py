@@ -1,6 +1,6 @@
 import os
-from collections.abc import Awaitable, Mapping
-from typing import Any, Protocol
+from collections.abc import Awaitable, Callable, Mapping
+from typing import Any, Protocol, TypeAlias
 
 from kante.context import HttpContext
 from strawberry.types import ExecutionResult
@@ -22,6 +22,11 @@ def build_relative_dir(path: str) -> str:
         The relative directory
     """
     return os.path.join(os.path.dirname(__file__), path)
+
+
+#: ``guest({key: roles})``: a context presenting a guest's token granted those collaborations, by their
+#: key (lok's), with the roles held in each (``[]``: view only).
+GuestFactory: TypeAlias = Callable[[Mapping[str, list[str]]], HttpContext]
 
 
 class AExecute(Protocol):

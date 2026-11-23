@@ -1,28 +1,32 @@
 """A guest of the organization, granted a collaboration and nothing else: what they read, and that they write nothing.
 
-Their token lists their collaborations by service instance (`collabs`, instance "1" in the test settings),
-with the roles they hold in each; the guest token is minted per test. A full member ("test")
-puts objects in a collaboration; what each needs to be seen comes along, and what is part of it is in it.
+Their token lists their collaborations by key (`collabs`: lok's key, one across the hub), with the
+roles they hold in each; the guest token is minted per test. A full member ("test") puts objects in a
+collaboration under a fresh key (`addManyToCollaboration`, which makes fluss's row of it); what each
+needs to be seen comes along, and what is part of it is in it.
 """
 
 import uuid
-from collections.abc import Callable, Iterator
-from typing import TypeAlias
 
 import pytest
-from arkitekt_service.collaborations import items as collaboration_items
 from arkitekt_service.collaborations.models import Collaboration
+from arkitekt_service.service import Service
 from asgiref.sync import sync_to_async
-from authentikate import settings as authentikate_settings
 from django.db.models import Model
-from kante.context import HttpContext, UniversalRequest
-from pytest_django.fixtures import SettingsWrapper
-from strawberry.http.temporal_response import TemporalResponse
+from kante.context import HttpContext
 from strawberry.types import ExecutionResult
 
 from fluss_server.schema import schema
 from reaktion import models
-from tests.utils import MakeFlow, MakeRun, MakeSnapshot, MakeWorkspace, data_of
+from tests.conftest import token_context
+from tests.utils import (
+    GuestFactory,
+    MakeFlow,
+    MakeRun,
+    MakeSnapshot,
+    MakeWorkspace,
+    data_of,
+)
 
 WORKSPACES = "{ workspaces { id flows { id } latestFlow { id } } }"
 WORKSPACE = "query ($id: ID!) { workspace(id: $id) { id flows { id } } }"
@@ -48,51 +52,8 @@ CREATE_PYTHON_RUN = (
 UPDATE_WORKSPACE = (
     "mutation ($input: UpdateWorkspaceInput!) { updateWorkspace(input: $input) { id } }"
 )
-CREATE_COLLABORATION = "mutation ($input: CreateCollaborationInput!) { createCollaboration(input: $input) { id } }"
-ADD = "mutation ($input: CollaborationObjectInput!) { addToCollaboration(input: $input) { id items { identifier objectId brought } } }"
-
-
-def _context(token: str) -> HttpContext:
-    return HttpContext(
-        request=UniversalRequest(_extensions={}),
-        response=TemporalResponse(),
-        headers={"Authorization": f"Bearer {token}"},
-        type="http",
-    )
-
-
-#: The ``guest`` fixture: a context for a guest granted these collaborations, with these roles.
-Guest: TypeAlias = Callable[[dict[Collaboration, list[str]]], HttpContext]
-
-
-@pytest.fixture
-def guest(
-    db: None, authenticated_context: HttpContext, settings: SettingsWrapper
-) -> Iterator[Guest]:
-    """``guest({collaboration: roles})``: a context presenting a guest's token granted those collaborations on instance "1"."""
-
-    def mint(collaborations: dict[Collaboration, list[str]]) -> HttpContext:
-        granted = {
-            str(collaboration.pk): roles
-            for collaboration, roles in collaborations.items()
-        }
-        settings.AUTHENTIKATE = {
-            **settings.AUTHENTIKATE,
-            "static_tokens": {
-                **settings.AUTHENTIKATE["static_tokens"],
-                "guest": {
-                    "sub": "20",
-                    "roles": [],
-                    "collabs": {"1": granted},
-                    "scope": "openid fluss_all",
-                },
-            },
-        }
-        authentikate_settings.cached_settings = None
-        return _context("guest")
-
-    yield mint
-    authentikate_settings.cached_settings = None
+ADD = "mutation ($input: CollaborationObjectInput!) { addToCollaboration(input: $input) { key name items { identifier objectId brought } } }"
+ADD_MANY = "mutation ($input: AddManyToCollaborationInput!) { addManyToCollaboration(input: $input) { key name } }"
 
 
 async def _run(ctx: HttpContext, query: str, **variables: object) -> ExecutionResult:
@@ -101,18 +62,34 @@ async def _run(ctx: HttpContext, query: str, **variables: object) -> ExecutionRe
     )
 
 
-async def _collaboration(ctx: HttpContext, *objects: Model) -> Collaboration:
-    """A collaboration of the organization holding ``objects``, as a full member puts them in."""
+def _identifier(obj: Model) -> str:
+    structure = Service.hosting(obj)
+    assert structure is not None, f"{type(obj).__name__} is no structure here"
+    return structure.identifier
 
-    def make() -> Collaboration:
-        collaboration = Collaboration.objects.create(
-            organization=ctx.request.organization, name="Shared"
-        )
-        for obj in objects:
-            collaboration_items.add(collaboration, obj)
-        return collaboration
 
-    return await sync_to_async(make)()
+async def _collaboration(ctx: HttpContext, *objects: Model) -> str:
+    """A collaboration of ``ctx``'s organization holding ``objects``, as a full member of it puts them
+    in: under a fresh key, as lok hands one out, in one ``addManyToCollaboration``. Its key."""
+    key = str(uuid.uuid4())
+    member = token_context(str(ctx.request.get_extension("token")))
+    added = await _run(
+        member,
+        ADD_MANY,
+        input={
+            "collaboration": key,
+            "name": "Shared",
+            "objects": [
+                {"identifier": _identifier(obj), "object": str(obj.pk)}
+                for obj in objects
+            ],
+        },
+    )
+    assert data_of(added)["addManyToCollaboration"] == {"key": key, "name": "Shared"}
+    assert await Collaboration.objects.filter(
+        key=key, organization=ctx.request.organization
+    ).aexists()
+    return key
 
 
 def _refused(result: ExecutionResult, reason: str) -> None:
@@ -153,7 +130,7 @@ def _python_run(flow: models.PythonFlow) -> models.PythonRun:
 @pytest.mark.asyncio
 async def test_a_guest_reads_the_workspace_in_their_collaboration_and_its_flows(
     authenticated_context: HttpContext,
-    guest: Guest,
+    guest: GuestFactory,
     make_workspace: MakeWorkspace,
     make_flow: MakeFlow,
 ) -> None:
@@ -180,7 +157,7 @@ async def test_a_guest_reads_the_workspace_in_their_collaboration_and_its_flows(
 @pytest.mark.asyncio
 async def test_a_flow_saved_into_a_shared_workspace_later_comes_in(
     authenticated_context: HttpContext,
-    guest: Guest,
+    guest: GuestFactory,
     make_workspace: MakeWorkspace,
     make_flow: MakeFlow,
 ) -> None:
@@ -199,7 +176,7 @@ async def test_a_flow_saved_into_a_shared_workspace_later_comes_in(
 @pytest.mark.asyncio
 async def test_a_shared_run_renders_with_its_flow_events_and_snapshots(
     authenticated_context: HttpContext,
-    guest: Guest,
+    guest: GuestFactory,
     make_run: MakeRun,
     make_snapshot: MakeSnapshot,
 ) -> None:
@@ -225,7 +202,7 @@ async def test_a_shared_run_renders_with_its_flow_events_and_snapshots(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_an_event_tracked_after_sharing_is_seen(
-    authenticated_context: HttpContext, guest: Guest, make_run: MakeRun
+    authenticated_context: HttpContext, guest: GuestFactory, make_run: MakeRun
 ) -> None:
     run = await make_run()
     ctx = guest({await _collaboration(authenticated_context, run): []})
@@ -255,7 +232,7 @@ async def test_an_event_tracked_after_sharing_is_seen(
 @pytest.mark.asyncio
 async def test_sharing_a_workspace_shares_none_of_its_runs(
     authenticated_context: HttpContext,
-    guest: Guest,
+    guest: GuestFactory,
     make_workspace: MakeWorkspace,
     make_flow: MakeFlow,
     make_run: MakeRun,
@@ -273,7 +250,7 @@ async def test_sharing_a_workspace_shares_none_of_its_runs(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_python_run_brings_its_flow_and_a_flow_brings_none_of_its_runs(
-    authenticated_context: HttpContext, guest: Guest
+    authenticated_context: HttpContext, guest: GuestFactory
 ) -> None:
     flow = await _python_flow(authenticated_context, "Shared")
     run = await _python_run(flow)
@@ -307,27 +284,25 @@ async def test_a_python_run_brings_its_flow_and_a_flow_brings_none_of_its_runs(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_member_puts_a_run_in_and_it_brings_its_flow_and_workspace(
-    authenticated_context: HttpContext, guest: Guest, make_run: MakeRun
+    authenticated_context: HttpContext, guest: GuestFactory, make_run: MakeRun
 ) -> None:
     run = await make_run()
-    made = await _run(
-        authenticated_context, CREATE_COLLABORATION, input={"name": "Results"}
-    )
-    assert not made.errors, made.errors
-    assert made.data is not None
-    collaboration = made.data["createCollaboration"]["id"]
+    key = str(uuid.uuid4())  # lok's: nothing of it is here until something is put in
 
     added = await _run(
         authenticated_context,
         ADD,
         input={
-            "collaboration": collaboration,
+            "collaboration": key,
             "identifier": "@fluss/run",
             "object": str(run.pk),
+            "name": "Results",
         },
     )
     assert not added.errors, added.errors
     assert added.data is not None
+    assert added.data["addToCollaboration"]["key"] == key
+    assert added.data["addToCollaboration"]["name"] == "Results"
     items = {
         (item["identifier"], item["brought"])
         for item in added.data["addToCollaboration"]["items"]
@@ -338,24 +313,35 @@ async def test_a_member_puts_a_run_in_and_it_brings_its_flow_and_workspace(
         ("@fluss/workspace", True),
     }
 
-    ctx = guest({await sync_to_async(Collaboration.objects.get)(pk=collaboration): []})
+    shown = await _run(
+        authenticated_context,
+        "query ($key: ID!) { collaboration(key: $key) { key name itemCount(brought: false) } }",
+        key=key,
+    )
+    assert data_of(shown)["collaboration"] == {
+        "key": key,
+        "name": "Results",
+        "itemCount": 1,
+    }
+
+    ctx = guest({key: []})
     assert _ids(data_of(await _run(ctx, RUNS))["runs"]) == [str(run.pk)]
-    listed = await _run(ctx, "{ collaborations { id } }")
-    assert data_of(listed)["collaborations"] == [{"id": collaboration}]
+    listed = await _run(ctx, "{ collaborations { key } }")
+    assert data_of(listed)["collaborations"] == [{"key": key}]
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_guest_writes_nothing_even_as_an_editor(
     authenticated_context: HttpContext,
-    guest: Guest,
+    guest: GuestFactory,
     make_run: MakeRun,
     make_workspace: MakeWorkspace,
 ) -> None:
     run = await make_run()
     python_flow = await _python_flow(authenticated_context, "Published")
-    collaboration = await _collaboration(authenticated_context, run, python_flow)
-    ctx = guest({collaboration: ["fluss_editor"]})
+    key = await _collaboration(authenticated_context, run, python_flow)
+    ctx = guest({key: ["fluss_editor"]})
 
     _refused(
         await _run(
@@ -411,7 +397,7 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
             ctx,
             ADD,
             input={
-                "collaboration": str(collaboration.pk),
+                "collaboration": key,
                 "identifier": "@fluss/workspace",
                 "object": str(elsewhere.pk),
             },
@@ -422,6 +408,7 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
     assert await models.Run.objects.acount() == 1
     assert await models.RunEvent.objects.acount() == 0
     assert await models.PythonRun.objects.acount() == 0
+    collaboration = await Collaboration.objects.aget(key=key)
     assert (
         await sync_to_async(collaboration.items.count)() == 4
     )  # the run, its flow and workspace, the Python flow
@@ -430,7 +417,9 @@ async def test_a_guest_writes_nothing_even_as_an_editor(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_root_fields_handing_out_no_objects_are_closed_to_guests(
-    authenticated_context: HttpContext, guest: Guest, make_workspace: MakeWorkspace
+    authenticated_context: HttpContext,
+    guest: GuestFactory,
+    make_workspace: MakeWorkspace,
 ) -> None:
     ctx = guest(
         {await _collaboration(authenticated_context, await make_workspace()): []}
@@ -450,7 +439,7 @@ async def test_root_fields_handing_out_no_objects_are_closed_to_guests(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_a_collaboration_of_another_organization_shows_nothing(
-    other_org_context: HttpContext, guest: Guest, make_workspace: MakeWorkspace
+    other_org_context: HttpContext, guest: GuestFactory, make_workspace: MakeWorkspace
 ) -> None:
     theirs = await make_workspace(context=other_org_context, title="Theirs")
     ctx = guest({await _collaboration(other_org_context, theirs): []})
